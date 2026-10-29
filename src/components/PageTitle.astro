@@ -1,0 +1,58 @@
+---
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+import { AUDIENCE_LABELS } from '../data/audiences';
+
+const { audience, lesson, part } = Astro.locals.starlightRoute.entry.data;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const badges = audience.filter((a) => AUDIENCE_LABELS[a]);
+---
+
+<Default />
+{
+	(badges.length > 0 || lesson || part) && (
+		<div class="page-meta" data-pagefind-ignore>
+			{badges.map((a) => (
+				<a class={`badge badge-${a}`} href={`${base}/audience/${a}/`}>
+					{AUDIENCE_LABELS[a]}
+				</a>
+			))}
+			{lesson && (
+				<span class="badge badge-plain">
+					{lesson.stage}・{lesson.domain}・設計者 {lesson.author}
+				</span>
+			)}
+			{part && (
+				<a class="badge badge-plain" href={`${base}/${part.parent}/`}>
+					《{part.of}》第 {part.index}／{part.total} 頁
+				</a>
+			)}
+		</div>
+	)
+}
+
+<style>
+	.page-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin-top: 0.75rem;
+	}
+	.badge {
+		display: inline-block;
+		padding: 0.1rem 0.6rem;
+		border-radius: 999px;
+		font-size: var(--sl-text-xs);
+		line-height: 1.6;
+		text-decoration: none;
+		border: 1px solid var(--sl-color-gray-5);
+		color: var(--sl-color-gray-2);
+	}
+	a.badge:hover {
+		border-color: var(--sl-color-accent);
+		color: var(--sl-color-white);
+	}
+	.badge-teacher { background: var(--aud-teacher-bg); border-color: transparent; color: var(--aud-teacher-fg); }
+	.badge-student { background: var(--aud-student-bg); border-color: transparent; color: var(--aud-student-fg); }
+	.badge-parent { background: var(--aud-parent-bg); border-color: transparent; color: var(--aud-parent-fg); }
+	.badge-admin { background: var(--aud-admin-bg); border-color: transparent; color: var(--aud-admin-fg); }
+</style>

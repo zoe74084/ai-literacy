@@ -1,0 +1,46 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  # 網站網址與子路徑：改掛到個人網站子網域時，把 BASE_PATH 設成 "/"，SITE_URL 設成該網域。
+  # 也可以在 repo 的 Settings → Secrets and variables → Actions → Variables 設定同名變數覆蓋。
+  SITE_URL: ${{ vars.SITE_URL || 'https://zoe74084.github.io' }}
+  BASE_PATH: ${{ vars.BASE_PATH || '/ai-literacy' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

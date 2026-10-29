@@ -1,0 +1,86 @@
+/* 色彩：沿用 Starlight 變數，另外定義讀者標籤與框架層級的顏色 */
+:root {
+	--sl-color-accent-low: #12304a;
+	--sl-color-accent: #2f7fc1;
+	--sl-color-accent-high: #b9dcf7;
+	--aud-teacher-bg: #1f3d2c;
+	--aud-teacher-fg: #b7ebc9;
+	--aud-student-bg: #1d3550;
+	--aud-student-fg: #bcdcff;
+	--aud-parent-bg: #4a2c1c;
+	--aud-parent-fg: #ffd2b5;
+	--aud-admin-bg: #3a2a4d;
+	--aud-admin-fg: #e0ccff;
+	--fw-l0: #2b6a8f;
+	--fw-l1: #2f7d5a;
+	--fw-l2: #8a5a1f;
+	--fw-level-fg: #ffffff;
+}
+:root[data-theme='light'] {
+	--sl-color-accent-low: #d6eafb;
+	--sl-color-accent: #1d6aa8;
+	--sl-color-accent-high: #0f3a5d;
+	--aud-teacher-bg: #dcf3e4;
+	--aud-teacher-fg: #1c5a33;
+	--aud-student-bg: #ddebfb;
+	--aud-student-fg: #1b4f86;
+	--aud-parent-bg: #fde7d9;
+	--aud-parent-fg: #8a3d12;
+	--aud-admin-bg: #ece2fa;
+	--aud-admin-fg: #55308a;
+	--fw-l0: #2b78a8;
+	--fw-l1: #2f8a62;
+	--fw-l2: #a8691d;
+}
+
+/* 中文排版：行高稍大，長表格可橫向捲動而不撐破版面 */
+.sl-markdown-content {
+	line-height: 1.85;
+	overflow-wrap: break-word;
+}
+.sl-markdown-content table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+	font-size: var(--sl-text-sm);
+	line-height: 1.6;
+}
+.sl-markdown-content td,
+.sl-markdown-content th {
+	min-width: 4.5em;
+	vertical-align: top;
+}
+
+/* 首頁讀者入口卡片 */
+.audience-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+}
+.audience-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 1.1rem 1.2rem;
+	border-radius: 0.75rem;
+	text-decoration: none !important;
+	border: 1px solid transparent;
+	transition: transform 0.15s ease;
+}
+.audience-card:hover {
+	transform: translateY(-2px);
+	border-color: currentColor;
+}
+.audience-card strong {
+	font-size: var(--sl-text-xl);
+}
+.audience-card span {
+	font-size: var(--sl-text-sm);
+	line-height: 1.6;
+	opacity: 0.9;
+}
+.audience-card.teacher { background: var(--aud-teacher-bg); color: var(--aud-teacher-fg); }
+.audience-card.student { background: var(--aud-student-bg); color: var(--aud-student-fg); }
+.audience-card.parent { background: var(--aud-parent-bg); color: var(--aud-parent-fg); }
+.audience-card.admin { background: var(--aud-admin-bg); color: var(--aud-admin-fg); }
