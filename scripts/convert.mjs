@@ -10,7 +10,9 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'source-md');
-const OUT = path.join(ROOT, 'src/content/docs');
+// 查詢版（Starlight）放在 /library/ 底下；首頁與導讀頁是 src/pages/ 的自訂頁面
+const OUT = path.join(ROOT, 'src/content/docs/library');
+const LIB = '/library';
 const GEN = path.join(ROOT, 'src/generated');
 
 // 超過這個大小（bytes）的文件依章節拆頁
@@ -705,6 +707,7 @@ function main() {
   const sidebar = buildSidebar(pagesOut);
   fs.writeFileSync(path.join(GEN, 'sidebar.json'), JSON.stringify(sidebar, null, 2));
   fs.writeFileSync(path.join(GEN, 'report.json'), JSON.stringify(report, null, 2));
+  fs.writeFileSync(path.join(GEN, 'catalog.json'), JSON.stringify(buildCatalog(pagesOut), null, 2));
 
   const total = report.docs.reduce((n, d) => n + d.pages.length, 0);
   console.log(`convert: ${specs.length} 份來源檔 → ${total} 頁（另有讀者入口 4 頁）`);
@@ -762,8 +765,23 @@ function writeAudiencePages(pages) {
   });
 }
 
+// 給首頁與導讀頁用的文件清單
+function buildCatalog(pages) {
+  return pages.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    label: p.label,
+    group: p.spec.group,
+    order: p.spec.order,
+    audience: p.spec.audience,
+    file: p.spec.file,
+    lesson: p.spec.lesson ?? null,
+    chapters: p.chapters ?? null,
+  }));
+}
+
 function link(p, label) {
-  return { label: label ?? p.label, link: `/${p.slug}/` };
+  return { label: label ?? p.label, link: `${LIB}/${p.slug}/` };
 }
 
 function docItem(p) {
@@ -771,7 +789,7 @@ function docItem(p) {
   return {
     label: p.label,
     collapsed: true,
-    items: [link(p, '總覽'), ...p.chapters.map((c) => ({ label: c.title, link: `/${c.slug}/` }))],
+    items: [link(p, '總覽'), ...p.chapters.map((c) => ({ label: c.title, link: `${LIB}/${c.slug}/` }))],
   };
 }
 
@@ -781,9 +799,9 @@ function buildSidebar(pages) {
   return [
     {
       label: '讀者入口',
-      items: Object.entries(AUDIENCE_PAGES).map(([aud, info]) => ({ label: `我是${AUDIENCES[aud]}`, link: `/${info.slug}/` })),
+      items: Object.entries(AUDIENCE_PAGES).map(([aud, info]) => ({ label: `我是${AUDIENCES[aud]}`, link: `${LIB}/${info.slug}/` })),
     },
-    { label: 'AI 素養框架', collapsed: true, items: [{ label: '框架矩陣（4 面向 × 3 層級）', link: '/framework/' }, ...by('framework').map(docItem)] },
+    { label: 'AI 素養框架', collapsed: true, items: [{ label: '框架矩陣（4 面向 × 3 層級）', link: `${LIB}/framework/` }, ...by('framework').map(docItem)] },
     { label: '使用生成式 AI 注意事項', collapsed: true, items: by('notices').map(docItem) },
     {
       label: '教學指引',
@@ -793,7 +811,7 @@ function buildSidebar(pages) {
     {
       label: '教案示例',
       collapsed: true,
-      items: [{ label: '總覽與篩選', link: '/lessons/' }, stageGroup('es', '國小'), stageGroup('jh', '國中'), stageGroup('sh', '普高'), stageGroup('vs', '技高')],
+      items: [{ label: '總覽與篩選', link: `${LIB}/lessons/` }, stageGroup('es', '國小'), stageGroup('jh', '國中'), stageGroup('sh', '普高'), stageGroup('vs', '技高')],
     },
     { label: 'AI 學習應用手冊', collapsed: true, items: by('handbooks').map(docItem) },
     { label: '家長宣導', collapsed: true, items: by('parents').map(docItem) },

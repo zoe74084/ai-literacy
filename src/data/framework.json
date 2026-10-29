@@ -3,7 +3,7 @@
   "source": "《臺灣中小學教師與學生 AI 素養框架》表 1 教師 AI 素養框架、表 2 學生 AI 素養框架",
   "teacher": {
     "label": "教師 AI 素養",
-    "page": "framework/full/04",
+    "page": "library/framework/full/04",
     "facets": [
       {
         "name": "AI 倫理",
@@ -45,7 +45,7 @@
   },
   "student": {
     "label": "學生 AI 素養",
-    "page": "framework/full/05",
+    "page": "library/framework/full/05",
     "facets": [
       {
         "name": "AI 倫理",

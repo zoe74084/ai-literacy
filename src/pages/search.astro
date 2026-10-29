@@ -1,0 +1,99 @@
+---
+import Site from '../layouts/Site.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const suggestions = ['AI 倫理', '生成式', '提示詞', '深偽', '因材網', '紅黃綠燈', '個資', '學術誠信', 'e 度', '人機協作'];
+---
+
+<Site title="搜尋" description="全文搜尋 AI 素養相關文件。" current="search">
+	<section class="page-hero wrap search-hero">
+		<span class="eyebrow reveal">Search</span>
+		<h1 class="reveal" style="--i:1">在 47 份文件裡<span class="mark">找一句話</span></h1>
+		<p class="lead reveal" style="--i:2">搜尋範圍是資料庫的全文。沒有空格的中文詞會找「連在一起」的字；用空格分開可以同時找多個詞。</p>
+		<p class="sugs reveal" style="--i:3">
+			{suggestions.map((s) => <button type="button" class="chip" data-q={s}>#{s}</button>)}
+		</p>
+	</section>
+	<section class="band band--white band--arch">
+		<div class="wrap-narrow">
+			<div id="search" data-bundle={`${base}/pagefind/`} data-base={`${base}/`}></div>
+			<noscript><p>搜尋需要 JavaScript。也可以到<a href={`${base}/library/`}>資料庫</a>依分類瀏覽。</p></noscript>
+		</div>
+	</section>
+</Site>
+
+<script>
+	import '@pagefind/default-ui/css/ui.css';
+	import { PagefindUI } from '@pagefind/default-ui';
+
+	const el = document.getElementById('search')!;
+	const ui = new PagefindUI({
+		element: '#search',
+		bundlePath: el.dataset.bundle,
+		baseUrl: el.dataset.base,
+		showImages: false,
+		showSubResults: true,
+		autofocus: true,
+		translations: {
+			placeholder: '輸入關鍵字，例如：AI 倫理',
+			zero_results: '找不到「[SEARCH_TERM]」',
+			many_results: '「[SEARCH_TERM]」共 [COUNT] 筆結果',
+			one_result: '「[SEARCH_TERM]」共 1 筆結果',
+			load_more: '載入更多',
+			clear_search: '清除',
+			searching: '搜尋「[SEARCH_TERM]」中…',
+		},
+	});
+	const q = new URLSearchParams(location.search).get('q');
+	if (q) ui.triggerSearch(q);
+	document.querySelectorAll<HTMLButtonElement>('[data-q]').forEach((b) =>
+		b.addEventListener('click', () => {
+			ui.triggerSearch(b.dataset.q!);
+			const u = new URL(location.href);
+			u.searchParams.set('q', b.dataset.q!);
+			history.replaceState(null, '', u);
+		}),
+	);
+</script>
+
+<style>
+	.sugs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin-top: 1.25rem;
+	}
+	.sugs .chip {
+		font: inherit;
+		font-size: 0.85rem;
+		border: 1px solid var(--line);
+		background: var(--white);
+		cursor: pointer;
+	}
+	.sugs .chip:hover {
+		background: var(--yamabuki-soft);
+	}
+	#search {
+		--pagefind-ui-scale: 1;
+		--pagefind-ui-primary: var(--ink);
+		--pagefind-ui-text: var(--ink);
+		--pagefind-ui-background: var(--white);
+		--pagefind-ui-border: var(--ink);
+		--pagefind-ui-tag: var(--paper-2);
+		--pagefind-ui-border-width: 1.5px;
+		--pagefind-ui-border-radius: 18px;
+		--pagefind-ui-font: var(--sans);
+		min-height: 20rem;
+	}
+	#search :global(.pagefind-ui__search-input) {
+		border-radius: 999px;
+		font-weight: 500;
+	}
+	#search :global(.pagefind-ui__result-link) {
+		font-family: var(--serif);
+		color: var(--ink);
+	}
+	#search :global(mark) {
+		background: var(--marker);
+		color: inherit;
+	}
+</style>

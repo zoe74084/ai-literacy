@@ -1,27 +1,21 @@
 ---
-title: AI 素養資源站
-description: 教育部數位學習推動辦公室 AI 素養相關文件的全文網站，依教師、學生、家長、校長・行政四類讀者整理，可全文搜尋。
+title: 資料庫：全文與查詢
+description: 教育部數位學習推動辦公室 AI 素養相關文件的全文資料庫，依章節分頁、依讀者分類，可全文搜尋。
 template: splash
 hero:
-  tagline: 把教育部的 AI 素養框架、教學指引、教案示例、學習手冊與行政文件整理成可搜尋的網頁。
+  tagline: 47 份文件的完整內容，依章節分頁、可全文搜尋。需要引用原文、找特定段落時用這裡；想先掌握重點，可以回到「導讀」。
   actions:
-    - text: 看 AI 素養框架
-      link: framework/
-      icon: right-arrow
-    - text: 找教案示例
-      link: lessons/
+    - text: 全站搜尋
+      link: ../search/
+      icon: magnifier
+    - text: 回到導讀
+      link: ../read/
       variant: minimal
 ---
 
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## 什麼是 AI 素養？
-
-依教育部《臺灣中小學教師與學生 AI 素養框架》，AI 素養以「以人為中心」為核心精神：在與 AI 協作時，人類始終掌握決策的主導權，並能辨識 AI 產出的真偽，不讓演算法取代我們的價值判斷。
-
-框架為教師與學生各規劃四個面向，每個面向都有「取得理解、深化應用、創造轉型」三個層級，讓師生依自己的步調循序發展。
-
-## 我是……
+## 依讀者找
 
 <div class="audience-cards">
 	<a class="audience-card teacher" href="audience/teacher/">
@@ -42,15 +36,16 @@ import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 	</a>
 </div>
 
-## 網站內容
+## 依文件找
 
 <CardGrid>
-	<LinkCard title="AI 素養框架" description="教師與學生各 4 面向 × 3 層級的矩陣，點格子看內涵" href="framework/" />
+	<LinkCard title="AI 素養框架" description="教師與學生各 4 面向 × 3 層級的矩陣，以及框架全文" href="framework/" />
 	<LinkCard title="使用生成式 AI 注意事項 2.1" description="學生版；教師、行政人員及家長版" href="notices/student/" />
 	<LinkCard title="數位與 AI 教學指引（115 年）" description="教師、家長、校長三份指引；114 年版收在歷史版本" href="guides/teacher/" />
-	<LinkCard title="教案示例" description="國小、國中、普高、技高的數位與 AI 融入教學方案，可依學段、領域篩選" href="lessons/" />
+	<LinkCard title="教案示例" description="國小、國中、普高、技高的課例，可依學段、領域篩選" href="lessons/" />
 	<LinkCard title="AI 學習應用手冊" description="國小生聰明用 AI、國中生靈活用 AI、高中生智慧駕馭 AI" href="handbooks/elementary/" />
+	<LinkCard title="行政文件" description="115 年度數位學習實施計畫、教育大數據介接文件、xAPI 規格" href="admin/plan/" />
 	<LinkCard title="AI 人才方舟計畫" description="中文版，另有英文、日文、韓文版" href="ark/" />
 </CardGrid>
 
-右上角的搜尋可以查全站文字，例如「AI 倫理」、「生成式」、「因材網」。
+原始 PDF 不在本站存放，請到 [教育部數位學習推動辦公室下載專區](https://pads.moe.edu.tw/download.php) 下載；每一頁頁尾都有原始檔名可以對照。

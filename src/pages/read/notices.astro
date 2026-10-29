@@ -1,0 +1,406 @@
+---
+import Site from '../../layouts/Site.astro';
+import ReadMeta from '../../components/read/ReadMeta.astro';
+import { readBody, md, mdInline, plain } from '../../lib/content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const NUM = '一二三四五六七八九十';
+const ITEM = new RegExp(`^(?:#+ |- )?([${NUM}])、(.+)$`);
+
+// PDF 轉檔把一段話切成好幾個「- 」開頭的行：沒有句尾標點就接回同一段
+function reflow(lines: string[]) {
+	const out: string[] = [];
+	for (const raw of lines) {
+		const t = raw.trim();
+		if (!t) continue;
+		const isList = /^- [（(]/.test(t) || /^\d+\.\s/.test(t);
+		const text = isList ? t : t.replace(/^- /, '');
+		const prev = out[out.length - 1];
+		// 上一段沒有句尾標點 → 這一行是它被 PDF 斷開的後半
+		if (!isList && prev && !/[。！？：」）]$/.test(prev) && !/^#/.test(prev)) {
+			out[out.length - 1] = prev + text;
+		} else {
+			out.push(text);
+		}
+	}
+	return out.join('\n\n');
+}
+
+function parse(slug: string) {
+	const body = readBody(slug);
+	const lines = body.split('\n');
+	const apx = lines.findIndex((l) => /附錄\s*1/.test(l));
+	const main = lines.slice(0, apx < 0 ? undefined : apx);
+	const appendix = apx < 0 ? [] : lines.slice(apx + 1);
+
+	const intro: string[] = [];
+	const items: { num: string; title: string; lines: string[] }[] = [];
+	const closing: string[] = [];
+	for (const l of main) {
+		const m = l.trim().match(ITEM);
+		if (m) {
+			items.push({ num: m[1], title: plain(m[2]), lines: [] });
+			continue;
+		}
+		if (/^生成式人工智慧技術的發展/.test(l.trim()) || closing.length) {
+			closing.push(l);
+			continue;
+		}
+		if (items.length) items[items.length - 1].lines.push(l);
+		else if (!/^#/.test(l.trim())) intro.push(l);
+	}
+
+	// 附錄 1：每一點的情境示例
+	const examples: Record<string, string> = {};
+	let cur = '';
+	for (const l of appendix) {
+		const t = l.trim();
+		if (/^#+ /.test(t) && /附錄\s*2|參考文獻/.test(t)) break;
+		const m = t.replace(/^- /, '').match(new RegExp(`^([${NUM}])、(.+)$`));
+		if (m) {
+			cur = m[1];
+			const text = m[2];
+			examples[cur] = text.includes('：') ? text.slice(text.indexOf('：') + 1) : text;
+		} else if (cur && t && !/^#/.test(t)) {
+			examples[cur] += t.replace(/^- /, '');
+		}
+	}
+
+	return {
+		intro: intro.filter((l) => l.trim() && !/^中華民國/.test(l.trim())).map((l) => l.trim()),
+		decree: lines.find((l) => /^中華民國/.test(l.trim()))?.trim() ?? '',
+		items: items.map((it) => ({ ...it, html: md(reflow(it.lines)), example: examples[it.num] ? mdInline(examples[it.num].replace(/\*\*/g, '')) : '' })),
+		closing: md(reflow(closing)),
+	};
+}
+
+const versions = [
+	{ key: 'student', label: '學生版', slug: 'notices/student', file: '03_生成式AI注意事項_中小學使用生成式人工智慧注意事項2.1_學生版.md', ...parse('notices/student') },
+	{ key: 'adults', label: '教師、行政人員及家長版', short: '大人版', slug: 'notices/adults', file: '03_生成式AI注意事項_中小學使用生成式人工智慧注意事項2.1_教師_行政人員及家長版.md', ...parse('notices/adults') },
+];
+const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'var(--shu-soft)', 'var(--fuji-soft)', 'var(--paper-2)'];
+---
+
+<Site title="生成式 AI 注意事項" description="中小學使用生成式人工智慧注意事項 2.1 的卡片式導讀：學生版與教師、行政人員及家長版。" current="read">
+	<section class="page-hero wrap">
+		<span class="eyebrow reveal">Read 02 · Notices</span>
+		<h1 class="reveal" style="--i:1">使用生成式 AI<br /><span class="mark">注意事項 2.1</span></h1>
+		<p class="lead reveal" style="--i:2">教育部為中小學訂的使用原則，分學生版和教師、行政人員及家長版。一張卡片一個重點；翻到背面是原文附錄裡的情境示例。</p>
+	</section>
+
+	<section class="band band--paper2 band--arch" data-notices>
+		<div class="wrap">
+			<div class="nt-controls reveal">
+				<div class="toggle" role="group" aria-label="選擇版本">
+					{versions.map((v, i) => <button type="button" data-v={v.key} aria-pressed={i === 0 ? 'true' : 'false'}>{v.short ?? v.label}</button>)}
+				</div>
+				<div class="deck-nav">
+					<button type="button" class="round" data-prev aria-label="上一張">←</button>
+					<span class="deck-count" aria-live="polite"><b data-cur>1</b> / <span data-total>{versions[0].items.length}</span></span>
+					<button type="button" class="round" data-next aria-label="下一張">→</button>
+				</div>
+			</div>
+
+			{
+				versions.map((v, vi) => (
+					<div class="version" data-version={v.key} hidden={vi !== 0}>
+						<div class="nt-intro">
+							{v.intro.map((p) => <p>{p}</p>)}
+							{v.decree && <p class="decree">{v.decree}</p>}
+						</div>
+						<ol class="deck" data-deck tabindex="0" aria-label={`${v.label}：共 ${v.items.length} 點`}>
+							{v.items.map((it, i) => (
+								<li class="slot" style={`--bg:${hues[i % hues.length]}`}>
+									<div class="flip" data-flip>
+										<article class="face front">
+											<span class="kanji" aria-hidden="true">
+												{it.num}
+											</span>
+											<p class="card-no">
+												第 {it.num} 點<span>／{v.items.length}</span>
+											</p>
+											<h2>{it.title}</h2>
+											<div class="card-body" set:html={it.html} />
+											{it.example && (
+												<button type="button" class="flip-btn" data-flip-btn>
+													看情境示例 ↻
+												</button>
+											)}
+										</article>
+										{it.example && (
+											<article class="face back" aria-hidden="true">
+												<p class="eyebrow">Example · 附錄 1 示例</p>
+												<h3>{it.title}</h3>
+												<p class="example" set:html={it.example} />
+												<button type="button" class="flip-btn" data-flip-btn>
+													翻回正面 ↺
+												</button>
+											</article>
+										)}
+									</div>
+								</li>
+							))}
+						</ol>
+						{v.closing.trim() && (
+							<div class="closing reveal">
+								<p class="eyebrow">Closing</p>
+								<div set:html={v.closing} />
+							</div>
+						)}
+						<ReadMeta file={v.file} full={`${v.slug}/`} />
+					</div>
+				))
+			}
+		</div>
+	</section>
+</Site>
+
+<script>
+	const root = document.querySelector<HTMLElement>('[data-notices]')!;
+	const vBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-v]')];
+	const cur = root.querySelector('[data-cur]')!;
+	const total = root.querySelector('[data-total]')!;
+	let active = new URLSearchParams(location.search).get('v') === 'adults' ? 'adults' : 'student';
+
+	const deck = () => root.querySelector<HTMLElement>(`[data-version="${active}"] [data-deck]`)!;
+	const slots = () => [...deck().children] as HTMLElement[];
+	const index = () => {
+		const d = deck();
+		const w = (slots()[0]?.offsetWidth ?? 1) + parseFloat(getComputedStyle(d).columnGap || '0');
+		return Math.round(d.scrollLeft / w);
+	};
+	const go = (i: number) => {
+		const s = slots();
+		const t = s[Math.max(0, Math.min(s.length - 1, i))];
+		deck().scrollTo({ left: t.offsetLeft - deck().offsetLeft, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+	};
+	const sync = () => {
+		cur.textContent = String(index() + 1);
+		total.textContent = String(slots().length);
+	};
+	const show = (v: string) => {
+		active = v;
+		vBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+		root.querySelectorAll<HTMLElement>('[data-version]').forEach((el) => (el.hidden = el.dataset.version !== v));
+		const u = new URL(location.href);
+		v === 'adults' ? u.searchParams.set('v', 'adults') : u.searchParams.delete('v');
+		history.replaceState(null, '', u);
+		sync();
+	};
+	vBtns.forEach((b) => b.addEventListener('click', () => show(b.dataset.v!)));
+	root.querySelector('[data-prev]')!.addEventListener('click', () => go(index() - 1));
+	root.querySelector('[data-next]')!.addEventListener('click', () => go(index() + 1));
+	root.querySelectorAll<HTMLElement>('[data-deck]').forEach((d) => {
+		d.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+		d.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowRight') go(index() + 1);
+			if (e.key === 'ArrowLeft') go(index() - 1);
+		});
+	});
+	root.querySelectorAll<HTMLButtonElement>('[data-flip-btn]').forEach((b) =>
+		b.addEventListener('click', () => {
+			const f = b.closest<HTMLElement>('[data-flip]')!;
+			const on = !f.classList.contains('is-flipped');
+			f.classList.toggle('is-flipped', on);
+			f.querySelector('.front')!.setAttribute('aria-hidden', String(on));
+			f.querySelector('.back')?.setAttribute('aria-hidden', String(!on));
+		}),
+	);
+	show(active);
+</script>
+
+<style>
+	.nt-controls {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+	.deck-nav {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	.round {
+		font: inherit;
+		width: 2.8rem;
+		height: 2.8rem;
+		border-radius: 50%;
+		border: 1.5px solid var(--ink);
+		background: var(--white);
+		cursor: pointer;
+		font-size: 1.1rem;
+		transition: transform 0.2s var(--ease);
+	}
+	.round:hover {
+		background: var(--ink);
+		color: var(--white);
+	}
+	.round:active {
+		transform: scale(0.92);
+	}
+	.deck-count {
+		font-family: var(--latin);
+		min-width: 4rem;
+		text-align: center;
+	}
+	.deck-count b {
+		font-size: 1.6rem;
+		font-weight: 300;
+	}
+	.nt-intro {
+		max-width: 50rem;
+		color: var(--ink-2);
+		margin-bottom: 1.5rem;
+	}
+	.decree {
+		font-size: 0.78rem;
+		color: var(--ink-3);
+	}
+
+	.deck {
+		list-style: none;
+		margin: 0 calc(-1 * var(--gutter));
+		padding: 1rem var(--gutter) 2rem;
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: min(88%, 30rem);
+		column-gap: 1.25rem;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-padding-inline: var(--gutter);
+		scrollbar-width: thin;
+	}
+	.deck:focus-visible {
+		outline-offset: -4px;
+	}
+	.slot {
+		scroll-snap-align: start;
+		perspective: 1400px;
+	}
+	.flip {
+		display: grid;
+		height: 100%;
+		transition: transform 0.7s var(--ease);
+		transform-style: preserve-3d;
+	}
+	.flip.is-flipped {
+		transform: rotateY(180deg);
+	}
+	.face {
+		grid-area: 1 / 1;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		padding: clamp(1.4rem, 4vw, 2.2rem);
+		border-radius: 1.75rem;
+		border: 1.5px solid var(--ink);
+		background: var(--white);
+		min-height: 30rem;
+		box-shadow: 6px 8px 0 var(--ink);
+	}
+	.front::before {
+		content: '';
+		position: absolute;
+		inset: 0 0 auto 0;
+		height: 7.5rem;
+		background: var(--bg);
+		border-bottom: 1.5px solid var(--ink);
+		border-radius: 0 0 50% 50% / 0 0 26px 26px;
+	}
+	.back {
+		transform: rotateY(180deg);
+		background: var(--night);
+		color: #ece6da;
+	}
+	.back .eyebrow {
+		color: #a9a295;
+	}
+	.kanji {
+		position: absolute;
+		right: 1.25rem;
+		top: 0.2rem;
+		font-family: var(--serif);
+		font-weight: 900;
+		font-size: 6rem;
+		line-height: 1;
+		color: var(--ink);
+		opacity: 0.12;
+	}
+	.card-no {
+		position: relative;
+		margin: 0;
+		font-family: var(--serif);
+		font-weight: 700;
+		color: var(--shu);
+	}
+	.card-no span {
+		color: var(--ink-3);
+		font-weight: 400;
+		font-size: 0.85rem;
+	}
+	.face h2 {
+		position: relative;
+		font-size: clamp(1.2rem, 3vw, 1.5rem);
+		margin: 1.4rem 0 0.25rem;
+	}
+	.back h3 {
+		font-size: 1.15rem;
+	}
+	.card-body {
+		font-size: 0.95rem;
+		color: var(--ink-2);
+	}
+	.card-body :global(p) {
+		margin: 0 0 0.8em;
+	}
+	.card-body :global(ul),
+	.card-body :global(ol) {
+		padding-left: 1.2em;
+		margin: 0 0 0.8em;
+	}
+	.example {
+		font-family: var(--serif);
+		font-size: 1.05rem;
+		line-height: 2;
+	}
+	.flip-btn {
+		margin-top: auto;
+		align-self: flex-start;
+		font: inherit;
+		font-size: 0.9rem;
+		font-weight: 700;
+		padding: 0.5rem 1.1rem;
+		border-radius: 999px;
+		border: 1.5px solid currentColor;
+		background: transparent;
+		color: inherit;
+		cursor: pointer;
+	}
+	.front .flip-btn {
+		background: var(--yamabuki-soft);
+		border-color: var(--ink);
+	}
+	.closing {
+		margin: 1rem 0 0;
+		padding: 1.5rem;
+		background: var(--white);
+		border-radius: 1.5rem;
+		border: 1.5px dashed var(--ink-3);
+		max-width: 50rem;
+	}
+	.closing :global(ol) {
+		padding-left: 1.3em;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.flip {
+			transition: none;
+		}
+	}
+</style>

@@ -1,0 +1,588 @@
+---
+// 閱讀版：每一份文件（與每一章）都能在這裡以較好讀的排版直接閱讀。
+// 內容與資料庫版相同（同一份轉換結果），只是版面與導覽不同。
+import { getCollection, render } from 'astro:content';
+import Site from '../../../layouts/Site.astro';
+import ReadMeta from '../../../components/read/ReadMeta.astro';
+import { catalog, type CatalogDoc } from '../../../lib/content';
+import { AUDIENCE_LABELS } from '../../../data/audiences';
+
+export async function getStaticPaths() {
+	const entries = await getCollection('docs', (e) => e.id.startsWith('library/') && Boolean(e.data.source));
+	const byId = new Map(entries.map((e) => [e.id.replace(/^library\//, ''), e]));
+	const paths = [];
+	for (const doc of catalog) {
+		const entry = byId.get(doc.slug);
+		if (entry) paths.push({ params: { slug: doc.slug }, props: { doc, slug: doc.slug, entry } });
+		doc.chapters?.forEach((c) => {
+			const ce = byId.get(c.slug);
+			if (ce) paths.push({ params: { slug: c.slug }, props: { doc, slug: c.slug, entry: ce } });
+		});
+	}
+	return paths;
+}
+
+interface Props {
+	doc: CatalogDoc;
+	slug: string;
+	entry: Awaited<ReturnType<typeof getCollection<'docs'>>>[number];
+}
+const { doc, slug, entry } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const isOverview = Boolean(doc.chapters) && slug === doc.slug;
+const chapters = doc.chapters ?? [];
+const idx = chapters.findIndex((c) => c.slug === slug);
+const chapter = idx >= 0 ? chapters[idx] : null;
+const prev = idx > 0 ? chapters[idx - 1] : idx === 0 ? { slug: doc.slug, title: '目次' } : null;
+const next = idx >= 0 && idx < chapters.length - 1 ? chapters[idx + 1] : isOverview && chapters.length ? chapters[0] : null;
+
+const { Content, headings } = isOverview ? { Content: null, headings: [] } : await render(entry);
+const toc = headings.filter((h) => h.depth === 2).slice(0, 40);
+
+const GROUP_LABEL: Record<string, string> = {
+	ark: 'AI 人才方舟計畫',
+	framework: 'AI 素養框架',
+	notices: '生成式 AI 注意事項',
+	guides: '教學指引（115 年）',
+	history: '教學指引（114 年，歷史版本）',
+	handbooks: 'AI 學習應用手冊',
+	parents: '家長宣導',
+	'admin-plan': '數位學習實施計畫',
+	'admin-data': '教育大數據',
+};
+const groupLabel = doc.lesson ? `教案示例・${doc.lesson.stage}` : (GROUP_LABEL[doc.group] ?? '');
+const pageTitle = chapter ? `${chapter.title}｜${doc.title}` : doc.title;
+// 方舟計畫的四種語言版本
+const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sort((a, b) => a.order - b.order) : [];
+---
+
+<Site title={pageTitle} description={entry.data.description} current="read">
+	<div class="progress" aria-hidden="true"><span data-progress></span></div>
+
+	<section class="page-hero wrap doc-hero">
+		<nav class="crumbs reveal" aria-label="位置">
+			<a href={`${base}/read/`}>導讀</a>
+			<span aria-hidden="true">／</span>
+			{groupLabel && <span>{groupLabel}</span>}
+			{
+				chapter && (
+					<>
+						<span aria-hidden="true">／</span>
+						<a href={`${base}/read/doc/${doc.slug}/`}>{doc.title}</a>
+					</>
+				)
+			}
+		</nav>
+		{chapter && <p class="doc-of reveal">第 {idx + 1} 頁／共 {chapters.length} 頁</p>}
+		<h1 class="reveal" style="--i:1">{chapter ? chapter.title : doc.title}</h1>
+		{
+			doc.lesson && (
+				<p class="lead reveal" style="--i:2">
+					{doc.lesson.stage}・{doc.lesson.domain}・設計者 {doc.lesson.author}
+				</p>
+			)
+		}
+		<p class="doc-aud reveal" style="--i:2">
+			{doc.audience.map((a) => <span class={`chip chip--${a}`}>{AUDIENCE_LABELS[a]}</span>)}
+		</p>
+		{
+			langs.length > 0 && (
+				<p class="langs reveal" style="--i:2">
+					{langs.map((l) => (
+						<a class="chip" aria-current={l.slug === slug ? 'page' : undefined} href={`${base}/read/doc/${l.slug}/`}>
+							{l.label}
+						</a>
+					))}
+				</p>
+			)
+		}
+		<ReadMeta file={doc.file} full={`${slug}/`} />
+	</section>
+
+	{
+		isOverview ? (
+			<section class="band band--paper2 band--arch">
+				<div class="wrap">
+					<div class="section-head reveal">
+						<span class="eyebrow">Contents</span>
+						<h2>目次</h2>
+						<p>本文件依原文章節分成 {chapters.length} 頁，依序閱讀或直接跳到想看的章節。</p>
+					</div>
+					<ol class="chapters">
+						{chapters.map((c, i) => (
+							<li class="reveal" style={`--i:${i % 4}`}>
+								<a href={`${base}/read/doc/${c.slug}/`}>
+									<span class="num">{String(i + 1).padStart(2, '0')}</span>
+									<span class="ch-title">{c.title}</span>
+									<span class="arrow" aria-hidden="true">
+										→
+									</span>
+								</a>
+							</li>
+						))}
+					</ol>
+				</div>
+			</section>
+		) : (
+			<section class="band band--white band--arch doc-band">
+				<div class="wrap doc-layout">
+					<aside class="doc-aside">
+						<div class="doc-aside-inner">
+							<p class="aside-tate tate">{doc.title}</p>
+							<div class="aside-nav">
+								<div class="fontsize" role="group" aria-label="字級">
+									<button type="button" data-fs="s" aria-label="小字">
+										A
+									</button>
+									<button type="button" data-fs="m" aria-label="中字">
+										A
+									</button>
+									<button type="button" data-fs="l" aria-label="大字">
+										A
+									</button>
+								</div>
+								{toc.length > 1 && (
+									<details class="toc" open>
+										<summary>本頁段落</summary>
+										<ol>
+											{toc.map((h) => (
+												<li>
+													<a href={`#${h.slug}`}>{h.text}</a>
+												</li>
+											))}
+										</ol>
+									</details>
+								)}
+								{chapters.length > 0 && (
+									<details class="toc">
+										<summary>所有章節</summary>
+										<ol>
+											{chapters.map((c) => (
+												<li>
+													<a href={`${base}/read/doc/${c.slug}/`} aria-current={c.slug === slug ? 'page' : undefined}>
+														{c.title}
+													</a>
+												</li>
+											))}
+										</ol>
+									</details>
+								)}
+							</div>
+						</div>
+					</aside>
+					<article class="prose" data-prose>
+						{Content && <Content />}
+					</article>
+				</div>
+			</section>
+		)
+	}
+
+	{
+		(prev || next) && (
+			<nav class="wrap pager" aria-label="上一章、下一章">
+				{prev ? (
+					<a class="pager-link" href={`${base}/read/doc/${prev.slug}/`}>
+						<span class="eyebrow">Prev</span>
+						<span>{prev.title}</span>
+					</a>
+				) : (
+					<span />
+				)}
+				{next && (
+					<a class="pager-link pager-next" href={`${base}/read/doc/${next.slug}/`}>
+						<span class="eyebrow">Next</span>
+						<span>{next.title}</span>
+					</a>
+				)}
+			</nav>
+		)
+	}
+</Site>
+
+<script>
+	// 閱讀進度條
+	const bar = document.querySelector<HTMLElement>('[data-progress]');
+	const prose = document.querySelector<HTMLElement>('[data-prose]');
+	if (bar && prose) {
+		const update = () => {
+			const r = prose.getBoundingClientRect();
+			const total = r.height - innerHeight;
+			const p = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 1;
+			bar.style.transform = `scaleX(${p})`;
+		};
+		addEventListener('scroll', update, { passive: true });
+		update();
+	}
+	// 字級（記在這台裝置上）
+	const sizes: Record<string, string> = { s: '0.95rem', m: '1.05rem', l: '1.22rem' };
+	const apply = (k: string) => {
+		if (!prose || !sizes[k]) return;
+		prose.style.fontSize = sizes[k];
+		document.querySelectorAll<HTMLButtonElement>('[data-fs]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fs === k)));
+	};
+	let saved = 'm';
+	try {
+		saved = localStorage.getItem('read-fs') || 'm';
+	} catch {}
+	apply(saved);
+	document.querySelectorAll<HTMLButtonElement>('[data-fs]').forEach((b) =>
+		b.addEventListener('click', () => {
+			apply(b.dataset.fs!);
+			try {
+				localStorage.setItem('read-fs', b.dataset.fs!);
+			} catch {}
+		}),
+	);
+	// 內文標題進場劃螢光筆
+	if (prose) {
+		const io = new IntersectionObserver(
+			(es) =>
+				es.forEach((e) => {
+					if (e.isIntersecting) {
+						e.target.classList.add('is-in');
+						io.unobserve(e.target);
+					}
+				}),
+			{ rootMargin: '0px 0px -15% 0px' },
+		);
+		prose.querySelectorAll('h2').forEach((h) => io.observe(h));
+	}
+</script>
+
+<style>
+	.progress {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 4px;
+		z-index: 60;
+	}
+	.progress span {
+		display: block;
+		height: 100%;
+		background: var(--shu);
+		transform: scaleX(0);
+		transform-origin: left;
+	}
+	.crumbs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		font-size: 0.85rem;
+		color: var(--ink-3);
+		margin-bottom: 1rem;
+	}
+	.crumbs a {
+		color: var(--ink-2);
+	}
+	.doc-of {
+		font-family: var(--latin);
+		font-size: 0.85rem;
+		letter-spacing: 0.1em;
+		color: var(--shu);
+		margin: 0 0 0.5rem;
+	}
+	.doc-hero h1 {
+		font-size: clamp(1.7rem, 5vw, 3rem);
+		max-width: 52rem;
+	}
+	.doc-aud,
+	.langs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin: 1.25rem 0 0;
+	}
+	.langs .chip {
+		border: 1px solid var(--line);
+		background: var(--white);
+	}
+	.langs .chip[aria-current='page'] {
+		background: var(--ink);
+		color: var(--white);
+	}
+
+	.chapters {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+		gap: 0.75rem;
+	}
+	.chapters a {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 1rem 1.25rem;
+		background: var(--white);
+		border: 1.5px solid var(--ink);
+		border-radius: 1.25rem;
+		text-decoration: none;
+		height: 100%;
+		transition:
+			transform 0.25s var(--ease),
+			box-shadow 0.25s var(--ease);
+	}
+	.chapters a:hover {
+		transform: translateY(-3px);
+		box-shadow: 5px 6px 0 var(--ink);
+	}
+	.chapters .num {
+		font-size: 2.4rem;
+		flex: none;
+	}
+	.ch-title {
+		flex: 1;
+		font-family: var(--serif);
+		font-weight: 700;
+		line-height: 1.5;
+	}
+
+	.doc-band {
+		padding-top: clamp(3rem, 7vw, 5rem);
+	}
+	.doc-layout {
+		display: grid;
+		grid-template-columns: 15rem minmax(0, 1fr);
+		gap: clamp(1.5rem, 4vw, 3.5rem);
+		align-items: start;
+	}
+	.doc-aside {
+		align-self: stretch;
+	}
+	.doc-aside-inner {
+		position: sticky;
+		top: 5.5rem;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 1rem;
+		max-height: calc(100vh - 7rem);
+	}
+	.aside-tate {
+		margin: 0;
+		font-family: var(--serif);
+		font-weight: 700;
+		color: var(--ink-3);
+		font-size: 0.95rem;
+		max-height: 22rem;
+		overflow: hidden;
+		border-left: 1.5px solid var(--line);
+		padding-left: 0.5rem;
+	}
+	.aside-nav {
+		min-width: 0;
+		overflow-y: auto;
+		display: grid;
+		gap: 0.75rem;
+		align-content: start;
+	}
+	.fontsize {
+		display: inline-flex;
+		gap: 0.25rem;
+	}
+	.fontsize button {
+		font: inherit;
+		font-family: var(--serif);
+		width: 2.2rem;
+		height: 2.2rem;
+		border-radius: 50%;
+		border: 1px solid var(--line);
+		background: var(--white);
+		cursor: pointer;
+	}
+	.fontsize button:nth-child(1) { font-size: 0.8rem; }
+	.fontsize button:nth-child(2) { font-size: 1rem; }
+	.fontsize button:nth-child(3) { font-size: 1.2rem; }
+	.fontsize button[aria-pressed='true'] {
+		background: var(--ink);
+		color: var(--white);
+		border-color: var(--ink);
+	}
+	.toc {
+		font-size: 0.85rem;
+	}
+	.toc summary {
+		cursor: pointer;
+		font-weight: 700;
+		margin-bottom: 0.4rem;
+	}
+	.toc ol {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 0.15rem;
+	}
+	.toc a {
+		display: block;
+		padding: 0.2rem 0.5rem;
+		border-radius: 0.4rem;
+		text-decoration: none;
+		color: var(--ink-2);
+		line-height: 1.5;
+	}
+	.toc a:hover,
+	.toc a[aria-current='page'] {
+		background: var(--yamabuki-soft);
+		color: var(--ink);
+	}
+	@media (max-width: 56rem) {
+		.doc-layout {
+			grid-template-columns: 1fr;
+		}
+		.doc-aside {
+			align-self: start;
+		}
+		.doc-aside-inner {
+			position: static;
+			max-height: none;
+			grid-template-columns: 1fr;
+		}
+		.aside-tate {
+			display: none;
+		}
+		.toc:not([open]) {
+			border-bottom: 1px dashed var(--line);
+		}
+	}
+
+	/* 內文排版 */
+	.prose {
+		font-size: 1.05rem;
+		line-height: 2;
+		max-width: 46rem;
+		overflow-wrap: break-word;
+	}
+	.prose :global(h2) {
+		font-family: var(--serif);
+		font-size: 1.55em;
+		margin: 2.4em 0 0.8em;
+		line-height: 1.45;
+		display: inline;
+		background: linear-gradient(var(--marker), var(--marker)) left 90% / 0% 0.42em no-repeat;
+		-webkit-box-decoration-break: clone;
+		box-decoration-break: clone;
+		transition: background-size 0.8s var(--ease) 0.2s;
+	}
+	.prose :global(h2.is-in) {
+		background-size: 100% 0.42em;
+	}
+	.prose :global(.sl-heading-wrapper) {
+		margin: 2.4em 0 0.8em;
+	}
+	.prose :global(.sl-heading-wrapper h2),
+	.prose :global(.sl-heading-wrapper h3) {
+		margin: 0;
+	}
+	.prose :global(.sl-anchor-link) {
+		display: none;
+	}
+	.prose :global(h3) {
+		font-family: var(--serif);
+		font-size: 1.25em;
+		margin: 1.8em 0 0.6em;
+		padding-left: 0.75rem;
+		border-left: 4px solid var(--kusa);
+		line-height: 1.5;
+	}
+	.prose :global(h4),
+	.prose :global(h5),
+	.prose :global(h6) {
+		font-size: 1.05em;
+		margin: 1.5em 0 0.5em;
+	}
+	.prose :global(p) {
+		margin: 0 0 1.1em;
+	}
+	.prose :global(strong) {
+		background: linear-gradient(transparent 62%, var(--yamabuki-soft) 62%);
+	}
+	.prose :global(ul),
+	.prose :global(ol) {
+		padding-left: 1.4em;
+		margin: 0 0 1.1em;
+	}
+	.prose :global(li) {
+		margin-bottom: 0.3em;
+	}
+	.prose :global(li::marker) {
+		color: var(--shu);
+	}
+	.prose :global(blockquote) {
+		margin: 1.2em 0;
+		padding: 0.8em 1.2em;
+		background: var(--paper);
+		border-radius: 1rem;
+		font-size: 0.92em;
+		color: var(--ink-2);
+	}
+	.prose :global(blockquote p) {
+		margin: 0;
+	}
+	.prose :global(table) {
+		display: block;
+		max-width: 100%;
+		overflow-x: auto;
+		border-collapse: collapse;
+		font-size: 0.85em;
+		line-height: 1.65;
+		margin: 1.5em 0;
+		border: 1.5px solid var(--ink);
+		border-radius: 0.75rem;
+	}
+	.prose :global(th),
+	.prose :global(td) {
+		border: 1px solid var(--line);
+		padding: 0.55em 0.75em;
+		vertical-align: top;
+		min-width: 5em;
+		text-align: left;
+	}
+	.prose :global(thead th) {
+		background: var(--paper-2);
+	}
+	.prose :global(a) {
+		color: var(--ai);
+	}
+	.prose :global(code) {
+		background: var(--paper);
+		padding: 0.1em 0.35em;
+		border-radius: 0.3em;
+		font-size: 0.9em;
+		word-break: break-all;
+	}
+
+	.pager {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		padding-block: 3rem 4rem;
+	}
+	.pager-link {
+		display: grid;
+		gap: 0.3rem;
+		padding: 1.25rem 1.5rem;
+		border: 1.5px solid var(--ink);
+		border-radius: 1.25rem;
+		background: var(--white);
+		text-decoration: none;
+		font-family: var(--serif);
+		font-weight: 700;
+		transition: box-shadow 0.25s var(--ease);
+	}
+	.pager-link:hover {
+		box-shadow: 5px 6px 0 var(--ink);
+	}
+	.pager-next {
+		text-align: right;
+		justify-items: end;
+	}
+	@media (max-width: 36rem) {
+		.pager {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

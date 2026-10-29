@@ -1,0 +1,69 @@
+---
+// 導讀頁標題下方的出處列：原始檔名、讀全文、查詢版、原文下載（連回教育部）
+import { moeFor, pdfName } from '../../data/moe';
+
+interface Props {
+	file: string;
+	/** 全文頁的 slug（不含 /library/ 前綴） */
+	full?: string;
+}
+const { file, full } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const moe = moeFor(file);
+---
+
+<div class="read-meta reveal" style="--i:3">
+	<p class="read-src"><span class="read-src-label">出處</span>{pdfName(file)}</p>
+	<div class="read-actions">
+		{full && <a class="chip" href={`${base}/read/doc/${full}`}>📖 網頁全文</a>}
+		{full && <a class="chip" href={`${base}/library/${full}`}>🔍 資料庫版</a>}
+		<a class="chip chip--moe" href={moe.url} target="_blank" rel="noopener" title={`在教育部下載專區的「${moe.name}」分類下載原始 PDF`}>
+			⬇ 原文 PDF（教育部）↗
+		</a>
+	</div>
+</div>
+
+<style>
+	.read-meta {
+		margin-top: 1.75rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem 1.5rem;
+		align-items: center;
+		padding-top: 1rem;
+		border-top: 1px dashed var(--line);
+	}
+	.read-src {
+		margin: 0;
+		font-size: 0.85rem;
+		color: var(--ink-2);
+		display: flex;
+		gap: 0.6rem;
+		align-items: baseline;
+		word-break: break-all;
+	}
+	.read-src-label {
+		flex: none;
+		font-size: 0.72rem;
+		padding: 0 0.5rem;
+		border: 1px solid var(--ink-3);
+		border-radius: 999px;
+		color: var(--ink-3);
+	}
+	.read-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+	.read-actions .chip {
+		border: 1px solid var(--line);
+		background: var(--white);
+	}
+	.read-actions .chip:hover {
+		border-color: var(--ink);
+	}
+	.chip--moe {
+		background: var(--ai-soft) !important;
+		color: var(--ai) !important;
+	}
+</style>

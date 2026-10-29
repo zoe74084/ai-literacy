@@ -1,5 +1,7 @@
-/* 色彩：沿用 Starlight 變數，另外定義讀者標籤與框架層級的顏色 */
+/* 資料庫（Starlight）沿用首頁與導讀頁的字體與和色 */
 :root {
+	--sl-font: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+	--serif: 'Noto Serif TC', 'Songti TC', serif;
 	--sl-color-accent-low: #12304a;
 	--sl-color-accent: #2f7fc1;
 	--sl-color-accent-high: #b9dcf7;
@@ -17,9 +19,22 @@
 	--fw-level-fg: #ffffff;
 }
 :root[data-theme='light'] {
-	--sl-color-accent-low: #d6eafb;
-	--sl-color-accent: #1d6aa8;
-	--sl-color-accent-high: #0f3a5d;
+	/* 和紙底色 */
+	--sl-color-bg: #fffdf8;
+	--sl-color-bg-nav: #f6f1e7;
+	--sl-color-bg-sidebar: #f6f1e7;
+	--sl-color-hairline-light: #e5d9bf;
+	--sl-color-hairline: #d9cdb5;
+	--sl-color-white: #2a2622;
+	--sl-color-gray-1: #3a352f;
+	--sl-color-gray-2: #5d564d;
+	--sl-color-gray-3: #8a8174;
+	--sl-color-gray-5: #d9cdb5;
+	--sl-color-gray-6: #efe6d3;
+	--sl-color-gray-7: #f6f1e7;
+	--sl-color-accent-low: #dbe5f1;
+	--sl-color-accent: #2f4d7e;
+	--sl-color-accent-high: #1d3150;
 	--aud-teacher-bg: #dcf3e4;
 	--aud-teacher-fg: #1c5a33;
 	--aud-student-bg: #ddebfb;
@@ -84,3 +99,22 @@
 .audience-card.student { background: var(--aud-student-bg); color: var(--aud-student-fg); }
 .audience-card.parent { background: var(--aud-parent-bg); color: var(--aud-parent-fg); }
 .audience-card.admin { background: var(--aud-admin-bg); color: var(--aud-admin-fg); }
+
+/* 標題用明朝體 */
+.sl-markdown-content :is(h2, h3),
+h1#_top,
+.site-title,
+.hero h1 {
+	font-family: var(--serif);
+	letter-spacing: 0.03em;
+}
+.site-title {
+	font-weight: 900;
+}
+.sl-markdown-content h2 {
+	background: linear-gradient(transparent 62%, rgba(242, 184, 61, 0.45) 62%);
+	display: inline;
+}
+.sl-markdown-content .sl-heading-wrapper:has(h2) {
+	margin-top: 2.2em;
+}

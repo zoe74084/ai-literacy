@@ -31,7 +31,23 @@ export default defineConfig({
 			locales: {
 				root: { label: '繁體中文', lang: 'zh-TW' },
 			},
-			sidebar: [{ label: '首頁', link: '/' }, ...sidebar],
+			sidebar: [
+				{ label: '← 回首頁', link: '/' },
+				{ label: '導讀（互動閱讀）', link: '/read/' },
+				{ label: '資料庫總覽', link: '/library/' },
+				...sidebar,
+			],
+			head: [
+				{ tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
+				{ tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
+				{
+					tag: 'link',
+					attrs: {
+						rel: 'stylesheet',
+						href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700;900&family=Outfit:wght@300;500;700&display=swap',
+					},
+				},
+			],
 			customCss: ['./src/styles/custom.css'],
 			components: {
 				Footer: './src/components/Footer.astro',

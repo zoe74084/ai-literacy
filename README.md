@@ -1,6 +1,11 @@
 # AI 素養資源站
 
-把教育部數位學習推動辦公室的 AI 素養相關文件（`source-md/`，由 PDF 轉出的 Markdown）做成可全文搜尋的靜態網站。使用 [Astro Starlight](https://starlight.astro.build/)，部署到 GitHub Pages。
+把教育部數位學習推動辦公室的 AI 素養相關文件（`source-md/`，由 PDF 轉出的 Markdown）做成網站，有兩個入口：
+
+- **讀・導讀**（`/read/`）：把文件轉成互動頁面。素養框架矩陣、注意事項翻卡、課堂 AI 紅黃綠燈、指引重點先看、教案地圖，以及每份文件的閱讀版。
+- **查・資料庫**（`/library/`）：全文分章、依讀者分類、中文全文搜尋（[Astro Starlight](https://starlight.astro.build/)）。
+
+原始 PDF 不放在本站，一律連回教育部下載專區。部署到 GitHub Pages。
 
 資料來源：[教育部數位學習推動辦公室 下載專區](https://pads.moe.edu.tw/download2.php)
 
@@ -21,8 +26,12 @@ npm run preview  # 預覽 dist/，可測試搜尋
 | --- | --- |
 | `source-md/` | 來源文件，**不要手動修改** |
 | `scripts/convert.mjs` | 轉換腳本：來源檔→頁面的對照表、清理規則、拆頁、讀者入口頁、側邊欄 |
-| `src/content/docs/**/*.md` | 轉換產出（已列入 `.gitignore`，每次 build 重新產生） |
-| `src/content/docs/**/*.mdx` | 手寫頁面：首頁、框架矩陣、教案篩選 |
+| `src/content/docs/library/**/*.md` | 轉換產出（已列入 `.gitignore`，每次 build 重新產生） |
+| `src/content/docs/library/**/*.mdx` | 資料庫的手寫頁面：資料庫首頁、框架矩陣、教案篩選 |
+| `src/pages/` | 首頁、導讀頁（`read/`）、閱讀版（`read/doc/`）、搜尋頁 |
+| `src/layouts/Site.astro`、`src/styles/site.css` | 首頁與導讀頁的版型與設計系統 |
+| `src/lib/content.ts` | 導讀頁從轉換結果擷取原文段落的工具 |
+| `src/data/moe.ts` | 教育部原文下載連結（要改成各分類或各檔案的直接連結，改這裡） |
 | `src/data/framework.json` | AI 素養框架表 1、表 2 的內容（矩陣用） |
 | `src/components/` | 頁尾資料來源、讀者標籤、框架矩陣、教案篩選 |
 | `src/search/` | 中文搜尋處理（見下方） |
@@ -62,6 +71,6 @@ GitHub Actions 部署時可以在 repo 的 **Settings → Secrets and variables 
 
 Pagefind 對繁體中文的斷詞不一致（同一個詞有時切成單字、有時當成一個詞），瀏覽器端又用另一套規則斷詞，導致像「人工智慧」只找得到少數頁面。`src/search/` 的處理方式：
 
-- 建索引時（`integration.mjs`，在 Starlight 建完索引之後重建）：只在索引用的 HTML 文字裡，相鄰漢字之間插入空白，頁面本身不變
+- 建索引時（`build-index.mjs`，由 `integration.mjs` 在建置結束時以獨立程序執行，輸出到 `dist/pagefind-zh/`）：只在索引用的 HTML 文字裡，相鄰漢字之間插入空白，頁面本身不變。另開程序是因為和 Starlight 共用 Pagefind 背景程序會讓索引檔寫到一半被中斷
 - 搜尋時（`pagefind-ui.js`，透過 Vite alias 包裝 Pagefind 介面）：查詢字串做同樣處理；沒有空白的中文查詢用精確比對（字要相連）
 - 顯示結果時把漢字之間的空白拿掉

@@ -21,6 +21,8 @@ export class PagefindUI extends BaseUI {
 			// 索引以「字」為單位，預設 30 個字的摘要太短
 			excerptLength: 60,
 			...opts,
+			// 改讀中文索引（Starlight 自己建的 pagefind/ 不用）
+			bundlePath: (opts.bundlePath ?? '/pagefind/').replace(/pagefind\/?$/, 'pagefind-zh/'),
 			processTerm: (term) => processQuery(opts.processTerm ? opts.processTerm(term) : term),
 			processResult: (result) => {
 				const r = opts.processResult?.(result) ?? result;

@@ -5,5 +5,5 @@ export const AUDIENCE_LABELS: Record<string, string> = {
 	admin: '校長・行政',
 };
 
-export const SOURCE_URL = 'https://pads.moe.edu.tw/download2.php';
+export const SOURCE_URL = 'https://pads.moe.edu.tw/download.php';
 export const SOURCE_NAME = '教育部數位學習推動辦公室';

@@ -12,7 +12,7 @@ const badges = audience.filter((a) => AUDIENCE_LABELS[a]);
 	(badges.length > 0 || lesson || part) && (
 		<div class="page-meta" data-pagefind-ignore>
 			{badges.map((a) => (
-				<a class={`badge badge-${a}`} href={`${base}/audience/${a}/`}>
+				<a class={`badge badge-${a}`} href={`${base}/library/audience/${a}/`}>
 					{AUDIENCE_LABELS[a]}
 				</a>
 			))}
@@ -22,7 +22,7 @@ const badges = audience.filter((a) => AUDIENCE_LABELS[a]);
 				</span>
 			)}
 			{part && (
-				<a class="badge badge-plain" href={`${base}/${part.parent}/`}>
+				<a class="badge badge-plain" href={`${base}/library/${part.parent}/`}>
 					《{part.of}》第 {part.index}／{part.total} 頁
 				</a>
 			)}

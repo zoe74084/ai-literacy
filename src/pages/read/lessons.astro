@@ -1,0 +1,237 @@
+---
+import Site from '../../layouts/Site.astro';
+import { catalog } from '../../lib/content';
+import { moeFor } from '../../data/moe';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const lessons = catalog.filter((d) => d.lesson).sort((a, b) => a.lesson!.number - b.lesson!.number);
+const STAGES = ['國小', '國中', '普高', '技高'];
+const DOMAINS = ['國語文', '英語文', '數學', '自然科學', '社會', '綜合活動', '科技', '彈性學習課程', '多媒體動畫科'].filter((d) =>
+	lessons.some((l) => l.lesson!.domain === d),
+);
+const at = (d: string, s: string) => lessons.filter((l) => l.lesson!.domain === d && l.lesson!.stage === s);
+const tint = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'var(--fuji-soft)'];
+const moe = moeFor('04_');
+---
+
+<Site title="教案地圖" description="數位與 AI 融入教學的教案示例，依學段與領域排成地圖。" current="read">
+	<section class="page-hero wrap">
+		<span class="eyebrow reveal">Read 05 · Lesson map</span>
+		<h1 class="reveal" style="--i:1">教案地圖<br /><span class="mark">{lessons.length} 份課例</span></h1>
+		<p class="lead reveal" style="--i:2">
+			教育部數位與 AI 教學指引附的教學方案示例，依學段（直欄）與領域（橫列）排開。點欄名或列名可以只亮那一欄、那一列；點課例就能閱讀全文。
+		</p>
+		<p class="reveal" style="--i:3">
+			<a class="moe-link" href={moe.url} target="_blank" rel="noopener">⬇ 原始教案 PDF 請至教育部下載專區（另開新視窗）↗</a>
+		</p>
+	</section>
+
+	<section class="band band--paper2 band--arch">
+		<div class="wrap">
+			<div class="map" data-map style={`--cols:${STAGES.length}`}>
+				<div class="map-corner">領域＼學段</div>
+				{
+					STAGES.map((s, i) => (
+						<button type="button" class="map-col" data-col={s} style={`--t:${tint[i]}`} aria-pressed="false">
+							{s}
+							<small>{lessons.filter((l) => l.lesson!.stage === s).length}</small>
+						</button>
+					))
+				}
+				{
+					DOMAINS.map((d) => (
+						<>
+							<button type="button" class="map-row" data-row={d} aria-pressed="false">
+								{d}
+							</button>
+							{STAGES.map((s, i) => (
+								<div class="map-cell" data-stage={s} data-domain={d} style={`--t:${tint[i]}`}>
+									<span class="cell-label">
+										{s}・{d}
+									</span>
+									{at(d, s).map((l) => (
+										<a class="lesson" href={`${base}/read/doc/${l.slug}/`}>
+											<span class="lesson-title">{l.title}</span>
+											<span class="lesson-author">{l.lesson!.author}</span>
+										</a>
+									))}
+								</div>
+							))}
+						</>
+					))
+				}
+			</div>
+			<p class="map-hint">
+				也可以到<a href={`${base}/library/lessons/`}>資料庫的教案列表</a>用篩選器找。
+			</p>
+		</div>
+	</section>
+</Site>
+
+<script>
+	const map = document.querySelector<HTMLElement>('[data-map]');
+	if (map) {
+		let col = '';
+		let row = '';
+		const apply = () => {
+			map.classList.toggle('is-filtered', Boolean(col || row));
+			map.querySelectorAll<HTMLElement>('.map-cell').forEach((c) => {
+				const on = (!col || c.dataset.stage === col) && (!row || c.dataset.domain === row);
+				c.classList.toggle('is-on', on);
+			});
+			map.querySelectorAll<HTMLButtonElement>('[data-col]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.col === col)));
+			map.querySelectorAll<HTMLButtonElement>('[data-row]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.row === row)));
+		};
+		map.querySelectorAll<HTMLButtonElement>('[data-col]').forEach((b) =>
+			b.addEventListener('click', () => {
+				col = col === b.dataset.col ? '' : b.dataset.col!;
+				apply();
+			}),
+		);
+		map.querySelectorAll<HTMLButtonElement>('[data-row]').forEach((b) =>
+			b.addEventListener('click', () => {
+				row = row === b.dataset.row ? '' : b.dataset.row!;
+				apply();
+			}),
+		);
+		apply();
+	}
+</script>
+
+<style>
+	.map {
+		display: grid;
+		grid-template-columns: 8rem repeat(var(--cols), minmax(0, 1fr));
+		gap: 0.5rem;
+	}
+	.map-corner {
+		font-size: 0.8rem;
+		color: var(--ink-3);
+		align-self: end;
+		padding: 0.5rem;
+	}
+	.map-col,
+	.map-row {
+		font: inherit;
+		font-family: var(--serif);
+		font-weight: 700;
+		border: 1.5px solid var(--ink);
+		cursor: pointer;
+		color: var(--ink);
+		transition:
+			transform 0.2s var(--ease),
+			background 0.2s;
+	}
+	.map-col {
+		background: var(--t);
+		border-radius: 1rem 1rem 0.4rem 0.4rem;
+		padding: 0.75rem 0.5rem;
+		font-size: 1.15rem;
+		display: flex;
+		align-items: baseline;
+		justify-content: center;
+		gap: 0.4rem;
+	}
+	.map-col small {
+		font-family: var(--latin);
+		font-weight: 300;
+		font-size: 0.85rem;
+	}
+	.map-row {
+		background: var(--white);
+		border-radius: 1rem 0.4rem 0.4rem 1rem;
+		padding: 0.5rem;
+		font-size: 0.95rem;
+		text-align: left;
+	}
+	.map-col:hover,
+	.map-row:hover {
+		transform: translateY(-2px);
+	}
+	.map-col[aria-pressed='true'],
+	.map-row[aria-pressed='true'] {
+		background: var(--ink);
+		color: var(--white);
+	}
+	.map-cell {
+		min-height: 4.5rem;
+		padding: 0.5rem;
+		border-radius: 0.6rem;
+		background: color-mix(in srgb, var(--t) 45%, var(--white));
+		border: 1px dashed var(--line);
+		display: grid;
+		gap: 0.4rem;
+		align-content: start;
+		transition:
+			opacity 0.3s,
+			filter 0.3s;
+	}
+	.map.is-filtered .map-cell:not(.is-on) {
+		opacity: 0.28;
+		filter: grayscale(1);
+	}
+	.cell-label {
+		display: none;
+	}
+	.lesson {
+		display: grid;
+		gap: 0.1rem;
+		padding: 0.55rem 0.7rem;
+		background: var(--white);
+		border: 1.5px solid var(--ink);
+		border-radius: 0.75rem;
+		text-decoration: none;
+		line-height: 1.45;
+		transition:
+			transform 0.25s var(--bounce),
+			box-shadow 0.25s var(--ease);
+	}
+	.lesson:hover {
+		transform: translateY(-3px) rotate(-1deg);
+		box-shadow: 4px 5px 0 var(--ink);
+	}
+	.lesson-title {
+		font-weight: 700;
+		font-size: 0.9rem;
+	}
+	.lesson-author {
+		font-size: 0.75rem;
+		color: var(--ink-3);
+	}
+	.map-hint {
+		margin-top: 1.5rem;
+		font-size: 0.9rem;
+		color: var(--ink-2);
+	}
+	/* 手機：改成依領域分組的清單，空格子不顯示 */
+	@media (max-width: 44rem) {
+		.map {
+			grid-template-columns: repeat(4, 1fr);
+		}
+		.map-corner {
+			display: none;
+		}
+		.map-col {
+			font-size: 0.95rem;
+			padding: 0.5rem 0.2rem;
+		}
+		.map-row {
+			grid-column: 1 / -1;
+			margin-top: 0.75rem;
+			border-radius: 999px;
+			text-align: center;
+		}
+		.map-cell {
+			grid-column: 1 / -1;
+			min-height: 0;
+		}
+		.map-cell:not(:has(.lesson)) {
+			display: none;
+		}
+		.cell-label {
+			display: block;
+			font-size: 0.75rem;
+			color: var(--ink-2);
+		}
+	}
+</style>
