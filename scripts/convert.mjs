@@ -631,6 +631,18 @@ function fixBold(lines) {
   });
 }
 
+// 11. 混用的半形、全形括號（「(以下簡稱…）」）：配成同一種，內容有中文用全形，否則用半形
+function fixBrackets(lines) {
+  const fix = (seg) =>
+    seg.replace(/[(（]([^()（）\n]*?)[)）]/g, (m, x) => {
+      const pair = /[\u3400-\u9fff]/.test(x) ? ['（', '）'] : ['(', ')'];
+      if ((m[0] === '(' && m.endsWith(')')) || (m[0] === '（' && m.endsWith('）'))) return m;
+      bump('統一混用的半形／全形括號');
+      return pair[0] + x + pair[1];
+    });
+  return lines.map((l) => (/^\s*</.test(l) ? l : fix(l)));
+}
+
 // 8. 頁緣章節側標：單獨一行的「壹」「貳」……在同一份文件重複出現就是每頁的側標，移除
 const SIDE_TAB = /^\s*(\*\*)?([壹貳參肆伍陸柒捌玖拾])(\*\*)?\s*$/;
 function dropSideTabs(lines) {
@@ -689,16 +701,20 @@ function joinBrokenLines(lines) {
 
 // 原文勘誤：src/data/errata.json 列出原文 PDF 本身的錯字（例如重複的標點）。
 // 每一筆都必須在該文件裡剛好出現一次，否則中止，避免勘誤表和原文對不上。
+// 轉檔修正：src/data/fixes.json 是轉檔造成、從上下文就能確定的問題（字型遺失的標點、
+// 圖示變成的亂碼、頁邊標籤插進句子），不是原文的錯，所以不列在網站的〈原文勘誤〉頁。
+// 標 all 的條目可以出現多次（至少一次）。
 const ERRATA = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/errata.json'), 'utf8'));
+const FIXES = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/fixes.json'), 'utf8'));
 function applyErrata(file, lines) {
-  const items = ERRATA.filter((e) => e.file === file);
+  const items = [...FIXES.map((e) => ({ ...e, kind: '轉檔修正（src/data/fixes.json）' })), ...ERRATA.map((e) => ({ ...e, kind: '原文勘誤（src/data/errata.json）' }))].filter((e) => e.file === file);
   if (!items.length) return lines;
   let text = lines.join('\n');
   for (const e of items) {
     const n = text.split(e.find).length - 1;
-    if (n !== 1) throw new Error(`原文勘誤對不上（${file}，第 ${e.page} 頁）：「${e.find}」出現 ${n} 次`);
-    text = text.replace(e.find, () => e.replace);
-    bump('原文勘誤（src/data/errata.json）');
+    if (e.all ? n < 1 : n !== 1) throw new Error(`${e.kind}對不上（${file}）：「${e.find}」出現 ${n} 次`);
+    text = e.all ? text.split(e.find).join(e.replace) : text.replace(e.find, () => e.replace);
+    bump(e.kind, e.all ? n : 1);
   }
   return text.split('\n');
 }
@@ -706,7 +722,7 @@ function applyErrata(file, lines) {
 export function cleanDocument(text) {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body } = parseHeader(raw);
-  const lines = fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(body))))))));
+  const lines = fixBrackets(fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(body)))))))));
   return { meta, lines };
 }
 

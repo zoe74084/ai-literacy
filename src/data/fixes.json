@@ -1,0 +1,187 @@
+[
+  {
+    "file": "01_AI人才方舟_AI_인재_아크_계획.md",
+    "slug": "ark/ko",
+    "page": 3,
+    "find": "VR�",
+    "replace": "VR)",
+    "all": true,
+    "note": "PDF 字型遺失的右括號（對照英文版）"
+  },
+  {
+    "file": "01_AI人才方舟_AI_인재_아크_계획.md",
+    "slug": "ark/ko",
+    "page": 3,
+    "find": "AR�",
+    "replace": "AR)",
+    "all": true,
+    "note": "PDF 字型遺失的右括號"
+  },
+  {
+    "file": "01_AI人才方舟_AI_인재_아크_계획.md",
+    "slug": "ark/ko",
+    "page": 3,
+    "find": "(TALPer�",
+    "replace": "(TALPer)",
+    "all": true,
+    "note": "PDF 字型遺失的右括號"
+  },
+  {
+    "file": "01_AI人才方舟_AI_인재_아크_계획.md",
+    "slug": "ark/ko",
+    "page": 3,
+    "find": "(TALP�",
+    "replace": "(TALP)",
+    "all": true,
+    "note": "PDF 字型遺失的右括號"
+  },
+  {
+    "file": "01_AI人才方舟_AI_인재_아크_계획.md",
+    "slug": "ark/ko",
+    "page": 12,
+    "find": "(MOEMDM�",
+    "replace": "(MOEMDM)",
+    "all": true,
+    "note": "PDF 字型遺失的右括號"
+  },
+  {
+    "file": "01_AI人才方舟_AI_인재_아크_계획.md",
+    "slug": "ark/ko",
+    "page": 4,
+    "find": "12�Year Basic Education�",
+    "replace": "12-Year Basic Education)",
+    "note": "PDF 字型遺失的連字號與右括號（對照英文版）"
+  },
+  {
+    "file": "01_AI人才方舟_AI_인재_아크_계획.md",
+    "slug": "ark/ko",
+    "page": 8,
+    "find": "�Retrieval�Augmented Generation� RAG�",
+    "replace": "(Retrieval-Augmented Generation, RAG)",
+    "note": "PDF 字型遺失的括號、連字號與逗號"
+  },
+  {
+    "file": "01_AI人才方舟_AI_인재_아크_계획.md",
+    "slug": "ark/ko",
+    "page": 11,
+    "find": "(Take�Home Student Device� THSD�",
+    "replace": "(Take-Home Student Device, THSD)",
+    "note": "PDF 字型遺失的連字號、逗號與右括號（對照英文版）"
+  },
+  {
+    "file": "04_教學指引_07._國小_數學領域-黃慶成-乘法.md",
+    "slug": "lessons/es-07",
+    "page": 14,
+    "find": "<br>���<br>(請自己複製燈)",
+    "replace": "<br>(請自己複製燈)",
+    "before": "表頭「AI 警示燈 ���（請自己複製燈）」",
+    "after": "「AI 警示燈（請自己複製燈）」",
+    "note": "燈號圖示轉成亂碼，移除"
+  },
+  {
+    "file": "04_教學指引_07._國小_數學領域-黃慶成-乘法.md",
+    "slug": "lessons/es-07",
+    "page": 14,
+    "find": "| �**/** � |",
+    "replace": "| 〔燈號圖示〕／〔燈號圖示〕 |",
+    "all": true,
+    "before": "「AI 警示燈」欄各列的「�/�」",
+    "after": "「〔燈號圖示〕／〔燈號圖示〕」",
+    "note": "燈號圖示轉成亂碼，改為文字標示"
+  },
+  {
+    "file": "04_教學指引_07._國小_數學領域-黃慶成-乘法.md",
+    "slug": "lessons/es-07",
+    "page": 14,
+    "find": "| � |",
+    "replace": "| 〔燈號圖示〕 |",
+    "all": true,
+    "before": "「AI 警示燈」欄各列的「�」",
+    "after": "「〔燈號圖示〕」",
+    "note": "燈號圖示轉成亂碼，改為文字標示"
+  },
+  {
+    "file": "04_教學指引_01._普高_自然科學領域-吳隆枝-電流磁效應_融入AI科學建模與探究_.md",
+    "slug": "lessons/sh-01",
+    "page": 11,
+    "find": "**AI 警示燈**���<br>",
+    "replace": "**AI 警示燈**<br>",
+    "before": "表頭「AI 警示燈 ���（請自己複製燈）」",
+    "after": "「AI 警示燈（請自己複製燈）」",
+    "note": "燈號圖示轉成亂碼，移除"
+  },
+  {
+    "file": "04_教學指引_115年中小學家長數位與AI學習知能指引v1150908.md",
+    "slug": "guides/parent/05",
+    "page": 112,
+    "find": "#### ����中小學家長數位與AI 學習知能指引",
+    "replace": "#### 115年中小學家長數位與AI 學習知能指引",
+    "before": "封底標題「����中小學家長數位與AI 學習知能指引」",
+    "after": "「115年中小學家長數位與AI 學習知能指引」",
+    "note": "封底書名的「115年」轉成亂碼"
+  },
+  {
+    "file": "07_數位學習實施計畫_115年度中小學數位學習實施計畫說明.md",
+    "slug": "admin/plan/01",
+    "page": 1,
+    "find": "JA � K\n",
+    "replace": "",
+    "before": "單獨一行「JA � K」",
+    "after": "刪除這一行",
+    "note": "圖片殘留的亂碼行"
+  },
+  {
+    "file": "05_學習應用手冊_115年中小學AI之學習應用手冊-國中生靈活用AIv1150908.md",
+    "slug": "handbooks/junior/06",
+    "page": 70,
+    "find": "（背健康與體育景）",
+    "replace": "（背景）",
+    "note": "頁邊的領域標籤「健康與體育」插進句子"
+  },
+  {
+    "file": "05_學習應用手冊_115年中小學AI之學習應用手冊-國中生靈活用AIv1150908.md",
+    "slug": "handbooks/junior/06",
+    "page": 71,
+    "find": "剛接觸資訊— 邏輯運算",
+    "replace": "剛接觸邏輯運算",
+    "note": "頁邊的領域標籤「資訊—演算法」插進句子"
+  },
+  {
+    "file": "05_學習應用手冊_115年中小學AI之學習應用手冊-國中生靈活用AIv1150908.md",
+    "slug": "handbooks/junior/06",
+    "page": 71,
+    "find": "（Binary 演算法 Search）",
+    "replace": "(Binary Search)",
+    "note": "頁邊的領域標籤「資訊—演算法」插進句子"
+  },
+  {
+    "file": "04_教學指引_115年中小學教師數位與AI教學指引1150920.md",
+    "slug": "guides/teacher/05",
+    "page": 74,
+    "find": "| **表4-3**|**：國小學生數位素養（包含AI 素養）檢視表** |  |\n| --- | --- | --- |\n| **檢視項目**|**自我檢核重點** | へ |",
+    "replace": "**表4-3：國小學生數位素養（包含AI 素養）檢視表**\n\n| **檢視項目** | **自我檢核重點** | **檢核** |\n| --- | --- | --- |",
+    "before": "表名「表4-3：國小學生數位素養（包含AI 素養）檢視表」被讀成表格第一列，勾選欄標題為「へ」",
+    "after": "表名移到表格上方；第三欄標題改為「檢核」",
+    "note": "表名被讀成表格第一列；勾選欄標題是圖示"
+  },
+  {
+    "file": "04_教學指引_01._國小_國語文領域-黃馨緯_-_建築界的長頸鹿.md",
+    "slug": "lessons/es-01",
+    "page": 16,
+    "find": "-\n\n- (6)請學生整理並自我省思：哪些地方採用了e 度建議？\n\n- 哪些是自己保留的？」理由為何？",
+    "replace": "- (6)請學生整理並自我省思：「哪些地方採用了e 度建議？哪些是自己保留的？」理由為何？",
+    "before": "清單第 (6) 項被拆成兩項：「請學生整理並自我省思：哪些地方採用了e 度建議？」／「哪些是自己保留的？」理由為何？」",
+    "after": "合成一項：「請學生整理並自我省思：「哪些地方採用了e 度建議？哪些是自己保留的？」理由為何？」",
+    "note": "清單項目被拆成兩項，且缺少上引號"
+  },
+  {
+    "file": "04_教學指引_01._國小_國語文領域-黃馨緯_-_建築界的長頸鹿.md",
+    "slug": "lessons/es-01",
+    "page": 16,
+    "find": "\n請學生整理並自我省思：哪些地方採用了e 度建議？哪些是自己保留的？」理由為何？",
+    "replace": "\n請學生整理並自我省思：「哪些地方採用了e 度建議？哪些是自己保留的？」理由為何？",
+    "before": "請學生整理並自我省思：哪些地方採用了e 度建議？哪些是自己保留的？」理由為何？",
+    "after": "補上引號：自我省思：「哪些地方採用了…",
+    "note": "缺少上引號"
+  }
+]
