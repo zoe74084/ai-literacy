@@ -66,6 +66,9 @@
 	min-width: 4.5em;
 	vertical-align: top;
 }
+.sl-markdown-content :is(td, th):first-child {
+	min-width: clamp(6em, 18vw, 9em);
+}
 
 /* 首頁讀者入口卡片 */
 .audience-cards {

@@ -571,6 +571,9 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	.prose :global(.facet-table tr.facet-start > *) {
 		border-top: 2px solid var(--grid-strong);
 	}
+	.prose :global(:is(td, th):first-child) {
+		min-width: clamp(6em, 18vw, 9em);
+	}
 	.prose :global(thead th) {
 		background: var(--paper-tint);
 	}
