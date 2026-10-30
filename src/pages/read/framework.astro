@@ -14,7 +14,10 @@ const agency = ch3
 	.map((l) => {
 		const t = l.replace(/^- /, '');
 		const [head, ...rest] = t.split('：');
-		return { head: head.replace(/^(一|二)、/, ''), body: rest.join('：') };
+		// 「人類能動性（Human Agency），確保自主的行動能力」→ 名稱、英文、說明分開排
+		const [name, ...sub] = head.replace(/^(一|二)、/, '').split('，');
+		const m = name.match(/^(.+?)（\s*(.+?)\s*）$/);
+		return { term: m ? m[1] : name, en: m ? m[2] : '', sub: sub.join('，'), body: rest.join('：') };
 	});
 
 // 每個面向在原文中的第一段說明
@@ -59,7 +62,11 @@ const colors = ['#5f9e77', '#2f7a50', '#1f5a43'];
 				{
 					agency.map((a, i) => (
 						<article class="agency-card">
-							<h3>{a.head}</h3>
+							<h3>
+								{a.term}
+								{a.en && <span class="agency-en" lang="en">{a.en}</span>}
+							</h3>
+							{a.sub && <p class="agency-sub">{a.sub}</p>}
 							<p>{a.body}</p>
 						</article>
 					))
@@ -223,8 +230,27 @@ const colors = ['#5f9e77', '#2f7a50', '#1f5a43'];
 		padding: clamp(1.5rem, 4vw, 2.5rem);
 	}
 	.agency-card h3 {
-		font-size: clamp(1.2rem, 2.6vw, 1.6rem);
-		margin: 0.5rem 0 0.75rem;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.2rem 0.75rem;
+		font-size: clamp(1.5rem, 3vw, 1.9rem);
+		margin: 0 0 0.35rem;
+	}
+	.agency-en {
+		font-family: var(--sans);
+		font-size: 0.9rem;
+		font-weight: 500;
+		letter-spacing: 0.02em;
+		color: var(--ink-3);
+		white-space: nowrap;
+	}
+	.agency-sub {
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.12rem;
+		color: var(--cover);
+		margin: 0 0 0.75rem;
 	}
 	.agency-card p {
 		color: var(--ink-2);
