@@ -25,7 +25,7 @@ function facetIntros(slug: string) {
 	const { sections: secs } = sections(readBody(slug));
 	const map: Record<string, string> = {};
 	for (const s of secs) {
-		const first = s.body.split('\n').find((l) => l.trim() && !/^[#|>*-]/.test(l.trim()));
+		const first = s.body.split('\n').find((l) => l.trim() && !/^[#|>*<-]/.test(l.trim()));
 		if (first) map[s.title] = first.trim();
 	}
 	return map;

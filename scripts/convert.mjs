@@ -459,10 +459,90 @@ function normalizeHeadings(lines) {
   return out;
 }
 
+// 6. AI 素養框架表：PDF 的合併儲存格（面向）被拆到每一列各放幾個字，
+//    分頁又把一張表切成兩段。把同一面向的三個層級合回一格（rowspan），
+//    兩段表格接回一張，夾在表格裡的表名移到表格上方。
+const FACET_LEVELS = ['取得理解', '深化應用', '創造轉型'];
+const FACET_NAMES = ['AI倫理', 'AI基礎與技術', 'AI賦能教學', 'AI促進教師專業發展', 'AI賦能學習', 'AI系統設計'];
+const bare = (c) => c.replace(/<br\s*\/?>/gi, '').replace(/\*\*/g, '').replace(/\s+/g, '');
+const cellHtml = (c) =>
+  c
+    .replace(/\\\|/g, '|')
+    .replace(/&(?!#?\w+;)/g, '&amp;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/<br\s*\/?>/gi, '<br>');
+
+function facetTables(lines) {
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!isTableLine(lines[i])) {
+      out.push(lines[i]);
+      continue;
+    }
+    // 連續的表格（中間只隔空行）視為同一組
+    let j = i;
+    const run = [];
+    while (j < lines.length && (isTableLine(lines[j]) || (!lines[j].trim() && lines.slice(j).find((l) => l.trim()) && isTableLine(lines.slice(j).find((l) => l.trim()))))) {
+      run.push(lines[j++]);
+    }
+    const rows = run.filter((l) => l.trim()).map(splitRow).filter((r) => !r.every((c) => SEP_CELL.test(c)));
+    const isHeader = (r) => bare(r[0] ?? '') === '面向' && bare(r[1] ?? '') === '層級';
+    const tables = run.join('\n').split(/\n\s*\n/).filter((t) => t.trim());
+    const allFacet = tables.every((t) => t.split('\n').map(splitRow).some(isHeader));
+    if (!allFacet || rows.length < 4 || rows.some((r) => r.length !== 4)) {
+      out.push(...run);
+      i = j - 1;
+      continue;
+    }
+    let caption = '';
+    const groups = [];
+    for (const r of rows) {
+      if (isHeader(r)) continue;
+      const level = bare(r[1]);
+      if (!FACET_LEVELS.includes(level)) {
+        if (!bare(r[0]) && !bare(r[1]) && /表/.test(r.join(''))) caption = bare(r.join(''));
+        continue;
+      }
+      if (level === FACET_LEVELS[0] || !groups.length) groups.push({ frags: [], rows: [] });
+      const g = groups[groups.length - 1];
+      g.frags.push(bare(r[0]));
+      g.rows.push(r);
+    }
+    for (const g of groups) {
+      let name = g.frags.join('');
+      if (name.includes('�')) {
+        const re = new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/�/g, '.')}$`);
+        const hit = FACET_NAMES.find((n) => re.test(n));
+        if (hit) {
+          bump('修復框架表格中的亂碼面向名稱');
+          name = hit;
+        }
+      }
+      g.name = name.replace(/^AI(?=\S)/, 'AI ');
+    }
+    bump('框架表格：合併面向儲存格');
+    if (tables.length > 1) bump('框架表格：接回被分頁切開的表格', tables.length - 1);
+    if (out.length && out[out.length - 1].trim()) out.push('');
+    if (caption) out.push(`**${caption}**`, '');
+    out.push('<div class="table-scroll"><table class="facet-table">');
+    out.push('<thead><tr><th scope="col">面向</th><th scope="col">層級</th><th scope="col">目標</th><th scope="col">內涵</th></tr></thead>');
+    out.push('<tbody>');
+    for (const g of groups) {
+      g.rows.forEach((r, k) => {
+        const head = k === 0 ? `<th scope="rowgroup" rowspan="${g.rows.length}">${g.name}</th>` : '';
+        out.push(`<tr${k === 0 ? ' class="facet-start"' : ''}>${head}<td>${bare(r[1])}</td><td>${cellHtml(r[2])}</td><td>${cellHtml(r[3])}</td></tr>`);
+      });
+    }
+    out.push('</tbody></table></div>', '');
+    i = j - 1;
+  }
+  return out;
+}
+
 export function cleanDocument(text) {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body } = parseHeader(raw);
-  const lines = cleanBlocks(cleanLines(cleanPages(body)));
+  const lines = facetTables(cleanBlocks(cleanLines(cleanPages(body))));
   return { meta, lines };
 }
 
