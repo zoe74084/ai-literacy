@@ -10,23 +10,22 @@ const DOMAINS = ['國語文', '英語文', '數學', '自然科學', '社會', '
 	lessons.some((l) => l.lesson!.domain === d),
 );
 const at = (d: string, s: string) => lessons.filter((l) => l.lesson!.domain === d && l.lesson!.stage === s);
-const tint = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'var(--fuji-soft)'];
+const tint = ['var(--c-student-soft)', 'var(--c-teacher-soft)', 'var(--paper-deep)', 'var(--c-admin-soft)'];
 const moe = moeFor('04_');
 ---
 
 <Site title="教案地圖" description="數位與 AI 融入教學的教案示例，依學段與領域排成地圖。" current="read">
 	<section class="page-hero wrap">
-		<span class="eyebrow reveal">Read 05 · Lesson map</span>
-		<h1 class="reveal" style="--i:1">教案地圖<br /><span class="mark">{lessons.length} 份課例</span></h1>
-		<p class="lead reveal" style="--i:2">
+		<h1>教案地圖<br />{lessons.length} 份課例</h1>
+		<p class="lead" style="--i:2">
 			教育部數位與 AI 教學指引附的教學方案示例，依學段（直欄）與領域（橫列）排開。點欄名或列名可以只亮那一欄、那一列；點課例就能閱讀全文。
 		</p>
-		<p class="reveal" style="--i:3">
+		<p>
 			<a class="moe-link" href={moe.url} target="_blank" rel="noopener">⬇ 原始教案 PDF 請至教育部下載專區（另開新視窗）↗</a>
 		</p>
 	</section>
 
-	<section class="band band--paper2 band--arch">
+	<section class="band band--tint">
 		<div class="wrap">
 			<div class="map" data-map style={`--cols:${STAGES.length}`}>
 				<div class="map-corner">領域＼學段</div>
@@ -113,13 +112,13 @@ const moe = moeFor('04_');
 	.map-col,
 	.map-row {
 		font: inherit;
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-weight: 700;
-		border: 1.5px solid var(--ink);
+		border: 1px solid var(--line);
 		cursor: pointer;
 		color: var(--ink);
 		transition:
-			transform 0.2s var(--ease),
+			transform 0.2s var(--ease-out),
 			background 0.2s;
 	}
 	.map-col {
@@ -133,12 +132,12 @@ const moe = moeFor('04_');
 		gap: 0.4rem;
 	}
 	.map-col small {
-		font-family: var(--latin);
+		font-family: var(--sans);
 		font-weight: 300;
 		font-size: 0.85rem;
 	}
 	.map-row {
-		background: var(--white);
+		background: var(--paper);
 		border-radius: 1rem 0.4rem 0.4rem 1rem;
 		padding: 0.5rem;
 		font-size: 0.95rem;
@@ -151,13 +150,13 @@ const moe = moeFor('04_');
 	.map-col[aria-pressed='true'],
 	.map-row[aria-pressed='true'] {
 		background: var(--ink);
-		color: var(--white);
+		color: var(--paper);
 	}
 	.map-cell {
 		min-height: 4.5rem;
 		padding: 0.5rem;
 		border-radius: 0.6rem;
-		background: color-mix(in srgb, var(--t) 45%, var(--white));
+		background: color-mix(in srgb, var(--t) 45%, var(--paper));
 		border: 1px dashed var(--line);
 		display: grid;
 		gap: 0.4rem;
@@ -177,18 +176,18 @@ const moe = moeFor('04_');
 		display: grid;
 		gap: 0.1rem;
 		padding: 0.55rem 0.7rem;
-		background: var(--white);
-		border: 1.5px solid var(--ink);
+		background: var(--paper);
+		border: 1px solid var(--line);
 		border-radius: 0.75rem;
 		text-decoration: none;
 		line-height: 1.45;
 		transition:
-			transform 0.25s var(--bounce),
-			box-shadow 0.25s var(--ease);
+			transform 0.25s var(--ease-out),
+			box-shadow 0.25s var(--ease-out);
 	}
 	.lesson:hover {
 		transform: translateY(-3px) rotate(-1deg);
-		box-shadow: 4px 5px 0 var(--ink);
+		box-shadow: var(--shadow-2);
 	}
 	.lesson-title {
 		font-weight: 700;

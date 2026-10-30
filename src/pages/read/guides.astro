@@ -17,9 +17,9 @@ function opening(body: string) {
 }
 
 const GUIDES = [
-	{ key: 'teacher', label: '教師', slug: 'guides/teacher', color: 'var(--kusa-soft)' },
-	{ key: 'parent', label: '家長', slug: 'guides/parent', color: 'var(--shu-soft)' },
-	{ key: 'principal', label: '校長', slug: 'guides/principal', color: 'var(--fuji-soft)' },
+	{ key: 'teacher', label: '教師', slug: 'guides/teacher', color: 'var(--c-teacher-soft)' },
+	{ key: 'parent', label: '家長', slug: 'guides/parent', color: 'var(--c-parent-soft)' },
+	{ key: 'principal', label: '校長', slug: 'guides/principal', color: 'var(--c-admin-soft)' },
 ].map((g) => {
 	const doc = bySlug(g.slug)!;
 	const chapters = (doc.chapters ?? []).map((c, i) => {
@@ -34,16 +34,15 @@ const history = byGroup('history');
 
 <Site title="指引重點先看" description="115 年教師、家長、校長數位與 AI 指引：各章重點一次看。" current="read">
 	<section class="page-hero wrap">
-		<span class="eyebrow reveal">Read 04 · Guides</span>
-		<h1 class="reveal" style="--i:1">三份指引，<br /><span class="mark">每章重點先看</span></h1>
-		<p class="lead reveal" style="--i:2">
+		<h1>三份指引，<br />每章重點先看</h1>
+		<p class="lead" style="--i:2">
 			115 年教育部的教師、家長、校長數位與 AI 指引都很厚。教師與校長指引每章開頭都有「重點先看」，這裡把它們依章節排成一條路；家長指引則列出各章開頭，方便決定要先讀哪一章。
 		</p>
 	</section>
 
-	<section class="band band--paper2 band--arch" data-guides>
+	<section class="band band--tint" data-guides>
 		<div class="wrap">
-			<div class="toggle reveal" role="tablist" aria-label="選擇指引">
+			<div class="toggle" role="tablist" aria-label="選擇指引">
 				{
 					GUIDES.map((g, i) => (
 						<button type="button" role="tab" data-g={g.key} aria-selected={i === 0 ? 'true' : 'false'}>
@@ -66,7 +65,7 @@ const history = byGroup('history');
 									<span class="stop-pin" aria-hidden="true">
 										{String(c.n).padStart(2, '0')}
 									</span>
-									<article class="stop-card reveal">
+									<article class="stop-card">
 										<h3>{c.title}</h3>
 										{c.kp ? (
 											<div class="kp">
@@ -77,7 +76,7 @@ const history = byGroup('history');
 											c.preview && <p class="preview">{c.preview}</p>
 										)}
 										<a class="moe-link" href={`${base}/read/doc/${c.slug}/`}>
-											讀這一章 →
+											讀這一章
 										</a>
 									</article>
 								</li>
@@ -91,15 +90,14 @@ const history = byGroup('history');
 
 	<section class="band">
 		<div class="wrap">
-			<div class="section-head reveal">
-				<span class="eyebrow">Archive</span>
+			<div class="section-head">
 				<h2>歷史版本（114 年）</h2>
 				<p>檔名含 1140113 的 114 年版指引，保留供對照。</p>
 			</div>
 			<div class="grid" style="--min:16rem">
 				{
 					history.map((h, i) => (
-						<a class="card reveal" style={`--i:${i}`} href={`${base}/read/doc/${h.slug}/`}>
+						<a class="card" style={`--i:${i}`} href={`${base}/read/doc/${h.slug}/`}>
 							<span class="chip">114 年</span>
 							<h3>{h.title}</h3>
 							<p>共 {h.chapters?.length ?? 1} 章</p>
@@ -180,18 +178,18 @@ const history = byGroup('history');
 		height: 3.4rem;
 		border-radius: 50%;
 		background: var(--ink);
-		color: var(--white);
-		font-family: var(--latin);
+		color: var(--paper);
+		font-family: var(--sans);
 		font-weight: 500;
 		position: relative;
 		z-index: 1;
-		box-shadow: 0 0 0 6px var(--paper-2);
+		box-shadow: 0 0 0 6px var(--paper-tint);
 	}
 	.stop-card {
 		grid-row: 1;
-		background: var(--white);
-		border: 1.5px solid var(--ink);
-		border-radius: 1.5rem;
+		background: var(--paper);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
 		padding: 1.4rem 1.5rem;
 		display: grid;
 		gap: 0.75rem;
@@ -223,7 +221,7 @@ const history = byGroup('history');
 		padding: 0 0.6rem;
 		border-radius: 999px;
 		background: var(--ink);
-		color: var(--white);
+		color: var(--paper);
 	}
 	.kp :global(p) {
 		margin: 0 0 0.6em;

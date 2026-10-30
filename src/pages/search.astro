@@ -6,14 +6,13 @@ const suggestions = ['AI 倫理', '生成式', '提示詞', '深偽', '因材網
 
 <Site title="搜尋" description="全文搜尋 AI 素養相關文件。" current="search">
 	<section class="page-hero wrap search-hero">
-		<span class="eyebrow reveal">Search</span>
-		<h1 class="reveal" style="--i:1">在 47 份文件裡<span class="mark">找一句話</span></h1>
-		<p class="lead reveal" style="--i:2">搜尋範圍是資料庫的全文。沒有空格的中文詞會找「連在一起」的字；用空格分開可以同時找多個詞。</p>
-		<p class="sugs reveal" style="--i:3">
+		<h1>在 47 份文件裡找一句話</h1>
+		<p class="lead" style="--i:2">搜尋範圍是資料庫的全文。沒有空格的中文詞會找「連在一起」的字；用空格分開可以同時找多個詞。</p>
+		<p class="sugs" style="--i:3">
 			{suggestions.map((s) => <button type="button" class="chip" data-q={s}>#{s}</button>)}
 		</p>
 	</section>
-	<section class="band band--white band--arch">
+	<section class="band ">
 		<div class="wrap-narrow">
 			<div id="search" data-bundle={`${base}/pagefind/`} data-base={`${base}/`}></div>
 			<noscript><p>搜尋需要 JavaScript。也可以到<a href={`${base}/library/`}>資料庫</a>依分類瀏覽。</p></noscript>
@@ -66,19 +65,19 @@ const suggestions = ['AI 倫理', '生成式', '提示詞', '深偽', '因材網
 		font: inherit;
 		font-size: 0.85rem;
 		border: 1px solid var(--line);
-		background: var(--white);
+		background: var(--paper);
 		cursor: pointer;
 	}
 	.sugs .chip:hover {
-		background: var(--yamabuki-soft);
+		background: var(--paper-deep);
 	}
 	#search {
 		--pagefind-ui-scale: 1;
 		--pagefind-ui-primary: var(--ink);
 		--pagefind-ui-text: var(--ink);
-		--pagefind-ui-background: var(--white);
+		--pagefind-ui-background: var(--paper);
 		--pagefind-ui-border: var(--ink);
-		--pagefind-ui-tag: var(--paper-2);
+		--pagefind-ui-tag: var(--paper-tint);
 		--pagefind-ui-border-width: 1.5px;
 		--pagefind-ui-border-radius: 18px;
 		--pagefind-ui-font: var(--sans);
@@ -89,11 +88,11 @@ const suggestions = ['AI 倫理', '生成式', '提示詞', '深偽', '因材網
 		font-weight: 500;
 	}
 	#search :global(.pagefind-ui__result-link) {
-		font-family: var(--serif);
+		font-family: var(--kai);
 		color: var(--ink);
 	}
 	#search :global(mark) {
-		background: var(--marker);
+		background: var(--chalk);
 		color: inherit;
 	}
 </style>

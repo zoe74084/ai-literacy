@@ -70,15 +70,14 @@ const LIGHTS = [
 
 <Site title="課堂 AI 紅黃綠燈" description="教師依學習目標決定課堂中使用 AI 的程度：紅燈、黃燈、綠燈。" current="read">
 	<section class="page-hero wrap tl-hero">
-		<span class="eyebrow reveal">Read 03 · Traffic light</span>
-		<h1 class="reveal" style="--i:1">課堂 AI<br /><span class="mark">紅黃綠燈</span></h1>
-		<p class="lead reveal" style="--i:2">{lead}</p>
+		<h1>課堂 AI<br />紅黃綠燈</h1>
+		<p class="lead" style="--i:2">{lead}</p>
 		<ReadMeta file="04_教學指引_115年中小學教師數位與AI教學指引1150920.md" full={`${SLUG}/`} />
 	</section>
 
-	<section class="band band--night band--arch tl-band" data-tl>
+	<section class="band band--cover tl-band" data-tl>
 		<div class="wrap tl-grid">
-			<div class="signal reveal" role="group" aria-label="選擇燈號">
+			<div class="signal" role="group" aria-label="選擇燈號">
 				<div class="signal-body">
 					{
 						LIGHTS.map((l, i) => (
@@ -102,7 +101,6 @@ const LIGHTS = [
 						const z = zones[l.key];
 						return (
 							<div class={`tl-panel tl-panel--${l.key}`} data-panel={l.key} hidden={i !== 0}>
-								<p class="eyebrow">Table 3-1 · 教師教學使用 AI 判斷原則參考</p>
 								{modes
 									.filter((m) => m.light === l.key)
 									.map((m) => (
@@ -129,7 +127,6 @@ const LIGHTS = [
 									))}
 								{z && (
 									<article class="zone">
-										<p class="eyebrow">班級公約示例</p>
 										<h3>{z.title}</h3>
 										{z.purpose && <p class="zone-purpose">目的：{z.purpose}</p>}
 										<ul>
@@ -152,16 +149,15 @@ const LIGHTS = [
 
 	{
 		checks.length > 0 && (
-			<section class="band band--paper2 band--bowl">
+			<section class="band band--tint">
 				<div class="wrap-narrow">
-					<div class="section-head reveal">
-						<span class="eyebrow">Self-check</span>
-						<h2>選擇燈號前的<span class="mark">自我檢核</span></h2>
+					<div class="section-head">
+						<h2>選擇燈號前的自我檢核</h2>
 						<p>{checkLead}</p>
 					</div>
 					<ol class="checks" data-checks>
 						{checks.map((c, i) => (
-							<li class="reveal" style={`--i:${i % 4}`}>
+							<li style={`--i:${i % 4}`}>
 								<label>
 									<input type="checkbox" />
 									<span class="check-box" aria-hidden="true">
@@ -187,8 +183,7 @@ const LIGHTS = [
 		<div class="wrap pledge">
 			{
 				promise.length > 0 && (
-					<div class="pledge-card reveal-left">
-						<p class="eyebrow">Class pact · 人機協作班級公約（舉例）</p>
+					<div class="pledge-card">
 						<h2>我們承諾</h2>
 						<ol>{promise.map((p) => <li>{p.replace(/^\d+\.\s*/, '')}</li>)}</ol>
 					</div>
@@ -196,16 +191,15 @@ const LIGHTS = [
 			}
 			{
 				learn.length > 0 && (
-					<div class="pledge-card pledge-card--2 reveal-right">
-						<p class="eyebrow">Learning pledge</p>
+					<div class="pledge-card pledge-card--2">
 						<h2>學習承諾</h2>
 						<ol>{learn.map((p) => <li>{p.replace(/^\d+\.\s*/, '')}</li>)}</ol>
 					</div>
 				)
 			}
 		</div>
-		<p class="wrap more reveal">
-			<a class="btn" href={`${base}/read/doc/${SLUG}/`}>讀第三章全文 <span class="arrow">→</span></a>
+		<p class="wrap more">
+			<a class="btn" href={`${base}/read/doc/${SLUG}/`}>讀第三章全文</a>
 		</p>
 	</section>
 </Site>
@@ -287,7 +281,7 @@ const LIGHTS = [
 		transition:
 			background 0.35s,
 			color 0.35s,
-			transform 0.25s var(--bounce);
+			transform 0.25s var(--ease-out);
 	}
 	.lamp:hover {
 		transform: scale(1.04);
@@ -329,7 +323,7 @@ const LIGHTS = [
 		text-align: center;
 	}
 	.lamp-text b {
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-size: 1.3rem;
 	}
 	.lamp-text small {
@@ -345,7 +339,7 @@ const LIGHTS = [
 	}
 	@media (prefers-reduced-motion: no-preference) {
 		.tl-panel.is-shown > * {
-			animation: rise 0.55s var(--ease) backwards;
+			animation: rise 0.55s var(--ease-out) backwards;
 		}
 		.tl-panel.is-shown > *:nth-child(3) {
 			animation-delay: 0.08s;
@@ -362,9 +356,9 @@ const LIGHTS = [
 	}
 	.mode,
 	.zone {
-		background: var(--white);
+		background: var(--paper);
 		color: var(--ink);
-		border-radius: 1.5rem;
+		border-radius: var(--r-lg);
 		padding: clamp(1.2rem, 3vw, 1.75rem);
 	}
 	.mode h2 {
@@ -413,7 +407,7 @@ const LIGHTS = [
 		margin: 0.3rem 0 0.5rem;
 	}
 	.zone-purpose {
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-weight: 600;
 	}
 	.zone ul {
@@ -424,7 +418,7 @@ const LIGHTS = [
 	}
 	.zone b {
 		margin-right: 0.4rem;
-		background: linear-gradient(transparent 60%, var(--marker) 60%);
+		background: linear-gradient(transparent 60%, var(--chalk) 60%);
 	}
 	@media (max-width: 44rem) {
 		.tl-grid {
@@ -457,22 +451,22 @@ const LIGHTS = [
 		gap: 0.9rem;
 		align-items: flex-start;
 		padding: 1rem 1.2rem;
-		background: var(--white);
+		background: var(--paper);
 		border-radius: 1rem;
 		border: 1.5px solid var(--line);
 		cursor: pointer;
 		transition: border-color 0.2s;
 	}
 	.checks label:has(input:checked) {
-		border-color: var(--kusa);
-		background: var(--kusa-soft);
+		border-color: var(--c-teacher);
+		background: var(--c-teacher-soft);
 	}
 	.checks input {
 		position: absolute;
 		opacity: 0;
 	}
 	.checks label:has(input:focus-visible) {
-		outline: 2.5px solid var(--ai);
+		outline: 2.5px solid var(--blue-pen);
 	}
 	.check-box {
 		flex: none;
@@ -481,30 +475,30 @@ const LIGHTS = [
 		width: 1.6rem;
 		height: 1.6rem;
 		border-radius: 0.5rem;
-		border: 1.5px solid var(--ink);
+		border: 1px solid var(--line);
 		color: transparent;
 		font-weight: 700;
 		transition:
 			background 0.2s,
 			color 0.2s,
-			transform 0.25s var(--bounce);
+			transform 0.25s var(--ease-out);
 	}
 	.checks input:checked + .check-box {
-		background: var(--kusa);
-		color: var(--white);
-		border-color: var(--kusa);
+		background: var(--c-teacher);
+		color: var(--paper);
+		border-color: var(--c-teacher);
 		transform: rotate(-8deg) scale(1.08);
 	}
 	.checks b {
 		display: block;
-		font-family: var(--serif);
+		font-family: var(--kai);
 	}
 	.check-count {
 		margin-top: 1.25rem;
 		font-size: 0.95rem;
 	}
 	.check-count b {
-		font-family: var(--latin);
+		font-family: var(--sans);
 		font-size: 1.6rem;
 		font-weight: 300;
 	}
@@ -516,12 +510,12 @@ const LIGHTS = [
 	}
 	.pledge-card {
 		padding: clamp(1.5rem, 4vw, 2.5rem);
-		border-radius: 1.75rem;
-		border: 1.5px solid var(--ink);
-		background: var(--yamabuki-soft);
+		border-radius: var(--r-lg);
+		border: 1px solid var(--line);
+		background: var(--paper-deep);
 	}
 	.pledge-card--2 {
-		background: var(--sora-soft);
+		background: var(--c-student-soft);
 	}
 	.pledge-card h2 {
 		font-size: 1.6rem;
@@ -532,7 +526,7 @@ const LIGHTS = [
 		padding-left: 1.3rem;
 		display: grid;
 		gap: 0.5rem;
-		font-family: var(--serif);
+		font-family: var(--kai);
 	}
 	.more {
 		margin-top: 2.5rem;

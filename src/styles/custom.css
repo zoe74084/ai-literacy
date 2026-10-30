@@ -1,10 +1,10 @@
 /* 資料庫（Starlight）沿用首頁與導讀頁的字體與和色 */
 :root {
 	--sl-font: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
-	--serif: 'Noto Serif TC', 'Songti TC', serif;
-	--sl-color-accent-low: #12304a;
-	--sl-color-accent: #2f7fc1;
-	--sl-color-accent-high: #b9dcf7;
+	--serif: 'LXGW WenKai TC', 'BiauKai', 'Kaiti TC', serif;
+	--sl-color-accent-low: #173a2d;
+	--sl-color-accent: #4fa57a;
+	--sl-color-accent-high: #c8ead6;
 	--aud-teacher-bg: #1f3d2c;
 	--aud-teacher-fg: #b7ebc9;
 	--aud-student-bg: #1d3550;
@@ -13,28 +13,28 @@
 	--aud-parent-fg: #ffd2b5;
 	--aud-admin-bg: #3a2a4d;
 	--aud-admin-fg: #e0ccff;
-	--fw-l0: #2b6a8f;
-	--fw-l1: #2f7d5a;
-	--fw-l2: #8a5a1f;
+	--fw-l0: #5f9e77;
+	--fw-l1: #2f7a50;
+	--fw-l2: #1f5a43;
 	--fw-level-fg: #ffffff;
 }
 :root[data-theme='light'] {
 	/* 和紙底色 */
-	--sl-color-bg: #fffdf8;
-	--sl-color-bg-nav: #f6f1e7;
-	--sl-color-bg-sidebar: #f6f1e7;
-	--sl-color-hairline-light: #e5d9bf;
-	--sl-color-hairline: #d9cdb5;
-	--sl-color-white: #2a2622;
-	--sl-color-gray-1: #3a352f;
-	--sl-color-gray-2: #5d564d;
-	--sl-color-gray-3: #8a8174;
-	--sl-color-gray-5: #d9cdb5;
-	--sl-color-gray-6: #efe6d3;
-	--sl-color-gray-7: #f6f1e7;
-	--sl-color-accent-low: #dbe5f1;
-	--sl-color-accent: #2f4d7e;
-	--sl-color-accent-high: #1d3150;
+	--sl-color-bg: #fdfdfa;
+	--sl-color-bg-nav: #fdfdfa;
+	--sl-color-bg-sidebar: #f1f6f0;
+	--sl-color-hairline-light: #e3ede4;
+	--sl-color-hairline: #d7e1da;
+	--sl-color-white: #1d2a24;
+	--sl-color-gray-1: #2c3a33;
+	--sl-color-gray-2: #4a5852;
+	--sl-color-gray-3: #6e7a74;
+	--sl-color-gray-5: #d7e1da;
+	--sl-color-gray-6: #e3ede4;
+	--sl-color-gray-7: #f1f6f0;
+	--sl-color-accent-low: #e1f1e6;
+	--sl-color-accent: #1f5a43;
+	--sl-color-accent-high: #17473a;
 	--aud-teacher-bg: #dcf3e4;
 	--aud-teacher-fg: #1c5a33;
 	--aud-student-bg: #ddebfb;
@@ -43,9 +43,9 @@
 	--aud-parent-fg: #8a3d12;
 	--aud-admin-bg: #ece2fa;
 	--aud-admin-fg: #55308a;
-	--fw-l0: #2b78a8;
-	--fw-l1: #2f8a62;
-	--fw-l2: #a8691d;
+	--fw-l0: #5f9e77;
+	--fw-l1: #2f7a50;
+	--fw-l2: #1f5a43;
 }
 
 /* 中文排版：行高稍大，長表格可橫向捲動而不撐破版面 */
@@ -112,8 +112,7 @@ h1#_top,
 	font-weight: 900;
 }
 .sl-markdown-content h2 {
-	background: linear-gradient(transparent 62%, rgba(242, 184, 61, 0.45) 62%);
-	display: inline;
+	color: var(--sl-color-white);
 }
 .sl-markdown-content .sl-heading-wrapper:has(h2) {
 	margin-top: 2.2em;

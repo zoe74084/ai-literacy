@@ -78,19 +78,18 @@ const versions = [
 	{ key: 'student', label: '學生版', slug: 'notices/student', file: '03_生成式AI注意事項_中小學使用生成式人工智慧注意事項2.1_學生版.md', ...parse('notices/student') },
 	{ key: 'adults', label: '教師、行政人員及家長版', short: '大人版', slug: 'notices/adults', file: '03_生成式AI注意事項_中小學使用生成式人工智慧注意事項2.1_教師_行政人員及家長版.md', ...parse('notices/adults') },
 ];
-const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'var(--shu-soft)', 'var(--fuji-soft)', 'var(--paper-2)'];
+const hues = ['var(--c-student-soft)', 'var(--c-teacher-soft)', 'var(--paper-deep)', 'var(--c-parent-soft)', 'var(--c-admin-soft)', 'var(--paper-tint)'];
 ---
 
 <Site title="生成式 AI 注意事項" description="中小學使用生成式人工智慧注意事項 2.1 的卡片式導讀：學生版與教師、行政人員及家長版。" current="read">
 	<section class="page-hero wrap">
-		<span class="eyebrow reveal">Read 02 · Notices</span>
-		<h1 class="reveal" style="--i:1">使用生成式 AI<br /><span class="mark">注意事項 2.1</span></h1>
-		<p class="lead reveal" style="--i:2">教育部為中小學訂的使用原則，分學生版和教師、行政人員及家長版。一張卡片一個重點；翻到背面是原文附錄裡的情境示例。</p>
+		<h1>使用生成式 AI<br />注意事項 2.1</h1>
+		<p class="lead" style="--i:2">教育部為中小學訂的使用原則，分學生版和教師、行政人員及家長版。一張卡片一個重點；翻到背面是原文附錄裡的情境示例。</p>
 	</section>
 
-	<section class="band band--paper2 band--arch" data-notices>
+	<section class="band band--tint" data-notices>
 		<div class="wrap">
-			<div class="nt-controls reveal">
+			<div class="nt-controls">
 				<div class="toggle" role="group" aria-label="選擇版本">
 					{versions.map((v, i) => <button type="button" data-v={v.key} aria-pressed={i === 0 ? 'true' : 'false'}>{v.short ?? v.label}</button>)}
 				</div>
@@ -113,27 +112,26 @@ const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'v
 								<li class="slot" style={`--bg:${hues[i % hues.length]}`}>
 									<div class="flip" data-flip>
 										<article class="face front">
-											<span class="kanji" aria-hidden="true">
-												{it.num}
-											</span>
 											<p class="card-no">
-												第 {it.num} 點<span>／{v.items.length}</span>
+												<span class="card-cell" aria-hidden="true">{it.num}</span>
+												<span class="visually-hidden">第 {it.num} 點，</span>
+												<span class="card-of">共 {v.items.length} 點</span>
 											</p>
 											<h2>{it.title}</h2>
 											<div class="card-body" set:html={it.html} />
 											{it.example && (
 												<button type="button" class="flip-btn" data-flip-btn>
-													看情境示例 ↻
+													看情境示例
 												</button>
 											)}
 										</article>
 										{it.example && (
 											<article class="face back" aria-hidden="true">
-												<p class="eyebrow">Example · 附錄 1 示例</p>
-												<h3>{it.title}</h3>
+												<h3>情境示例</h3>
+												<p class="back-of">{it.title}（原文附錄 1）</p>
 												<p class="example" set:html={it.example} />
 												<button type="button" class="flip-btn" data-flip-btn>
-													翻回正面 ↺
+													翻回正面
 												</button>
 											</article>
 										)}
@@ -142,8 +140,7 @@ const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'v
 							))}
 						</ol>
 						{v.closing.trim() && (
-							<div class="closing reveal">
-								<p class="eyebrow">Closing</p>
+							<div class="closing">
 								<div set:html={v.closing} />
 							</div>
 						)}
@@ -228,21 +225,21 @@ const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'v
 		width: 2.8rem;
 		height: 2.8rem;
 		border-radius: 50%;
-		border: 1.5px solid var(--ink);
-		background: var(--white);
+		border: 1px solid var(--line);
+		background: var(--paper);
 		cursor: pointer;
 		font-size: 1.1rem;
-		transition: transform 0.2s var(--ease);
+		transition: transform 0.2s var(--ease-out);
 	}
 	.round:hover {
 		background: var(--ink);
-		color: var(--white);
+		color: var(--paper);
 	}
 	.round:active {
 		transform: scale(0.92);
 	}
 	.deck-count {
-		font-family: var(--latin);
+		font-family: var(--sans);
 		min-width: 4rem;
 		text-align: center;
 	}
@@ -283,7 +280,7 @@ const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'v
 	.flip {
 		display: grid;
 		height: 100%;
-		transition: transform 0.7s var(--ease);
+		transition: transform 0.7s var(--ease-out);
 		transform-style: preserve-3d;
 	}
 	.flip.is-flipped {
@@ -299,56 +296,48 @@ const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'v
 		flex-direction: column;
 		gap: 0.75rem;
 		padding: clamp(1.4rem, 4vw, 2.2rem);
-		border-radius: 1.75rem;
-		border: 1.5px solid var(--ink);
-		background: var(--white);
-		min-height: 30rem;
-		box-shadow: 6px 8px 0 var(--ink);
-	}
-	.front::before {
-		content: '';
-		position: absolute;
-		inset: 0 0 auto 0;
-		height: 7.5rem;
-		background: var(--bg);
-		border-bottom: 1.5px solid var(--ink);
-		border-radius: 0 0 50% 50% / 0 0 26px 26px;
+		border-radius: var(--r-lg);
+		border: 1px solid var(--line);
+		background: var(--paper);
+		box-shadow: var(--shadow-2);
 	}
 	.back {
 		transform: rotateY(180deg);
-		background: var(--night);
-		color: #ece6da;
-	}
-	.back .eyebrow {
-		color: #a9a295;
-	}
-	.kanji {
-		position: absolute;
-		right: 1.25rem;
-		top: 0.2rem;
-		font-family: var(--serif);
-		font-weight: 900;
-		font-size: 6rem;
-		line-height: 1;
-		color: var(--ink);
-		opacity: 0.12;
+		background: var(--cover);
+		color: var(--cover-ink);
 	}
 	.card-no {
-		position: relative;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
 		margin: 0;
-		font-family: var(--serif);
-		font-weight: 700;
-		color: var(--shu);
 	}
-	.card-no span {
+	/* 點次寫在一格稿紙裡 */
+	.card-cell {
+		display: grid;
+		place-items: center;
+		width: 3rem;
+		height: 3rem;
+		border: 1.5px solid var(--c-teacher);
+		background: linear-gradient(var(--grid), var(--grid)) center / 100% 1px no-repeat,
+			linear-gradient(90deg, var(--grid), var(--grid)) center / 1px 100% no-repeat, var(--bg);
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.8rem;
+		line-height: 1;
+	}
+	.card-of {
+		font-size: 0.82rem;
 		color: var(--ink-3);
-		font-weight: 400;
-		font-size: 0.85rem;
 	}
 	.face h2 {
-		position: relative;
 		font-size: clamp(1.2rem, 3vw, 1.5rem);
-		margin: 1.4rem 0 0.25rem;
+		margin: 0.25rem 0;
+	}
+	.back-of {
+		font-size: 0.85rem;
+		color: var(--cover-ink-2);
+		margin: 0;
 	}
 	.back h3 {
 		font-size: 1.15rem;
@@ -366,7 +355,7 @@ const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'v
 		margin: 0 0 0.8em;
 	}
 	.example {
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-size: 1.05rem;
 		line-height: 2;
 	}
@@ -384,14 +373,14 @@ const hues = ['var(--sora-soft)', 'var(--kusa-soft)', 'var(--yamabuki-soft)', 'v
 		cursor: pointer;
 	}
 	.front .flip-btn {
-		background: var(--yamabuki-soft);
+		background: var(--paper-deep);
 		border-color: var(--ink);
 	}
 	.closing {
 		margin: 1rem 0 0;
 		padding: 1.5rem;
-		background: var(--white);
-		border-radius: 1.5rem;
+		background: var(--paper);
+		border-radius: var(--r-lg);
 		border: 1.5px dashed var(--ink-3);
 		max-width: 50rem;
 	}

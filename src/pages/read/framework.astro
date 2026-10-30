@@ -35,32 +35,30 @@ const who = (['teacher', 'student'] as const).map((k) => ({
 	page: fw[k].page.replace(/^library\//, ''),
 	facets: fw[k].facets.map((f) => ({ ...f, intro: intros[k][f.heading] ?? '' })),
 }));
-const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
+// 三個層級是遞進關係：同一個綠色由淺到深
+const colors = ['#5f9e77', '#2f7a50', '#1f5a43'];
 ---
 
 <Site title="AI 素養框架" description="臺灣中小學教師與學生 AI 素養框架的互動導讀：4 面向 × 3 層級。" current="read">
 	<section class="page-hero wrap">
-		<span class="eyebrow reveal">Read 01 · Framework</span>
-		<h1 class="reveal" style="--i:1">AI 素養框架<br /><span class="mark">4 面向 × 3 層級</span></h1>
-		<p class="lead reveal" style="--i:2">
+		<h1>AI 素養框架</h1>
+		<p class="lead" style="--i:2">
 			教育部《臺灣中小學教師與學生 AI 素養框架》為教師與學生各規劃四個面向，每個面向分「取得理解、深化應用、創造轉型」三個層級。框架也提醒：各面向可以非同步發展，不需要每個人都到最高層級。
 		</p>
 		<ReadMeta file="02_AI素養框架_臺灣中小學教師與學生AI素養框架.md" full="framework/full/" />
 	</section>
 
 	<!-- 以人為中心 -->
-	<section class="band band--paper2 band--arch">
+	<section class="band band--tint">
 		<div class="wrap">
-			<div class="section-head reveal">
-				<span class="eyebrow">Human-centred</span>
-				<h2>核心：<span class="mark">以人為中心</span></h2>
+			<div class="section-head">
+				<h2>核心是「以人為中心」</h2>
 				<p>框架原文說，兩種能動性確保人類在與 AI 協作時仍掌握關鍵能力：</p>
 			</div>
 			<div class="agency">
 				{
 					agency.map((a, i) => (
-						<article class={`agency-card ${i ? 'reveal-right' : 'reveal-left'}`}>
-							<span class="num">0{i + 1}</span>
+						<article class="agency-card">
 							<h3>{a.head}</h3>
 							<p>{a.body}</p>
 						</article>
@@ -73,25 +71,24 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 	<!-- 互動矩陣 -->
 	<section class="band" id="matrix" data-fw>
 		<div class="wrap">
-			<div class="section-head reveal">
-				<span class="eyebrow">Explore</span>
+			<div class="section-head">
 				<h2>選身分，再選層級</h2>
 				<p>點下方的階梯切換層級；每張卡片是該面向在這一層的目標與內涵，文字取自原文表 1、表 2。</p>
 			</div>
 
-			<div class="controls reveal">
+			<div class="controls">
 				<div class="toggle" role="group" aria-label="選擇身分">
 					{who.map((w, i) => <button type="button" data-who={w.key} aria-pressed={i === 0 ? 'true' : 'false'}>{w.label}</button>)}
 				</div>
 				<button type="button" class="view-all" data-view-all aria-pressed="false">整張表一次看</button>
 			</div>
 
-			<div class="steps reveal" role="group" aria-label="選擇層級">
+			<div class="steps" role="group" aria-label="選擇層級">
 				{
 					fw.levels.map((lv, i) => (
 						<button type="button" class="step" data-level={i} aria-pressed={i === 0 ? 'true' : 'false'} style={`--c:${colors[i]};--h:${45 + i * 27}%`}>
 							<span class="step-bar" />
-							<span class="step-num">0{i + 1}</span>
+							<span class="step-num">{['一', '二', '三'][i]}</span>
 							<span class="step-name">{lv}</span>
 						</button>
 					))
@@ -125,7 +122,7 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 									</details>
 								)}
 								<a class="moe-link" href={`${base}/read/doc/${w.page}/`}>
-									讀「{f.name}」完整說明 →
+									讀「{f.name}」完整說明
 								</a>
 							</article>
 						))}
@@ -136,24 +133,23 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 	</section>
 
 	<!-- 下一步 -->
-	<section class="band band--paper3 band--arch">
+	<section class="band band--tint">
 		<div class="wrap">
-			<div class="section-head reveal">
-				<span class="eyebrow">Next</span>
+			<div class="section-head">
 				<h2>接著讀</h2>
 			</div>
 			<div class="grid" style="--min:15rem">
-				<a class="card reveal" href={`${base}/read/doc/framework/full/`} style="--i:0"
+				<a class="card" href={`${base}/read/doc/framework/full/`} style="--i:0"
 					><span class="chip">全文</span>
 					<h3>框架全文（分 5 章）</h3>
 					<p>前言、國際趨勢、我國框架、教師與學生 AI 素養的完整說明。</p></a
 				>
-				<a class="card reveal" href={`${base}/read/doc/framework/slides/`} style="--i:1"
+				<a class="card" href={`${base}/read/doc/framework/slides/`} style="--i:1"
 					><span class="chip">附錄</span>
 					<h3>公版簡報</h3>
 					<p>框架公版簡報的文字內容。</p></a
 				>
-				<a class="card reveal" href={`${base}/read/traffic-light/`} style="--i:2"
+				<a class="card" href={`${base}/read/traffic-light/`} style="--i:2"
 					><span class="chip chip--teacher">導讀</span>
 					<h3>課堂 AI 紅黃綠燈</h3>
 					<p>把素養落實到課堂：什麼任務該用多少 AI。</p></a
@@ -221,9 +217,9 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 		gap: clamp(1rem, 3vw, 2rem);
 	}
 	.agency-card {
-		background: var(--white);
-		border: 1.5px solid var(--ink);
-		border-radius: 1.75rem;
+		background: var(--paper);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
 		padding: clamp(1.5rem, 4vw, 2.5rem);
 	}
 	.agency-card h3 {
@@ -261,7 +257,7 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 	}
 	.view-all[aria-pressed='true'] {
 		border-style: solid;
-		background: var(--yamabuki-soft);
+		background: var(--paper-deep);
 	}
 
 	/* 階梯 */
@@ -279,8 +275,8 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 		height: var(--h);
 		font: inherit;
 		color: var(--ink);
-		background: var(--white);
-		border: 1.5px solid var(--ink);
+		background: var(--paper);
+		border: 1px solid var(--line);
 		border-bottom: 0;
 		border-radius: 1rem 1rem 0 0;
 		cursor: pointer;
@@ -290,7 +286,7 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 		justify-content: flex-end;
 		padding: 0.75rem 1rem;
 		overflow: hidden;
-		transition: transform 0.3s var(--bounce);
+		transition: transform 0.3s var(--ease-out);
 	}
 	.step:hover {
 		transform: translateY(-4px);
@@ -301,26 +297,26 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 		background: var(--c);
 		transform: scaleY(0);
 		transform-origin: bottom;
-		transition: transform 0.45s var(--ease);
+		transition: transform 0.45s var(--ease-out);
 	}
 	.step[aria-pressed='true'] .step-bar {
 		transform: scaleY(1);
 	}
 	.step[aria-pressed='true'] {
-		color: var(--white);
+		color: var(--paper);
 	}
 	.step-num,
 	.step-name {
 		position: relative;
 	}
 	.step-num {
-		font-family: var(--latin);
+		font-family: var(--sans);
 		font-weight: 300;
 		font-size: 1.5rem;
 		line-height: 1;
 	}
 	.step-name {
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-weight: 700;
 		font-size: clamp(0.95rem, 2.4vw, 1.25rem);
 	}
@@ -339,9 +335,9 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 		flex-direction: column;
 		gap: 0.75rem;
 		padding: 1.25rem;
-		border-radius: 1.5rem;
-		border: 1.5px solid var(--ink);
-		background: var(--white);
+		border-radius: var(--r-lg);
+		border: 1px solid var(--line);
+		background: var(--paper);
 	}
 	.facet-head {
 		display: flex;
@@ -351,26 +347,29 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 		border-bottom: 1px dashed var(--line);
 	}
 	.facet-no {
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-weight: 900;
-		color: var(--shu);
+		color: var(--red-pen);
 	}
 	.facet-head h3 {
 		font-size: 1.15rem;
 	}
 	.cell {
-		border-left: 5px solid var(--c);
-		padding: 0.25rem 0 0.25rem 0.85rem;
+		padding: 0.1rem 0;
 	}
 	.cell-level {
+		display: inline-block;
 		margin: 0;
-		font-size: 0.75rem;
-		color: var(--ink-3);
-		letter-spacing: 0.1em;
+		font-size: 0.78rem;
+		font-weight: 700;
+		padding: 0 0.5rem;
+		border-radius: 0.3rem;
+		color: var(--paper);
+		background: var(--c);
 	}
 	.cell-goal {
 		margin: 0.1rem 0 0.4rem;
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-weight: 700;
 		font-size: 1.1rem;
 		line-height: 1.5;
@@ -404,7 +403,7 @@ const colors = ['var(--sora)', 'var(--kusa)', 'var(--shu)'];
 	}
 	@media (prefers-reduced-motion: no-preference) {
 		.board.is-swap .facet {
-			animation: pop 0.5s var(--ease) backwards;
+			animation: pop 0.5s var(--ease-out) backwards;
 			animation-delay: calc(var(--i) * 70ms);
 		}
 	}

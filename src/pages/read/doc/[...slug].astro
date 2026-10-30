@@ -60,7 +60,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	<div class="progress" aria-hidden="true"><span data-progress></span></div>
 
 	<section class="page-hero wrap doc-hero">
-		<nav class="crumbs reveal" aria-label="位置">
+		<nav class="crumbs" aria-label="位置">
 			<a href={`${base}/read/`}>導讀</a>
 			<span aria-hidden="true">／</span>
 			{groupLabel && <span>{groupLabel}</span>}
@@ -73,21 +73,21 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 				)
 			}
 		</nav>
-		{chapter && <p class="doc-of reveal">第 {idx + 1} 頁／共 {chapters.length} 頁</p>}
-		<h1 class="reveal" style="--i:1">{chapter ? chapter.title : doc.title}</h1>
+		{chapter && <p class="doc-of">第 {idx + 1} 頁／共 {chapters.length} 頁</p>}
+		<h1>{chapter ? chapter.title : doc.title}</h1>
 		{
 			doc.lesson && (
-				<p class="lead reveal" style="--i:2">
+				<p class="lead" style="--i:2">
 					{doc.lesson.stage}・{doc.lesson.domain}・設計者 {doc.lesson.author}
 				</p>
 			)
 		}
-		<p class="doc-aud reveal" style="--i:2">
+		<p class="doc-aud" style="--i:2">
 			{doc.audience.map((a) => <span class={`chip chip--${a}`}>{AUDIENCE_LABELS[a]}</span>)}
 		</p>
 		{
 			langs.length > 0 && (
-				<p class="langs reveal" style="--i:2">
+				<p class="langs" style="--i:2">
 					{langs.map((l) => (
 						<a class="chip" aria-current={l.slug === slug ? 'page' : undefined} href={`${base}/read/doc/${l.slug}/`}>
 							{l.label}
@@ -101,16 +101,15 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 
 	{
 		isOverview ? (
-			<section class="band band--paper2 band--arch">
+			<section class="band band--tint">
 				<div class="wrap">
-					<div class="section-head reveal">
-						<span class="eyebrow">Contents</span>
+					<div class="section-head">
 						<h2>目次</h2>
 						<p>本文件依原文章節分成 {chapters.length} 頁，依序閱讀或直接跳到想看的章節。</p>
 					</div>
 					<ol class="chapters">
 						{chapters.map((c, i) => (
-							<li class="reveal" style={`--i:${i % 4}`}>
+							<li style={`--i:${i % 4}`}>
 								<a href={`${base}/read/doc/${c.slug}/`}>
 									<span class="num">{String(i + 1).padStart(2, '0')}</span>
 									<span class="ch-title">{c.title}</span>
@@ -124,11 +123,10 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 				</div>
 			</section>
 		) : (
-			<section class="band band--white band--arch doc-band">
+			<section class="band  doc-band">
 				<div class="wrap doc-layout">
 					<aside class="doc-aside">
 						<div class="doc-aside-inner">
-							<p class="aside-tate tate">{doc.title}</p>
 							<div class="aside-nav">
 								<div class="fontsize" role="group" aria-label="字級">
 									<button type="button" data-fs="s" aria-label="小字">
@@ -183,7 +181,6 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 			<nav class="wrap pager" aria-label="上一章、下一章">
 				{prev ? (
 					<a class="pager-link" href={`${base}/read/doc/${prev.slug}/`}>
-						<span class="eyebrow">Prev</span>
 						<span>{prev.title}</span>
 					</a>
 				) : (
@@ -191,7 +188,6 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 				)}
 				{next && (
 					<a class="pager-link pager-next" href={`${base}/read/doc/${next.slug}/`}>
-						<span class="eyebrow">Next</span>
 						<span>{next.title}</span>
 					</a>
 				)}
@@ -234,20 +230,6 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 			} catch {}
 		}),
 	);
-	// 內文標題進場劃螢光筆
-	if (prose) {
-		const io = new IntersectionObserver(
-			(es) =>
-				es.forEach((e) => {
-					if (e.isIntersecting) {
-						e.target.classList.add('is-in');
-						io.unobserve(e.target);
-					}
-				}),
-			{ rootMargin: '0px 0px -15% 0px' },
-		);
-		prose.querySelectorAll('h2').forEach((h) => io.observe(h));
-	}
 </script>
 
 <style>
@@ -262,7 +244,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	.progress span {
 		display: block;
 		height: 100%;
-		background: var(--shu);
+		background: var(--red-pen);
 		transform: scaleX(0);
 		transform-origin: left;
 	}
@@ -278,10 +260,10 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		color: var(--ink-2);
 	}
 	.doc-of {
-		font-family: var(--latin);
+		font-family: var(--sans);
 		font-size: 0.85rem;
 		letter-spacing: 0.1em;
-		color: var(--shu);
+		color: var(--red-pen);
 		margin: 0 0 0.5rem;
 	}
 	.doc-hero h1 {
@@ -297,11 +279,11 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	}
 	.langs .chip {
 		border: 1px solid var(--line);
-		background: var(--white);
+		background: var(--paper);
 	}
 	.langs .chip[aria-current='page'] {
 		background: var(--ink);
-		color: var(--white);
+		color: var(--paper);
 	}
 
 	.chapters {
@@ -317,18 +299,18 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		align-items: center;
 		gap: 1rem;
 		padding: 1rem 1.25rem;
-		background: var(--white);
-		border: 1.5px solid var(--ink);
-		border-radius: 1.25rem;
+		background: var(--paper);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
 		text-decoration: none;
 		height: 100%;
 		transition:
-			transform 0.25s var(--ease),
-			box-shadow 0.25s var(--ease);
+			transform 0.25s var(--ease-out),
+			box-shadow 0.25s var(--ease-out);
 	}
 	.chapters a:hover {
 		transform: translateY(-3px);
-		box-shadow: 5px 6px 0 var(--ink);
+		box-shadow: var(--shadow-2);
 	}
 	.chapters .num {
 		font-size: 2.4rem;
@@ -336,7 +318,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	}
 	.ch-title {
 		flex: 1;
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-weight: 700;
 		line-height: 1.5;
 	}
@@ -357,13 +339,12 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		position: sticky;
 		top: 5.5rem;
 		display: grid;
-		grid-template-columns: auto 1fr;
 		gap: 1rem;
 		max-height: calc(100vh - 7rem);
 	}
 	.aside-tate {
 		margin: 0;
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-weight: 700;
 		color: var(--ink-3);
 		font-size: 0.95rem;
@@ -385,12 +366,12 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	}
 	.fontsize button {
 		font: inherit;
-		font-family: var(--serif);
+		font-family: var(--kai);
 		width: 2.2rem;
 		height: 2.2rem;
 		border-radius: 50%;
 		border: 1px solid var(--line);
-		background: var(--white);
+		background: var(--paper);
 		cursor: pointer;
 	}
 	.fontsize button:nth-child(1) { font-size: 0.8rem; }
@@ -398,7 +379,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	.fontsize button:nth-child(3) { font-size: 1.2rem; }
 	.fontsize button[aria-pressed='true'] {
 		background: var(--ink);
-		color: var(--white);
+		color: var(--paper);
 		border-color: var(--ink);
 	}
 	.toc {
@@ -426,7 +407,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	}
 	.toc a:hover,
 	.toc a[aria-current='page'] {
-		background: var(--yamabuki-soft);
+		background: var(--paper-deep);
 		color: var(--ink);
 	}
 	@media (max-width: 56rem) {
@@ -457,18 +438,22 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		overflow-wrap: break-word;
 	}
 	.prose :global(h2) {
-		font-family: var(--serif);
-		font-size: 1.55em;
+		font-family: var(--kai);
+		font-size: 1.6em;
 		margin: 2.4em 0 0.8em;
 		line-height: 1.45;
-		display: inline;
-		background: linear-gradient(var(--marker), var(--marker)) left 90% / 0% 0.42em no-repeat;
-		-webkit-box-decoration-break: clone;
-		box-decoration-break: clone;
-		transition: background-size 0.8s var(--ease) 0.2s;
+		display: flex;
+		gap: 0.5em;
+		align-items: baseline;
 	}
-	.prose :global(h2.is-in) {
-		background-size: 100% 0.42em;
+	/* 標題前一格稿紙 */
+	.prose :global(h2)::before {
+		content: '';
+		flex: none;
+		width: 0.62em;
+		height: 0.62em;
+		border: 1.5px solid var(--c-teacher);
+		translate: 0 0.04em;
 	}
 	.prose :global(.sl-heading-wrapper) {
 		margin: 2.4em 0 0.8em;
@@ -481,11 +466,10 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		display: none;
 	}
 	.prose :global(h3) {
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-size: 1.25em;
 		margin: 1.8em 0 0.6em;
-		padding-left: 0.75rem;
-		border-left: 4px solid var(--kusa);
+		color: var(--cover);
 		line-height: 1.5;
 	}
 	.prose :global(h4),
@@ -498,7 +482,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		margin: 0 0 1.1em;
 	}
 	.prose :global(strong) {
-		background: linear-gradient(transparent 62%, var(--yamabuki-soft) 62%);
+		color: var(--ink);
 	}
 	.prose :global(ul),
 	.prose :global(ol) {
@@ -509,7 +493,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		margin-bottom: 0.3em;
 	}
 	.prose :global(li::marker) {
-		color: var(--shu);
+		color: var(--red-pen);
 	}
 	.prose :global(blockquote) {
 		margin: 1.2em 0;
@@ -530,7 +514,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		font-size: 0.85em;
 		line-height: 1.65;
 		margin: 1.5em 0;
-		border: 1.5px solid var(--ink);
+		border: 1px solid var(--line);
 		border-radius: 0.75rem;
 	}
 	.prose :global(th),
@@ -542,10 +526,10 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		text-align: left;
 	}
 	.prose :global(thead th) {
-		background: var(--paper-2);
+		background: var(--paper-tint);
 	}
 	.prose :global(a) {
-		color: var(--ai);
+		color: var(--blue-pen);
 	}
 	.prose :global(code) {
 		background: var(--paper);
@@ -565,16 +549,16 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		display: grid;
 		gap: 0.3rem;
 		padding: 1.25rem 1.5rem;
-		border: 1.5px solid var(--ink);
-		border-radius: 1.25rem;
-		background: var(--white);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
+		background: var(--paper);
 		text-decoration: none;
-		font-family: var(--serif);
+		font-family: var(--kai);
 		font-weight: 700;
-		transition: box-shadow 0.25s var(--ease);
+		transition: box-shadow 0.25s var(--ease-out);
 	}
 	.pager-link:hover {
-		box-shadow: 5px 6px 0 var(--ink);
+		box-shadow: var(--shadow-2);
 	}
 	.pager-next {
 		text-align: right;
