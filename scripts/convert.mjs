@@ -130,7 +130,7 @@ const bump = (k, n = 1) => (stats[k] = (stats[k] ?? 0) + n);
 
 const PAGE_MARK = /^<!--\s*第\s*\d+\s*頁\s*-->$/;
 const CTRL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/;
-const CJK = /[㐀-鿿豈-﫿]/;
+const CJK = /[\u3400-\u9fff\uf900-\ufaff]/;
 const DOT_LEADER = /(\.{5,}|…{3,}|·{5,}|‧{5,}|．{5,})/;
 const TOC_HEADING = /^(目錄|目次|圖目錄|表目錄|圖表目錄|CONTENTS?|TableofContents|목차)$/i;
 const ALLOWED_TAGS = /^<\/?(br|sup|sub)\s*\/?>/i;
@@ -244,6 +244,31 @@ function parseHeader(text) {
 }
 
 // 2. 依頁碼註解切頁，處理頁首頁尾與單獨頁碼，再接回來
+// 下一段可以接上去：開頭是中文，不是章節記號、小標、編號或沒有標點的短標籤
+function continues(line) {
+  const t = line.trim();
+  if (!/^[\u3400-\u9fff\uf900-\ufaff（「]/.test(t)) return false;
+  if (/^[壹貳參肆伍陸柒捌玖拾](\s|$|[^\u3400-\u9fff])/.test(t) || /^[壹貳參肆伍陸柒捌玖拾]$/.test(t)) return false;
+  if (/^[（(][一二三四五六七八九十\d]+[）)]|^[一二三四五六七八九十]+[、．.]|^第.[章節課]/.test(t)) return false;
+  if (/___/.test(t)) return false;
+  const first = t.split(/(?<=[。！？])/)[0];
+  if (!/[，。！？；：、」）]/.test(first) && [...first].length <= 20) return false;
+  return true;
+}
+
+// 句子還沒結束：停在逗號、頓號，或停在一般中文字且最後一個子句夠長（不是標題、編號）
+function midSentence(line) {
+  if (/^\s*([-*+]\s+|\d+\.\s+)?\*\*[^*]+\*\*\s*$/.test(line)) return false; // 整行粗體是小標
+  const t = line.replace(/\*\*/g, '').trim().replace(/^([-*+]|\d+\.)\s+/, '');
+  if (/[，、]$/.test(t)) return true;
+  if (!CJK.test(t.slice(-1))) return false;
+  if (/[●⚫]/.test(t) || /^\p{Extended_Pictographic}/u.test(t) || /如下[圖表]?$/.test(t)) return false;
+  if (/^[（(][一二三四五六七八九十]+[）)]/.test(t) && !/。/.test(t)) return false; // 「（三）……」小標
+  const tail = t.split(/[。！？；：:]/).pop().trim().replace(/^([-*+]|\d+\.)\s*/, '');
+  if (/^[（(]?[一二三四五六七八九十\d]+[）)、.．]/.test(tail) || /^[壹貳參肆伍陸柒捌玖拾]、/.test(tail)) return /，/.test(tail) && [...tail].length >= 20;
+  return /[，。]/.test(t) && [...tail].length >= 8 && [...t].length >= 28;
+}
+
 function cleanPages(body) {
   const pages = [[]];
   for (const line of body.split('\n')) {
@@ -304,12 +329,12 @@ function cleanPages(body) {
     const prev = out[out.length - 1];
     const first = p[0];
     const plain = (l) => l && !/^\s*([#>|\-*+]|\d+\.\s|<)/.test(l);
+    // 上一頁最後一行可以是清單項目或粗體開頭的段落，只要它停在句子中間
+    const prose = (l) => l && !/^\s*([#>|]|<)/.test(l);
     if (
       prev !== undefined &&
-      plain(prev) &&
-      plain(first) &&
-      CJK.test(prev.slice(-1)) &&
-      CJK.test(first.charAt(0))
+      ((plain(prev) && CJK.test(prev.slice(-1)) && CJK.test(first.charAt(0))) || (prose(prev) && midSentence(prev) && continues(first))) &&
+      plain(first)
     ) {
       out[out.length - 1] = prev + first;
       out.push(...p.slice(1));
@@ -539,10 +564,64 @@ function facetTables(lines) {
   return out;
 }
 
+// 8. 頁緣章節側標：單獨一行的「壹」「貳」……在同一份文件重複出現就是每頁的側標，移除
+const SIDE_TAB = /^\s*(\*\*)?([壹貳參肆伍陸柒捌玖拾])(\*\*)?\s*$/;
+function dropSideTabs(lines) {
+  const n = new Map();
+  for (const l of lines) {
+    const m = l.match(SIDE_TAB);
+    if (m) n.set(m[2], (n.get(m[2]) ?? 0) + 1);
+  }
+  const out = lines.filter((l) => {
+    const m = l.match(SIDE_TAB);
+    if (m && n.get(m[2]) >= 2) {
+      bump('移除頁緣章節側標（壹、貳……）');
+      return false;
+    }
+    return true;
+  });
+  // 移除後可能留下連續空行
+  return out.filter((l, i) => l.trim() || (i > 0 && out[i - 1].trim()));
+}
+
+// 7. 同一頁內被 PDF 換行切成兩段的句子：上一段停在句子中間，下一段直接接續中文
+function joinBrokenLines(lines) {
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const a = lines[i];
+    const b = lines[i + 2];
+    if (
+      b !== undefined &&
+      !lines[i + 1].trim() &&
+      /^\s*([-*+]\s|\d+\.\s|\*\*|[^#>|<\s])/.test(a) &&
+      !/^\s*\*\*[^*]+\*\*\s*$/.test(a) &&
+      midSentence(a)
+    ) {
+      // 下一段：一般段落；或上一項清單停在逗號、下一項其實是同一句的後半
+      const listA = /^\s*([-*+]|\d+\.)\s/.test(a);
+      const commaEnd = /[，、]$/.test(a.replace(/\*\*/g, '').trim());
+      const listB = b.match(/^\s*[-*+]\s+(.*)$/);
+      let rest = null;
+      if (!/^\s*([-*+]|\d+\.)\s/.test(b) && (continues(b) || (commaEnd && /^[A-Za-z]/.test(b)))) rest = b;
+      else if (listA && commaEnd && listB && continues(listB[1]) && !/^.{1,8}[：:]/.test(listB[1])) rest = listB[1];
+      if (rest === null) {
+        out.push(a);
+        continue;
+      }
+      lines[i + 2] = a.replace(/\s+$/, '') + rest;
+      bump('接回同頁內斷開的句子');
+      i++; // 跳過中間的空行，合併後的行在下一輪處理
+      continue;
+    }
+    out.push(a);
+  }
+  return out;
+}
+
 export function cleanDocument(text) {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body } = parseHeader(raw);
-  const lines = facetTables(cleanBlocks(cleanLines(cleanPages(body))));
+  const lines = facetTables(joinBrokenLines(dropSideTabs(cleanBlocks(cleanLines(cleanPages(body))))));
   return { meta, lines };
 }
 

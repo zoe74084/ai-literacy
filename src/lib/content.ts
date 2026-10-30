@@ -90,7 +90,20 @@ export function keyPoints(body: string): string[] | null {
 		out.push(t);
 		if (out.length >= 14) break;
 	}
-	return out.length ? out : null;
+	return out.length ? out.flatMap(splitNumbered) : null;
+}
+
+/**
+ * 「學習目標 1. 甲 2. 乙 3. 丙」擠在同一行時拆成清單；
+ * 句中的列舉（「1.AI 倫理、2. AI 基礎……」）不拆。
+ */
+function splitNumbered(line: string): string[] {
+	const t = line.replace(/\*\*/g, '');
+	if ((t.match(/(^|\s)\d+\.\s/g) ?? []).length < 2 || /、\s*\d+\.\s/.test(t)) return [line];
+	const bold = /^\*\*.*\*\*$/.test(line.trim());
+	const parts = t.split(/\s+(?=\d+\.\s)/).map((p) => p.trim()).filter(Boolean);
+	const head = /^\d+\.\s/.test(parts[0]) ? [] : [bold ? `**${parts.shift()}**` : parts.shift()!];
+	return [...head, parts.join('\n')];
 }
 
 /** 解析 Markdown 表格（第一列為表頭） */
@@ -185,7 +198,8 @@ export function handbookChapter(slug: string, title: string): HandbookChapter {
 		const level = m[1].length;
 		const skip = /我學到了嗎|我學會了|學習檢核|挑戰任務|下一章預告|本章重點|本章核心|最重要的一句話|提示詞|小叮嚀|隨堂練習/.test(text);
 		const t = stripEmoji(plain(text));
-		if ((level === 2 || level === 3) && !skip && t && [...t].length <= 40) byLevel[level].push({ text: t, slug: s });
+		// 只有角色名字（吱吱、可可）的小標不算章節內容
+		if ((level === 2 || level === 3) && !skip && t && [...t].length > 2 && [...t].length <= 40) byLevel[level].push({ text: t, slug: s });
 	}
 	const sections = (byLevel[2].length >= 3 ? byLevel[2] : [...byLevel[2], ...byLevel[3]]).slice(0, 12);
 
