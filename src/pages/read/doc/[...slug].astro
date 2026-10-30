@@ -412,7 +412,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	}
 	@media (max-width: 56rem) {
 		.doc-layout {
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr);
 		}
 		.doc-aside {
 			align-self: start;
@@ -420,7 +420,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		.doc-aside-inner {
 			position: static;
 			max-height: none;
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr);
 		}
 		.aside-tate {
 			display: none;
@@ -508,6 +508,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 	}
 	.prose :global(table) {
 		display: block;
+		width: max-content;
 		max-width: 100%;
 		overflow-x: auto;
 		border-collapse: collapse;
@@ -524,6 +525,36 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		vertical-align: top;
 		min-width: 5em;
 		text-align: left;
+	}
+	.prose :global(.table-scroll) {
+		max-width: 100%;
+		overflow-x: auto;
+		margin: 1.5em 0;
+		border: 1px solid var(--line);
+		border-radius: 0.75rem;
+	}
+	.prose :global(.facet-table) {
+		display: table;
+		width: 100%;
+		min-width: 36rem;
+		margin: 0;
+		border: 0;
+		border-radius: 0;
+		border-style: hidden;
+	}
+	.prose :global(.facet-table td:nth-last-child(3)) {
+		white-space: nowrap;
+	}
+	.prose :global(.facet-table th[scope='rowgroup']) {
+		vertical-align: middle;
+		min-width: 6em;
+		font-family: var(--kai);
+		font-size: 1.05em;
+		background: var(--paper-tint);
+		color: var(--cover);
+	}
+	.prose :global(.facet-table tr.facet-start > *) {
+		border-top: 2px solid var(--grid-strong);
 	}
 	.prose :global(thead th) {
 		background: var(--paper-tint);

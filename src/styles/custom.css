@@ -55,6 +55,7 @@
 }
 .sl-markdown-content table {
 	display: block;
+	width: max-content;
 	max-width: 100%;
 	overflow-x: auto;
 	font-size: var(--sl-text-sm);
@@ -116,4 +117,31 @@ h1#_top,
 }
 .sl-markdown-content .sl-heading-wrapper:has(h2) {
 	margin-top: 2.2em;
+}
+
+/* 框架表格（convert.mjs 產生的 HTML 表格，面向合併儲存格） */
+.table-scroll {
+	max-width: 100%;
+	overflow-x: auto;
+	margin: 1.5em 0;
+}
+.table-scroll .facet-table {
+	display: table;
+	width: 100%;
+	min-width: 36rem;
+	margin: 0;
+}
+.sl-markdown-content .facet-table :is(th, td) {
+	padding: 0.5rem 0.75rem;
+}
+.facet-table th[scope='rowgroup'] {
+	vertical-align: middle;
+	min-width: 6em;
+	font-weight: 700;
+}
+.facet-table td:nth-last-child(3) {
+	white-space: nowrap;
+}
+.facet-table tr.facet-start > * {
+	border-top-width: 2px;
 }
