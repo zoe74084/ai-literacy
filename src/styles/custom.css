@@ -145,3 +145,14 @@ h1#_top,
 .facet-table tr.facet-start > * {
 	border-top-width: 2px;
 }
+
+/* 桌面版左側目錄收合（按鈕在 SiteTitle.astro） */
+@media (min-width: 50em) {
+	html[data-sidebar-collapsed] {
+		--sl-sidebar-width: 0px;
+		--sl-content-inline-start: 0px;
+	}
+	html[data-sidebar-collapsed] .sidebar-pane {
+		display: none;
+	}
+}

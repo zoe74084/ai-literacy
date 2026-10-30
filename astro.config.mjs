@@ -52,6 +52,7 @@ export default defineConfig({
 			components: {
 				Footer: './src/components/Footer.astro',
 				PageTitle: './src/components/PageTitle.astro',
+				SiteTitle: './src/components/SiteTitle.astro',
 			},
 			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
 			lastUpdated: false,
