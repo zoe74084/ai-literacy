@@ -181,12 +181,20 @@ const anchor = (heading: string) => {
 		color: var(--sl-color-white);
 	}
 	.fw-cell ul {
-		margin: 0 0.75rem 0.5rem 0;
+		margin: 0.15rem 0.75rem 0.6rem 0 !important;
 		padding-inline-start: 1.75rem;
 		font-size: var(--sl-text-sm);
 	}
+	.fw-cell li {
+		margin: 0.15rem 0 0 !important;
+		line-height: 1.6;
+	}
+	.fw-cell[open] summary {
+		margin-bottom: 0 !important;
+	}
 	.fw-more {
 		display: block;
+		margin-top: 0 !important;
 		padding: 0 0.75rem 0.6rem;
 		font-size: var(--sl-text-xs);
 	}
