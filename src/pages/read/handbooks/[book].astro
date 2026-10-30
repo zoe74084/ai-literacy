@@ -1,0 +1,681 @@
+---
+// 學習應用手冊的互動版：每章是路線上的一站，章末「我學會了嗎」可以逐項勾選
+// 「做到了／再練習」，進度記在這台裝置的瀏覽器裡。文字都取自手冊原文。
+import Site from '../../../layouts/Site.astro';
+import ReadMeta from '../../../components/read/ReadMeta.astro';
+import Icon from '../../../components/Icon.astro';
+import { byGroup, handbookChapter } from '../../../lib/content';
+
+export function getStaticPaths() {
+	return [
+		{ params: { book: 'elementary' }, props: { stage: '國小', idx: 0 } },
+		{ params: { book: 'junior' }, props: { stage: '國中', idx: 1 } },
+		{ params: { book: 'senior' }, props: { stage: '高中', idx: 2 } },
+	];
+}
+
+const { book } = Astro.params;
+const { stage, idx } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const books = byGroup('handbooks');
+const doc = books[idx];
+const STAGES = ['國小', '國中', '高中'];
+
+// 第一章是封面與序言、最後一章是研發團隊名單，不放進路線
+const chapters = (doc.chapters ?? [])
+	.filter((c, i) => i > 0 && !/^教育部中小學AI之學習應用手冊/.test(c.title))
+	.map((c) => handbookChapter(c.slug, c.title));
+const totalChecks = chapters.reduce((n, c) => n + c.checks.length, 0);
+const colors = { elementary: 'var(--c-teacher)', junior: 'var(--c-student)', senior: 'var(--c-admin)' } as const;
+---
+
+<Site title={`${doc.title}：學習應用手冊`} description={`115 年中小學 AI 之學習應用手冊（${stage}）的互動版：每章重點、我學會了嗎、挑戰任務。`} current="read">
+	<section class="page-hero wrap hb-hero" style={`--book:${colors[book as keyof typeof colors]}`}>
+		<nav class="book-switch" aria-label="選擇手冊">
+			{
+				books.map((b, i) => (
+					<a href={`${base}/read/handbooks/${['elementary', 'junior', 'senior'][i]}/`} aria-current={i === idx ? 'page' : undefined}>
+						{STAGES[i]}
+					</a>
+				))
+			}
+		</nav>
+		<div class="cover">
+			<span class="cover-stage">{stage}</span>
+			<div>
+				<h1>{doc.title}</h1>
+				<p class="lead">
+					115 年中小學 AI 之學習應用手冊。沿著路線一章一章讀，讀完在「我學會了嗎」逐項勾選；勾選紀錄只存在這台裝置的瀏覽器。
+				</p>
+			</div>
+		</div>
+		<ReadMeta file={doc.file} full={`${doc.slug}/`} />
+	</section>
+
+	<section class="band band--grid journey-band" data-hb={book} data-total={totalChecks} style={`--book:${colors[book as keyof typeof colors]}`}>
+		<div class="wrap">
+			<div class="progress-line" aria-live="polite">
+				<span>已做到 <b data-done>0</b> / {totalChecks} 項</span>
+				<span class="bar" aria-hidden="true"><span data-bar></span></span>
+				<button type="button" class="reset" data-reset>清除紀錄</button>
+			</div>
+
+			<ol class="route" role="tablist" aria-label="章節">
+				{
+					chapters.map((c, i) => (
+						<li role="presentation">
+							<a
+								role="tab"
+								href={`#ch-${i + 1}`}
+								id={`tab-${i + 1}`}
+								aria-controls={`ch-${i + 1}`}
+								aria-selected={i === 0 ? 'true' : 'false'}
+								data-tab={i + 1}
+							>
+								<span class="stop" data-stop={i + 1}>
+									{i + 1}
+								</span>
+								<span class="stop-title">{c.title}</span>
+							</a>
+						</li>
+					))
+				}
+			</ol>
+
+			{
+				chapters.map((c, i) => (
+					<article class="chapter" id={`ch-${i + 1}`} role="tabpanel" aria-labelledby={`tab-${i + 1}`} data-panel={i + 1}>
+						<div class="ch-main">
+							<p class="ch-no">第 {i + 1} 站／共 {chapters.length} 站</p>
+							<h2>{c.title}</h2>
+							{c.sections.length > 0 && (
+								<>
+									<h3 class="sub">這一章在講</h3>
+									<ul class="sections">
+										{c.sections.map((s) => (
+											<li>
+												<a href={`${base}/read/doc/${c.slug}/#${s.slug}`}>{s.text}</a>
+											</li>
+										))}
+									</ul>
+								</>
+							)}
+							<a class="btn btn--solid" href={`${base}/read/doc/${c.slug}/`}>
+								<Icon name="book" />
+								讀這一章全文
+							</a>
+						</div>
+
+						<div class="ch-side">
+							{c.checks.length > 0 && (
+								<section class="checks" aria-label="我學會了嗎">
+									<h3>我學會了嗎？</h3>
+									{c.checkPrompt && <p class="check-prompt">{c.checkPrompt}</p>}
+									<ol>
+										{c.checks.map((k) => (
+											<li data-check={k.id}>
+												<p class="check-text">{k.text}</p>
+												{k.subs.length > 0 && (
+													<ul class="check-subs">
+														{k.subs.map((s) => (
+															<li>{s}</li>
+														))}
+													</ul>
+												)}
+												<div class="check-btns" role="group" aria-label={`第 ${k.id.split('#')[1]} 項`}>
+													<button type="button" data-v="done" aria-pressed="false">
+														<Icon name="check" />
+														做到了
+													</button>
+													<button type="button" data-v="again" aria-pressed="false">
+														再練習
+													</button>
+												</div>
+											</li>
+										))}
+									</ol>
+								</section>
+							)}
+
+							{c.quote && (
+								<blockquote class="quote">
+									<p>{c.quote}</p>
+									<cite>本章最重要的一句話</cite>
+								</blockquote>
+							)}
+
+							{c.recap.length > 0 && (
+								<section class="recap">
+									<h3>本章重點</h3>
+									<ol>
+										{c.recap.map((r) => (
+											<li>{r}</li>
+										))}
+									</ol>
+								</section>
+							)}
+
+							{c.challenges.map((ch) => (
+								<details class="challenge">
+									<summary>{ch.title}</summary>
+									<div class="challenge-body" set:html={ch.html} />
+								</details>
+							))}
+						</div>
+
+						<nav class="ch-pager" aria-label="上一站、下一站">
+							{i > 0 ? (
+								<a href={`#ch-${i}`} data-go={i}>
+									上一站：{chapters[i - 1].title}
+								</a>
+							) : (
+								<span />
+							)}
+							{i < chapters.length - 1 && (
+								<a class="next" href={`#ch-${i + 2}`} data-go={i + 2}>
+									下一站：{chapters[i + 1].title}
+								</a>
+							)}
+						</nav>
+					</article>
+				))
+			}
+		</div>
+	</section>
+</Site>
+
+<script>
+	const root = document.querySelector<HTMLElement>('[data-hb]')!;
+	const key = `ai-literacy:handbook:${root.dataset.hb}`;
+	let state: Record<string, 'done' | 'again'> = {};
+	try {
+		state = JSON.parse(localStorage.getItem(key) || '{}');
+	} catch {}
+	const save = () => {
+		try {
+			localStorage.setItem(key, JSON.stringify(state));
+		} catch {}
+	};
+
+	const tabs = [...root.querySelectorAll<HTMLAnchorElement>('[data-tab]')];
+	const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
+
+	// 一次只顯示一站（沒有 JS 時全部依序顯示）
+	const show = (n: number, focus = false) => {
+		n = Math.min(Math.max(1, n), panels.length);
+		tabs.forEach((t) => {
+			const on = Number(t.dataset.tab) === n;
+			t.setAttribute('aria-selected', String(on));
+			t.tabIndex = on ? 0 : -1;
+		});
+		panels.forEach((p) => (p.hidden = Number(p.dataset.panel) !== n));
+		if (location.hash !== `#ch-${n}`) history.replaceState(null, '', `#ch-${n}`);
+		tabs[n - 1].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+		if (focus) panels[n - 1].querySelector('h2')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+	};
+	tabs.forEach((t, i) => {
+		t.addEventListener('click', (e) => {
+			e.preventDefault();
+			show(i + 1);
+		});
+		t.addEventListener('keydown', (e) => {
+			const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+			if (!d) return;
+			e.preventDefault();
+			const n = Math.min(Math.max(1, i + 1 + d), tabs.length);
+			show(n);
+			tabs[n - 1].focus();
+		});
+	});
+	root.querySelectorAll<HTMLAnchorElement>('[data-go]').forEach((a) =>
+		a.addEventListener('click', (e) => {
+			e.preventDefault();
+			show(Number(a.dataset.go), true);
+		}),
+	);
+
+	// 我學會了嗎：做到了／再練習，再按一次取消
+	const render = () => {
+		let done = 0;
+		root.querySelectorAll<HTMLElement>('[data-check]').forEach((li) => {
+			const v = state[li.dataset.check!];
+			li.dataset.state = v ?? '';
+			li.querySelectorAll<HTMLButtonElement>('[data-v]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+			if (v === 'done') done++;
+		});
+		panels.forEach((p, i) => {
+			const items = [...p.querySelectorAll<HTMLElement>('[data-check]')];
+			const complete = items.length > 0 && items.every((li) => state[li.dataset.check!] === 'done');
+			const stop = root.querySelector<HTMLElement>(`[data-stop="${i + 1}"]`)!;
+			stop.classList.toggle('is-complete', complete);
+			stop.setAttribute('aria-label', complete ? `第 ${i + 1} 站，已完成` : `第 ${i + 1} 站`);
+		});
+		const total = Number(root.dataset.total) || 1;
+		root.querySelector('[data-done]')!.textContent = String(done);
+		root.querySelector<HTMLElement>('[data-bar]')!.style.transform = `scaleX(${done / total})`;
+	};
+	root.querySelectorAll<HTMLElement>('[data-check]').forEach((li) => {
+		li.querySelectorAll<HTMLButtonElement>('[data-v]').forEach((b) =>
+			b.addEventListener('click', () => {
+				const id = li.dataset.check!;
+				const v = b.dataset.v as 'done' | 'again';
+				if (state[id] === v) delete state[id];
+				else state[id] = v;
+				save();
+				render();
+			}),
+		);
+	});
+	root.querySelector('[data-reset]')!.addEventListener('click', () => {
+		if (!confirm('要清除這本手冊的勾選紀錄嗎？')) return;
+		state = {};
+		save();
+		render();
+	});
+
+	const m = location.hash.match(/^#ch-(\d+)$/);
+	show(m ? Number(m[1]) : 1);
+	render();
+</script>
+
+<style>
+	.book-switch {
+		display: inline-flex;
+		gap: 0.25rem;
+		padding: 0.25rem;
+		border-radius: var(--r-md);
+		background: var(--paper-deep);
+		margin-bottom: 1.75rem;
+	}
+	.book-switch a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.5rem;
+		padding: 0 1.1rem;
+		border-radius: 0.7rem;
+		text-decoration: none;
+		font-weight: 700;
+		color: var(--ink-2);
+	}
+	.book-switch a[aria-current='page'] {
+		background: var(--paper);
+		color: var(--ink);
+		box-shadow: var(--shadow-1);
+	}
+	.cover {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: clamp(1rem, 3vw, 2rem);
+		align-items: start;
+	}
+	/* 手冊書背：直書的學段 */
+	.cover-stage {
+		writing-mode: vertical-rl;
+		text-orientation: upright;
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: clamp(1.4rem, 3vw, 2rem);
+		letter-spacing: 0.2em;
+		padding: 1rem 0.55rem;
+		border-radius: 0.3rem;
+		background: var(--book);
+		color: var(--paper);
+	}
+
+	.journey-band {
+		--cell: 26px;
+		padding-top: 2.5rem;
+	}
+	.progress-line {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 1rem;
+		background: var(--paper);
+		border: 1px solid var(--line);
+		border-radius: var(--r-md);
+		padding: 0.6rem 1rem;
+		font-size: 0.92rem;
+		font-variant-numeric: tabular-nums;
+	}
+	.progress-line b {
+		font-size: 1.15rem;
+	}
+	.bar {
+		flex: 1;
+		min-width: 6rem;
+		height: 0.5rem;
+		border-radius: 999px;
+		background: var(--paper-deep);
+		overflow: hidden;
+	}
+	.bar span {
+		display: block;
+		height: 100%;
+		background: var(--book);
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.4s var(--ease-out);
+	}
+	.reset {
+		font: inherit;
+		font-size: 0.82rem;
+		border: 0;
+		background: none;
+		color: var(--ink-3);
+		text-decoration: underline;
+		cursor: pointer;
+		min-height: 2rem;
+	}
+
+	/* 路線：一站一站，中間以虛線相連 */
+	.route {
+		list-style: none;
+		margin: 1.5rem 0 0;
+		padding: 0.5rem 0 1rem;
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: minmax(7.5rem, 1fr);
+		gap: 0;
+		overflow-x: auto;
+		scroll-snap-type: x proximity;
+		scrollbar-width: thin;
+	}
+	.route li {
+		position: relative;
+		scroll-snap-align: center;
+	}
+	.route li + li::before {
+		content: '';
+		position: absolute;
+		top: 1.45rem;
+		left: -50%;
+		width: 100%;
+		border-top: 2px dashed var(--grid-strong);
+		z-index: 0;
+	}
+	.route a {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		justify-items: center;
+		gap: 0.4rem;
+		padding: 0 0.35rem;
+		text-decoration: none;
+		text-align: center;
+		color: var(--ink-2);
+	}
+	.stop {
+		display: grid;
+		place-items: center;
+		width: 2.9rem;
+		height: 2.9rem;
+		border: 2px solid var(--grid-strong);
+		background: var(--paper);
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.25rem;
+		color: var(--ink-2);
+		transition:
+			background-color 0.2s,
+			color 0.2s,
+			border-color 0.2s;
+	}
+	.stop.is-complete {
+		background: var(--book);
+		border-color: var(--book);
+		color: var(--paper);
+	}
+	.stop-title {
+		font-size: 0.82rem;
+		line-height: 1.45;
+		max-width: 9rem;
+	}
+	.route a[aria-selected='true'] .stop {
+		border-color: var(--ink);
+		box-shadow: 0 0 0 4px var(--paper), 0 0 0 6px var(--book);
+	}
+	.route a[aria-selected='true'] .stop-title {
+		color: var(--ink);
+		font-weight: 700;
+	}
+	.route a:hover .stop-title {
+		color: var(--ink);
+	}
+
+	/* 章節面板 */
+	.chapter {
+		display: grid;
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr);
+		gap: clamp(1.25rem, 4vw, 2.5rem);
+		margin-top: 1rem;
+		padding: clamp(1.25rem, 4vw, 2.5rem);
+		background: var(--paper);
+		border-radius: var(--r-lg);
+		box-shadow: var(--shadow-2);
+	}
+	.chapter + .chapter {
+		margin-top: 1.5rem;
+	}
+	.ch-no {
+		margin: 0 0 0.25rem;
+		font-size: 0.85rem;
+		color: var(--red-pen);
+		font-variant-numeric: tabular-nums;
+	}
+	.chapter h2 {
+		font-size: clamp(1.6rem, 3.6vw, 2.2rem);
+		margin-bottom: 1.25rem;
+	}
+	.sub {
+		font-family: var(--sans);
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		margin: 0 0 0.4rem;
+	}
+	.sections {
+		list-style: none;
+		margin: 0 0 1.5rem;
+		padding: 0;
+		border-top: 1px solid var(--line);
+	}
+	.sections a {
+		display: block;
+		padding: 0.55rem 0.1rem;
+		border-bottom: 1px solid var(--line);
+		text-decoration: none;
+		line-height: 1.55;
+	}
+	.sections a:hover {
+		color: var(--cover);
+		text-decoration: underline;
+	}
+	.ch-side {
+		display: grid;
+		gap: 1.25rem;
+		align-content: start;
+	}
+	.checks h3,
+	.recap h3 {
+		font-size: 1.4rem;
+		margin-bottom: 0.5rem;
+	}
+	.check-prompt {
+		color: var(--ink-2);
+		font-size: 0.92rem;
+	}
+	.checks ol {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 0.6rem;
+		counter-reset: chk;
+	}
+	.checks > ol > li {
+		counter-increment: chk;
+		padding: 0.85rem 1rem;
+		border: 1px solid var(--line);
+		border-radius: var(--r-md);
+		background: var(--paper);
+		transition:
+			background-color 0.2s,
+			border-color 0.2s;
+	}
+	.checks > ol > li[data-state='done'] {
+		background: var(--c-teacher-soft);
+		border-color: var(--c-teacher);
+	}
+	.checks > ol > li[data-state='again'] {
+		background: var(--c-parent-soft);
+		border-color: var(--c-parent);
+	}
+	.check-text {
+		margin: 0 0 0.6rem;
+		line-height: 1.7;
+	}
+	.check-text::before {
+		content: counter(chk) '. ';
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+	.check-subs {
+		margin: -0.3rem 0 0.6rem;
+		padding-left: 1.2rem;
+		font-size: 0.9rem;
+		color: var(--ink-2);
+	}
+	.check-btns {
+		display: flex;
+		gap: 0.4rem;
+	}
+	.check-btns button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		font: inherit;
+		font-size: 0.88rem;
+		font-weight: 700;
+		min-height: 2.5rem;
+		padding: 0 0.9rem;
+		border-radius: var(--r-sm);
+		border: 1px solid var(--line);
+		background: var(--paper);
+		color: var(--ink-2);
+		cursor: pointer;
+		touch-action: manipulation;
+		transition:
+			background-color 0.15s,
+			color 0.15s,
+			border-color 0.15s;
+	}
+	.check-btns button:hover {
+		border-color: var(--ink-3);
+	}
+	.check-btns [data-v='done'][aria-pressed='true'] {
+		background: var(--c-teacher);
+		border-color: var(--c-teacher);
+		color: var(--paper);
+	}
+	.check-btns [data-v='again'][aria-pressed='true'] {
+		background: var(--c-parent);
+		border-color: var(--c-parent);
+		color: var(--paper);
+	}
+	.quote {
+		margin: 0;
+		padding: 1.25rem 1.4rem;
+		background: var(--cover);
+		color: var(--cover-ink);
+		border-radius: var(--r-md);
+	}
+	.quote p {
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.3rem;
+		line-height: 1.6;
+		margin: 0 0 0.4rem;
+	}
+	.quote cite {
+		font-style: normal;
+		font-size: 0.82rem;
+		color: var(--cover-ink-2);
+	}
+	.recap ol {
+		margin: 0;
+		padding-left: 1.3rem;
+		display: grid;
+		gap: 0.35rem;
+	}
+	.recap li::marker {
+		color: var(--book);
+		font-weight: 700;
+	}
+	.challenge {
+		border: 1px solid var(--line);
+		border-radius: var(--r-md);
+		background: var(--paper-tint);
+	}
+	.challenge summary {
+		cursor: pointer;
+		list-style: none;
+		padding: 0.85rem 1rem;
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.15rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		min-height: 2.75rem;
+	}
+	.challenge summary::-webkit-details-marker {
+		display: none;
+	}
+	.challenge summary::after {
+		content: '展開';
+		font-family: var(--sans);
+		font-size: 0.8rem;
+		font-weight: 500;
+		color: var(--ink-3);
+	}
+	.challenge[open] summary::after {
+		content: '收合';
+	}
+	.challenge-body {
+		padding: 0 1rem 1rem;
+		font-size: 0.92rem;
+		overflow-x: auto;
+	}
+	.challenge-body :global(table) {
+		border-collapse: collapse;
+		font-size: 0.88rem;
+	}
+	.challenge-body :global(td),
+	.challenge-body :global(th) {
+		border: 1px solid var(--line);
+		padding: 0.4rem 0.6rem;
+		vertical-align: top;
+	}
+	.ch-pager {
+		grid-column: 1 / -1;
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--line);
+		font-size: 0.92rem;
+	}
+	.ch-pager a {
+		color: var(--blue-pen);
+	}
+	.ch-pager .next {
+		margin-left: auto;
+		text-align: right;
+	}
+	@media (max-width: 52rem) {
+		.chapter {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
