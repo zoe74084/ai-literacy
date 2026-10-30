@@ -189,6 +189,57 @@ function splitRow(line) {
 
 const SEP_CELL = /^:?-{3,}:?$/;
 
+// 表格儲存格裡 PDF 換行留下的 <br>：上一行是寫滿的一整行（10 字以上、沒有在句尾或冒號結束），
+// 下一行也不是新的項目（・、●、1.、(1)…），就接回同一行，讓文字隨欄寬重新排；
+// 頭尾多出來的 <br> 拿掉。短的條列（「因材網<br>酷英網」）保持分行。
+function reflowCell(c) {
+  const parts = c.split(/<br\s*\/?>/i);
+  if (parts.length < 2) return c;
+  while (parts.length && !parts[0].trim()) parts.shift();
+  while (parts.length && !parts[parts.length - 1].trim()) parts.pop();
+  const out = [];
+  for (const raw of parts) {
+    const p = raw.trim();
+    const prev = out[out.length - 1];
+    const bare = (x) => x.replace(/\*\*/g, '');
+    if (
+      prev !== undefined &&
+      [...bare(prev)].length >= 10 &&
+      !/[。！？；：:]$/.test(bare(prev)) &&
+      !(!/[\u3400-\u9fff]/.test(bare(prev)) && /[A-Za-z]$/.test(bare(prev)) && /^[\u3400-\u9fff]/.test(bare(p))) && // 「Sources<br>看來源」這類英中對照保持分行
+      !/^([・●○■□◆▪•※\-–—①-⑳❶-❿]|\d+[.、．)]|[（(]\d+[）)]|[一二三四五六七八九十]+、|[A-Za-z][.)]\s)/.test(bare(p)) &&
+      !/^[^，。、；：:\s]{1,6}[：:]/.test(bare(p)) && // 「做法：」「目的：」這類標籤開頭是新的一項
+      !(/^([①-⑳❶-❿]|\d+[.、．)]|[（(]\d+[）)])/.test(bare(prev)) && !/[，。、；：！？]/.test(bare(prev))) // 沒有標點的編號行是小標
+    ) {
+      // 英數字之間補空白（ISO<br>8601），但網址、程式識別字斷在中間的不補（xapi/att<br>empt_id）
+      const tail = bare(prev).split(/\s/).pop();
+      const head = bare(p).split(/\s/)[0];
+      const code = /[/._:"{=@#-]/.test(tail + head);
+      out[out.length - 1] = prev + (!code && /[A-Za-z0-9,]$/.test(tail) && /^[A-Za-z0-9]/.test(head) ? ' ' : '') + p;
+      bump('表格儲存格內的 PDF 換行接回');
+    } else out.push(p);
+  }
+  return out.join('<br>');
+}
+
+// 第一欄通常是名稱或項目，PDF 欄寬窄而斷成好幾行（「115年中小學校長<br>數位與 AI 學習領導<br>指引」）：
+// 前後都是中文、沒有標點、不是編號時接回
+function joinTitleCell(c) {
+  const parts = c.split(/<br\s*\/?>/i);
+  if (parts.length < 2) return c;
+  const out = [];
+  parts.forEach((p, i) => {
+    const prev = out[out.length - 1];
+    const a = i > 0 ? parts[i - 1].replace(/\*\*/g, '').trim() : '';
+    const b = p.replace(/\*\*/g, '').trim();
+    if (prev !== undefined && /[\u3400-\u9fff]$/.test(a) && /^[\u3400-\u9fff]/.test(b) && [...a].length <= 14 && [...b].length <= 14 && !/^([一二三四五六七八九十]+、|第.[節堂課])/.test(b)) {
+      out[out.length - 1] = prev + p;
+      bump('表格第一欄的名稱接回同一行');
+    } else out.push(p);
+  });
+  return out.join('<br>');
+}
+
 function fixTable(lines) {
   // 目錄表：多數列帶點線引導 → 整張刪除
   const dotRows = lines.filter((l) => DOT_LEADER.test(l)).length;
@@ -210,7 +261,7 @@ function fixTable(lines) {
   });
   if (padded) bump('補齊表格欄數', padded);
   rows = rows.map((r) =>
-    r.map((cell) => {
+    r.map((cell, ci) => {
       let c = cleanInline(cell);
       // 直排文字「面<br>向」→「面向」
       const parts = c.split(/<br\s*\/?>/i);
@@ -218,6 +269,8 @@ function fixTable(lines) {
         bump('合併表格直排文字');
         c = parts.map((p) => p.trim()).join('');
       }
+      c = reflowCell(c);
+      if (ci === 0) c = joinTitleCell(c);
       return c.replace(/\|/g, '\\|').replace(/\\\\\|/g, '\\|');
     }),
   );
