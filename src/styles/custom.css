@@ -148,9 +148,10 @@ h1#_top,
 
 /* 桌面版左側目錄收合（按鈕在 SiteTitle.astro） */
 @media (min-width: 50em) {
+	/* 收合後內文填滿畫面；--sl-sidebar-width 不歸零，右側「本頁目錄」仍用它算寬度 */
 	html[data-sidebar-collapsed] {
-		--sl-sidebar-width: 0px;
 		--sl-content-inline-start: 0px;
+		--sl-content-width: 100%;
 	}
 	html[data-sidebar-collapsed] .sidebar-pane {
 		display: none;
