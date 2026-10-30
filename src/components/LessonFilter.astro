@@ -1,0 +1,198 @@
+---
+// 教案示例列表：依學段、領域篩選（不需 JS 也會顯示完整列表）
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const lessons = (await getCollection('docs', (e) => Boolean(e.data.lesson)))
+	.map((e) => ({ id: e.id, title: e.data.title, ...e.data.lesson! }))
+	.sort((a, b) => a.stageOrder - b.stageOrder || a.number - b.number);
+
+const stages = ['國小', '國中', '普高', '技高'].filter((s) => lessons.some((l) => l.stage === s));
+// 依課綱領域順序排列，未列出的放最後
+const DOMAIN_ORDER = ['國語文', '英語文', '數學', '自然科學', '社會', '綜合活動', '科技', '彈性學習課程', '多媒體動畫科'];
+const rank = (d: string) => (DOMAIN_ORDER.indexOf(d) + 1 || 99);
+const domains = [...new Set(lessons.map((l) => l.domain))].sort((a, b) => rank(a) - rank(b));
+const count = (key: 'stage' | 'domain', v: string) => lessons.filter((l) => l[key] === v).length;
+---
+
+<div class="lesson-filter" data-pagefind-ignore>
+	<fieldset>
+		<legend>學段</legend>
+		<label><input type="radio" name="stage" value="" checked /> 全部（{lessons.length}）</label>
+		{
+			stages.map((s) => (
+				<label>
+					<input type="radio" name="stage" value={s} /> {s}（{count('stage', s)}）
+				</label>
+			))
+		}
+	</fieldset>
+	<fieldset>
+		<legend>領域</legend>
+		<label><input type="radio" name="domain" value="" checked /> 全部</label>
+		{
+			domains.map((d) => (
+				<label>
+					<input type="radio" name="domain" value={d} /> {d}（{count('domain', d)}）
+				</label>
+			))
+		}
+	</fieldset>
+	<p class="lesson-count" aria-live="polite">顯示 <strong>{lessons.length}</strong> 份教案</p>
+</div>
+
+<ul class="lesson-list">
+	{
+		lessons.map((l) => (
+			<li data-stage={l.stage} data-domain={l.domain}>
+				<a href={`${base}/${l.id}/`}>
+					<span class="lesson-tags">
+						<span class="tag tag-stage">{l.stage}</span>
+						<span class="tag">{l.domain}</span>
+					</span>
+					<span class="lesson-title">{l.title}</span>
+					<span class="lesson-author">設計者：{l.author}</span>
+				</a>
+			</li>
+		))
+	}
+</ul>
+<p class="lesson-empty" hidden>沒有符合條件的教案，請換個篩選條件。</p>
+
+<script>
+	const root = document.querySelector<HTMLElement>('.lesson-filter');
+	if (root) {
+		const items = [...document.querySelectorAll<HTMLLIElement>('.lesson-list li')];
+		const countEl = root.querySelector('.lesson-count strong')!;
+		const empty = document.querySelector<HTMLElement>('.lesson-empty')!;
+		const value = (name: string) =>
+			root.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value ?? '';
+		const apply = () => {
+			const stage = value('stage');
+			const domain = value('domain');
+			let shown = 0;
+			for (const li of items) {
+				const ok = (!stage || li.dataset.stage === stage) && (!domain || li.dataset.domain === domain);
+				li.hidden = !ok;
+				if (ok) shown++;
+			}
+			countEl.textContent = String(shown);
+			empty.hidden = shown > 0;
+			const params = new URLSearchParams();
+			if (stage) params.set('stage', stage);
+			if (domain) params.set('domain', domain);
+			const qs = params.toString();
+			history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+		};
+		// 支援 ?stage=國小&domain=數學 直接連結到篩選結果
+		const params = new URLSearchParams(location.search);
+		for (const name of ['stage', 'domain']) {
+			const v = params.get(name);
+			const input = v && root.querySelector<HTMLInputElement>(`input[name="${name}"][value="${CSS.escape(v)}"]`);
+			if (input) input.checked = true;
+		}
+		root.addEventListener('change', apply);
+		apply();
+	}
+</script>
+
+<style>
+	.lesson-filter fieldset {
+		border: 0;
+		padding: 0;
+		margin: 0 0 0.75rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		align-items: center;
+	}
+	.lesson-filter legend {
+		font-weight: 600;
+		margin-bottom: 0.35rem;
+		width: 100%;
+		float: left;
+	}
+	.lesson-filter label {
+		margin: 0;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.2rem 0.7rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 999px;
+		font-size: var(--sl-text-sm);
+		cursor: pointer;
+		user-select: none;
+	}
+	.lesson-filter label:has(input:checked) {
+		background: var(--sl-color-accent-low);
+		border-color: var(--sl-color-accent);
+		color: var(--sl-color-white);
+	}
+	.lesson-filter input {
+		position: absolute;
+		opacity: 0;
+		width: 1px;
+		height: 1px;
+	}
+	.lesson-filter label:has(input:focus-visible) {
+		outline: 2px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+	.lesson-count {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+	.lesson-list {
+		list-style: none;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+		gap: 0.75rem;
+	}
+	.lesson-list li {
+		margin: 0 !important;
+	}
+	.lesson-list li[hidden] {
+		display: none;
+	}
+	.lesson-list a {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		height: 100%;
+		padding: 0.8rem 1rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.6rem;
+		text-decoration: none;
+		color: var(--sl-color-gray-2);
+	}
+	.lesson-list a:hover {
+		border-color: var(--sl-color-accent);
+		background: var(--sl-color-gray-6);
+	}
+	.lesson-tags {
+		display: flex;
+		gap: 0.3rem;
+	}
+	.tag {
+		font-size: var(--sl-text-xs);
+		padding: 0 0.5rem;
+		border-radius: 999px;
+		background: var(--sl-color-gray-6);
+		color: var(--sl-color-gray-2);
+	}
+	.tag-stage {
+		background: var(--sl-color-accent-low);
+		color: var(--sl-color-accent-high);
+	}
+	.lesson-title {
+		font-weight: 600;
+		color: var(--sl-color-white);
+		line-height: 1.4;
+	}
+	.lesson-author {
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+</style>

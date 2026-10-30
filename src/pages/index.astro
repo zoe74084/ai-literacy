@@ -1,0 +1,915 @@
+---
+import Site from '../layouts/Site.astro';
+import Ring from '../components/Ring.astro';
+import Icon from '../components/Icon.astro';
+import { catalog, byGroup } from '../lib/content';
+import { MOE_CATEGORIES } from '../data/moe';
+import fw from '../data/framework.json';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const r = (p: string) => `${base}/read/${p}`;
+const l = (p: string) => `${base}/library/${p}`;
+
+// 標題寫進稿紙格子：一格一字，「AI」兩個半形字共用一格
+const row1 = ['AI', '素', '養', '，'];
+const row2 = ['從', '讀', '懂', '開', '始', '。'];
+
+const roles = [
+	{
+		key: 'teacher',
+		label: '教師',
+		lead: '備課時需要的：素養框架、課堂 AI 使用燈號、指引重點與 23 份教案。',
+		items: [
+			{ t: 'AI 素養框架：教師的四個面向', h: r('framework/'), k: '導讀' },
+			{ t: '課堂 AI 紅黃綠燈', h: r('traffic-light/'), k: '導讀' },
+			{ t: '教師指引每章的「重點先看」', h: r('guides/'), k: '導讀' },
+			{ t: '教案地圖', h: r('lessons/'), k: '導讀' },
+			{ t: '生成式 AI 注意事項（教師、行政人員及家長版）', h: r('notices/?v=adults'), k: '導讀' },
+			{ t: '115 年教師數位與 AI 教學指引', h: l('guides/teacher/'), k: '全文' },
+		],
+	},
+	{
+		key: 'student',
+		label: '學生',
+		lead: '先看看自己可以怎麼和 AI 一起學，再挑一本適合你的學習手冊。',
+		items: [
+			{ t: 'AI 素養框架：學生的四個面向', h: r('framework/?who=student'), k: '導讀' },
+			{ t: '生成式 AI 注意事項（學生版）', h: r('notices/'), k: '導讀' },
+			{ t: '國小生聰明用 AI', h: r('doc/handbooks/elementary/'), k: '手冊' },
+			{ t: '國中生靈活用 AI', h: r('doc/handbooks/junior/'), k: '手冊' },
+			{ t: '高中生智慧駕馭 AI', h: r('doc/handbooks/senior/'), k: '手冊' },
+		],
+	},
+	{
+		key: 'parent',
+		label: '家長',
+		lead: '陪孩子用 AI 之前，先了解學校怎麼教、家裡可以怎麼陪。',
+		items: [
+			{ t: '生成式 AI 注意事項（教師、行政人員及家長版）', h: r('notices/?v=adults'), k: '導讀' },
+			{ t: '家長數位與 AI 學習知能指引：各章一覽', h: r('guides/?g=parent'), k: '導讀' },
+			{ t: '家長陪伴公版簡報', h: r('doc/parents/briefing/'), k: '閱讀' },
+			{ t: '家長指引全文', h: l('guides/parent/'), k: '全文' },
+		],
+	},
+	{
+		key: 'admin',
+		label: '校長・行政',
+		lead: '學校層級的領導指引、年度實施計畫與教育大數據介接文件。',
+		items: [
+			{ t: '校長數位與 AI 學習領導指引：重點先看', h: r('guides/?g=principal'), k: '導讀' },
+			{ t: '115 年度中小學數位學習實施計畫說明', h: r('doc/admin/plan/'), k: '閱讀' },
+			{ t: '教育大數據介接申請規範、申請書、協議書', h: l('admin/bigdata/rules/'), k: '全文' },
+			{ t: '學習資料 xAPI 規格 v1.6', h: l('admin/bigdata/xapi/'), k: '全文' },
+		],
+	},
+];
+
+const contents = [
+	{ t: 'AI 素養框架', d: '教師與學生各四個面向、三個層級，點選切換。', h: r('framework/') },
+	{ t: '生成式 AI 注意事項', d: '學生版與大人版，一張卡片一個重點，背面是情境示例。', h: r('notices/') },
+	{ t: '課堂 AI 紅黃綠燈', d: '依學習目標決定 AI 使用程度，附班級公約示例。', h: r('traffic-light/') },
+	{ t: '指引重點先看', d: '教師、校長指引每章開頭的重點；家長指引各章一覽。', h: r('guides/') },
+	{ t: '教案地圖', d: '23 份課例排在學段與領域交錯的課表上。', h: r('lessons/') },
+	{ t: '書架', d: '47 份文件都能直接在網頁上閱讀。', h: r('') },
+];
+
+const shelf = [
+	{ code: '01', title: 'AI人才方舟計畫', groups: ['ark'], href: r('doc/ark/'), c: 'teacher' },
+	{ code: '02', title: 'AI素養框架', groups: ['framework'], href: r('framework/'), c: 'student' },
+	{ code: '03', title: '生成式AI注意事項', groups: ['notices'], href: r('notices/'), c: 'parent' },
+	{ code: '04', title: '數位與AI教學指引', groups: ['guides', 'history'], href: r('guides/'), c: 'admin' },
+	{ code: '04', title: '教案示例', groups: ['lessons-es', 'lessons-jh', 'lessons-sh', 'lessons-vs'], href: r('lessons/'), c: 'teacher' },
+	{ code: '05', title: '學習應用手冊', groups: ['handbooks'], href: r('#handbooks'), c: 'student' },
+	{ code: '06', title: '家長宣導', groups: ['parents'], href: r('doc/parents/briefing/'), c: 'parent' },
+	{ code: '07', title: '數位學習實施計畫', groups: ['admin-plan'], href: r('doc/admin/plan/'), c: 'admin' },
+	{ code: '08', title: '教育大數據', groups: ['admin-data'], href: l('admin/bigdata/xapi/'), c: 'teacher' },
+].map((s) => ({ ...s, count: catalog.filter((d) => s.groups.includes(d.group)).length, moe: MOE_CATEGORIES[s.code] }));
+
+const handbooks = byGroup('handbooks');
+const stages = ['國小', '國中', '高中'];
+---
+
+<Site title="AI 素養資源站" current="home">
+	<!-- ===== 主視覺：標題寫在稿紙上 ===== -->
+	<section class="hero band--grid">
+		<div class="wrap hero-inner">
+			<div class="hero-main">
+				<h1 class="manuscript" aria-label="AI 素養，從讀懂開始。">
+					<span class="ms-row" aria-hidden="true">
+						{row1.map((c, i) => <span class:list={['ms-cell write-in', { latin: c === 'AI', punct: c === '，' }]} style={`--i:${i}`}>{c}</span>)}
+					</span>
+					<span class="ms-row" aria-hidden="true">
+						<span class="ms-cell write-in" style="--i:4">{row2[0]}</span>
+						<Ring draw delay="1.05s"
+							><span class="ms-cell write-in" style="--i:5">{row2[1]}</span><span class="ms-cell write-in" style="--i:6">{row2[2]}</span></Ring
+						>
+						{row2.slice(3).map((c, i) => <span class:list={['ms-cell write-in', { punct: c === '。' }]} style={`--i:${7 + i}`}>{c}</span>)}
+					</span>
+				</h1>
+				<p class="hero-lead">
+					教育部的 AI 素養框架、教學指引、教案示例與學習手冊，整理成可以<strong>互動導讀</strong>、也能<strong>全文查詢</strong>的網頁。
+				</p>
+				<form class="hero-search" action={`${base}/search/`} method="get" role="search">
+					<label class="visually-hidden" for="hero-q">搜尋全站</label>
+					<Icon name="search" class="hero-search-icon" />
+					<input id="hero-q" name="q" type="search" placeholder="輸入關鍵字，例如：AI 倫理…" autocomplete="off" enterkeyhint="search" />
+					<button class="btn btn--solid" type="submit">搜尋</button>
+				</form>
+				<p class="hero-tags">
+					常查的詞：
+					{['AI 倫理', '生成式', '提示詞', '深偽', '因材網'].map((k) => <a href={`${base}/search/?q=${encodeURIComponent(k)}`}>{k}</a>)}
+				</p>
+			</div>
+			<p class="hero-note tate" aria-hidden="true">教育部數位學習推動辦公室　公開文件四十七份</p>
+		</div>
+	</section>
+
+	<!-- ===== 兩個入口：作業簿綠封面上的兩本冊子 ===== -->
+	<section class="band band--cover doors-band">
+		<div class="perforation" aria-hidden="true"></div>
+		<div class="wrap">
+			<h2 class="doors-title">想慢慢讀，還是直接查？</h2>
+			<div class="doors">
+				<a class="door door--read" href={`${base}/read/`}>
+					<span class="door-kanji" aria-hidden="true">讀</span>
+					<span class="door-body">
+						<span class="door-name"><Icon name="book" /> 導讀</span>
+						<span class="door-desc">把厚厚的文件換成可以點、切換、翻面的頁面。第一次接觸，或想先抓重點時從這裡開始。</span>
+						<span class="door-list">素養框架・注意事項卡片・紅黃綠燈・指引重點・教案地圖</span>
+						<span class="btn btn--solid">開始導讀</span>
+					</span>
+				</a>
+				<a class="door door--search" href={`${base}/library/`}>
+					<span class="door-kanji" aria-hidden="true">查</span>
+					<span class="door-body">
+						<span class="door-name"><Icon name="lens" /> 資料庫</span>
+						<span class="door-desc">47 份文件的完整內容，依章節分頁、可全文搜尋。要引用原文、找特定段落時用這裡。</span>
+						<span class="door-list">中文全文搜尋・依讀者分類・教案篩選・附原文出處</span>
+						<span class="btn btn--on-cover">進入資料庫</span>
+					</span>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===== 我是… ===== -->
+	<section class="band roles-band">
+		<div class="wrap roles-layout">
+			<div class="section-head">
+				<h2>我是……</h2>
+				<p>選一個身分，看看建議的閱讀順序。</p>
+			</div>
+			<div class="roles" data-roles>
+				<div class="role-tabs" role="tablist" aria-label="選擇身分">
+					{
+						roles.map((ro, i) => (
+							<button
+								role="tab"
+								type="button"
+								id={`tab-${ro.key}`}
+								aria-controls={`panel-${ro.key}`}
+								aria-selected={i === 0 ? 'true' : 'false'}
+								tabindex={i === 0 ? 0 : -1}
+								class={`role-tab role-tab--${ro.key}`}
+							>
+								{ro.label}
+							</button>
+						))
+					}
+				</div>
+				{
+					roles.map((ro, i) => (
+						<div class={`role-panel role-panel--${ro.key}`} role="tabpanel" id={`panel-${ro.key}`} aria-labelledby={`tab-${ro.key}`} hidden={i !== 0}>
+							<p class="role-lead">{ro.lead}</p>
+							<ol class="role-list">
+								{ro.items.map((it) => (
+									<li>
+										<a href={it.h}>
+											<span class="role-title">{it.t}</span>
+											<span class="leader" aria-hidden="true" />
+											<span class="role-kind">{it.k}</span>
+										</a>
+									</li>
+								))}
+							</ol>
+							<a class="role-all" href={`${base}/library/audience/${ro.key}/`}>
+								{ro.label}相關的完整清單
+							</a>
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- ===== 框架：直接放原文表格 ===== -->
+	<section class="band band--tint fw-band">
+		<div class="wrap fw-layout">
+			<div class="fw-text">
+				<h2>四個面向，三個層級</h2>
+				<p>
+					教育部《臺灣中小學教師與學生 AI 素養框架》以「以人為中心」為核心。每個面向都從「取得理解」走到「深化應用」，再到「創造轉型」；框架也提醒，各面向可以非同步發展，不需要每個人都到最高層級。
+				</p>
+				<a class="btn btn--solid" href={r('framework/')}>打開素養框架</a>
+			</div>
+			<figure class="fw-table">
+				<table>
+					<caption>教師 AI 素養框架：各層級的目標（原文表 1）</caption>
+					<thead>
+						<tr>
+							<th scope="col">面向</th>
+							{fw.levels.map((lv) => <th scope="col">{lv}</th>)}
+						</tr>
+					</thead>
+					<tbody>
+						{
+							fw.teacher.facets.map((f) => (
+								<tr>
+									<th scope="row">{f.name}</th>
+									{f.cells.map((c) => (
+										<td>{c.goal}</td>
+									))}
+								</tr>
+							))
+						}
+					</tbody>
+				</table>
+			</figure>
+		</div>
+	</section>
+
+	<!-- ===== 導讀目次 ===== -->
+	<section class="band contents-band">
+		<div class="wrap-narrow">
+			<div class="section-head">
+				<h2>導讀目次</h2>
+				<p>每一頁都是教育部原文，只是換了一種讀法。</p>
+			</div>
+			<ul class="contents">
+				{
+					contents.map((c) => (
+						<li>
+							<a href={c.h}>
+								<span class="ct-title">{c.t}</span>
+								<span class="leader" aria-hidden="true" />
+								<span class="ct-go">閱讀</span>
+								<span class="ct-desc">{c.d}</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+
+	<!-- ===== 書架 ===== -->
+	<section class="band band--tint shelf-band" id="shelf">
+		<div class="wrap">
+			<div class="section-head">
+				<h2>書架</h2>
+				<p>依教育部下載專區的分類排列。原始 PDF 不另外存放，每一冊下方的連結都通往教育部下載專區。</p>
+			</div>
+			<ul class="shelf">
+				{
+					shelf.map((s) => (
+						<li>
+							<a class={`spine spine--${s.c}`} href={s.href}>
+								<span class="spine-code">{s.code}</span>
+								<span class="spine-title tate">{s.title}</span>
+								<span class="spine-count">{s.count} 份</span>
+							</a>
+							<a class="spine-moe" href={s.moe.url} target="_blank" rel="noopener" aria-label={`${s.title}原文（教育部下載專區，另開新視窗）`}>
+								原文
+								<Icon name="external" class="ext" />
+							</a>
+						</li>
+					))
+				}
+			</ul>
+			<div class="handbooks" id="handbooks">
+				<h3>學習應用手冊</h3>
+				<div class="hb-row">
+					{
+						handbooks.map((h, i) => (
+							<a class="hb" href={r(`doc/${h.slug}/`)}>
+								<span class="hb-stage">{stages[i]}</span>
+								<span class="hb-title">{h.title}</span>
+								<span class="hb-meta">共 {h.chapters?.length ?? 1} 章</span>
+							</a>
+						))
+					}
+				</div>
+			</div>
+		</div>
+	</section>
+</Site>
+
+<script>
+	// 身分切換：左右方向鍵可移動（WAI-ARIA Tabs）
+	const root = document.querySelector('[data-roles]');
+	if (root) {
+		const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role=tab]')];
+		const select = (t: HTMLButtonElement) => {
+			for (const x of tabs) {
+				const on = x === t;
+				x.setAttribute('aria-selected', String(on));
+				x.tabIndex = on ? 0 : -1;
+				document.getElementById(x.getAttribute('aria-controls')!)!.hidden = !on;
+			}
+		};
+		tabs.forEach((t, i) => {
+			t.addEventListener('click', () => select(t));
+			t.addEventListener('keydown', (e) => {
+				const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+				if (!d) return;
+				const n = tabs[(i + d + tabs.length) % tabs.length];
+				n.focus();
+				select(n);
+			});
+		});
+	}
+</script>
+
+<style>
+	/* 主視覺 */
+	.hero {
+		--cell: clamp(22px, 2.6vw, 30px);
+		padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(3rem, 7vw, 5rem);
+	}
+	.hero-inner {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: clamp(1rem, 4vw, 3rem);
+		align-items: start;
+	}
+	.manuscript {
+		display: grid;
+		gap: 0;
+		width: max-content;
+		max-width: 100%;
+		font-weight: 700;
+		--size: clamp(3.1rem, 9.6vw, 6rem);
+		font-size: calc(var(--size) * 0.72);
+		line-height: 1;
+	}
+	.ms-row {
+		display: flex;
+		width: max-content;
+		background: var(--paper);
+		border: 2px solid var(--c-teacher);
+	}
+	.ms-row + .ms-row {
+		border-top: 0;
+		margin-left: calc(var(--size) * 1);
+	}
+	.ms-cell {
+		display: grid;
+		place-items: center;
+		width: var(--size);
+		height: var(--size);
+		border-right: 1px solid var(--grid-strong);
+		color: var(--ink);
+	}
+	.ms-row > :last-child {
+		border-right: 0;
+	}
+	.ms-cell.latin {
+		font-family: var(--sans);
+		font-weight: 700;
+		font-size: 0.78em;
+		letter-spacing: -0.02em;
+	}
+	.ms-cell.punct {
+		place-items: start start;
+		padding: 0.12em 0 0 0.18em;
+	}
+	.manuscript :global(.ring) {
+		display: flex;
+	}
+	.manuscript :global(.ring > svg) {
+		inset: -0.18em -0.3em;
+		width: calc(100% + 0.6em);
+		height: calc(100% + 0.36em);
+		z-index: 1;
+	}
+	.manuscript :global(.ring path) {
+		stroke-width: 2.6;
+	}
+	.hero-lead {
+		margin-top: 2rem;
+		font-size: clamp(1.02rem, 2vw, 1.2rem);
+		color: var(--ink-2);
+		max-width: 34rem;
+		background: var(--paper);
+		box-shadow: 0 0 0 0.4rem var(--paper);
+	}
+	.hero-lead strong {
+		color: var(--ink);
+	}
+	.hero-search {
+		position: relative;
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 1.5rem;
+		max-width: 34rem;
+		padding: 0.4rem;
+		background: var(--paper);
+		border: 1.5px solid var(--ink);
+		border-radius: var(--r-md);
+		box-shadow: var(--shadow-2);
+	}
+	.hero-search :global(.hero-search-icon) {
+		position: absolute;
+		left: 1rem;
+		top: 50%;
+		translate: 0 -50%;
+		font-size: 1.15rem;
+		color: var(--ink-3);
+	}
+	.hero-search input {
+		flex: 1;
+		min-width: 0;
+		font: inherit;
+		font-size: 1rem;
+		padding: 0.55rem 0.75rem 0.55rem 2.6rem;
+		border: 0;
+		background: transparent;
+		color: var(--ink);
+	}
+	.hero-search input:focus {
+		outline: none;
+	}
+	.hero-search:focus-within {
+		outline: 2.5px solid var(--blue-pen);
+		outline-offset: 3px;
+	}
+	.hero-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 0.9rem;
+		margin-top: 1rem;
+		font-size: 0.9rem;
+		color: var(--ink-3);
+		background: var(--paper);
+		width: fit-content;
+		box-shadow: 0 0 0 0.35rem var(--paper);
+	}
+	.hero-tags a {
+		color: var(--blue-pen);
+	}
+	.hero-note {
+		margin: 0;
+		font-family: var(--kai);
+		font-size: 1.05rem;
+		color: var(--ink-2);
+		background: var(--paper);
+		padding: 0.6rem 0.3rem;
+		border-right: 2px solid var(--red-pen);
+	}
+	@media (max-width: 44rem) {
+		.hero-inner {
+			grid-template-columns: 1fr;
+		}
+		.hero-note {
+			display: none;
+		}
+		.manuscript {
+			--size: clamp(2.75rem, 14vw, 4rem);
+		}
+		.ms-row + .ms-row {
+			margin-left: 0;
+		}
+	}
+
+	/* 兩個入口 */
+	.doors-band {
+		padding-top: 0;
+	}
+	.doors-band .wrap {
+		padding-top: clamp(3rem, 7vw, 5rem);
+	}
+	.doors-title {
+		font-size: clamp(1.7rem, 4vw, 2.5rem);
+		color: var(--cover-ink);
+		margin-bottom: 2rem;
+	}
+	.doors {
+		display: grid;
+		grid-template-columns: 1.15fr 1fr;
+		gap: clamp(1rem, 3vw, 1.75rem);
+	}
+	.door {
+		position: relative;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: clamp(1rem, 3vw, 2rem);
+		padding: clamp(1.4rem, 3.5vw, 2.4rem);
+		border-radius: var(--r-lg);
+		text-decoration: none;
+		transition:
+			transform 0.25s var(--ease-out),
+			box-shadow 0.25s var(--ease-out);
+	}
+	.door:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.45);
+	}
+	.door--read {
+		background: var(--grid-bg), var(--paper);
+		color: var(--ink);
+	}
+	.door--search {
+		background: var(--cover-2);
+		color: var(--cover-ink);
+		border: 1px solid rgba(242, 247, 242, 0.18);
+	}
+	.door-kanji {
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: clamp(4.5rem, 10vw, 7.5rem);
+		line-height: 1;
+		display: grid;
+		place-items: center;
+		width: 1.25em;
+		height: 1.25em;
+		border: 2px solid currentColor;
+		border-radius: 0.12em;
+		background: inherit;
+	}
+	.door--read .door-kanji {
+		color: var(--cover);
+		background: var(--paper);
+	}
+	.door--search .door-kanji {
+		color: var(--chalk);
+		border-color: var(--chalk);
+	}
+	.door-body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		align-items: flex-start;
+	}
+	.door-name {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: clamp(1.5rem, 3vw, 1.9rem);
+	}
+	.door-desc {
+		max-width: 26rem;
+	}
+	.door--read .door-desc {
+		background: var(--paper);
+	}
+	.door-list {
+		font-size: 0.85rem;
+		opacity: 0.85;
+		margin-bottom: 0.5rem;
+	}
+	.door .btn {
+		margin-top: auto;
+	}
+	@media (max-width: 52rem) {
+		.doors {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 30rem) {
+		.door {
+			grid-template-columns: 1fr;
+		}
+		.door-kanji {
+			font-size: 3.5rem;
+		}
+	}
+
+	/* 我是… */
+	.roles-layout {
+		display: grid;
+		grid-template-columns: 15rem minmax(0, 1fr);
+		gap: clamp(1.5rem, 4vw, 3rem);
+		align-items: start;
+	}
+	.role-tabs {
+		display: flex;
+		gap: 0.35rem;
+		padding-left: 0.75rem;
+	}
+	.role-tab {
+		font: inherit;
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.12rem;
+		min-height: 2.9rem;
+		padding: 0.45rem 1.2rem;
+		border: 1px solid var(--line);
+		border-bottom: 0;
+		border-radius: var(--r-sm) var(--r-sm) 0 0;
+		background: var(--paper-tint);
+		color: var(--ink-2);
+		cursor: pointer;
+		position: relative;
+		top: 1px;
+		touch-action: manipulation;
+	}
+	.role-tab[aria-selected='true'] {
+		background: var(--paper);
+		color: var(--ink);
+		box-shadow: inset 0 3px 0 var(--tab);
+	}
+	.role-tab--teacher { --tab: var(--c-teacher); }
+	.role-tab--student { --tab: var(--c-student); }
+	.role-tab--parent { --tab: var(--c-parent); }
+	.role-tab--admin { --tab: var(--c-admin); }
+	.role-panel {
+		border: 1px solid var(--line);
+		border-radius: var(--r-md);
+		background: var(--paper);
+		padding: clamp(1.25rem, 3.5vw, 2rem);
+		box-shadow: var(--shadow-1);
+	}
+	.role-lead {
+		font-family: var(--kai);
+		font-size: clamp(1.1rem, 2.2vw, 1.3rem);
+		font-weight: 700;
+		margin-bottom: 1rem;
+	}
+	.role-list {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 1.25rem;
+	}
+	.role-list a,
+	.contents a {
+		display: grid;
+		grid-template-columns: auto 1fr auto;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding: 0.7rem 0.25rem;
+		text-decoration: none;
+		border-bottom: 1px solid var(--line);
+	}
+	.role-list a:hover .role-title,
+	.contents a:hover .ct-title {
+		color: var(--cover);
+		text-decoration: underline;
+		text-underline-offset: 0.25em;
+	}
+	.leader {
+		border-bottom: 2px dotted var(--grid-strong);
+		min-width: 1.5rem;
+		translate: 0 -0.3em;
+	}
+	.role-title {
+		font-weight: 500;
+	}
+	.role-kind {
+		font-size: 0.82rem;
+		color: var(--ink-3);
+	}
+	.role-all {
+		font-size: 0.92rem;
+		color: var(--blue-pen);
+	}
+	@media (max-width: 52rem) {
+		.roles-layout {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 34rem) {
+		.role-tabs {
+			padding-left: 0;
+			overflow-x: auto;
+		}
+		.role-tab {
+			flex: none;
+			padding-inline: 0.85rem;
+		}
+		.role-list a {
+			grid-template-columns: 1fr auto;
+		}
+		.role-list .leader {
+			display: none;
+		}
+	}
+
+	/* 框架 */
+	.fw-layout {
+		display: grid;
+		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+		gap: clamp(1.5rem, 5vw, 4rem);
+		align-items: center;
+	}
+	.fw-text h2 {
+		font-size: clamp(1.8rem, 4.2vw, 2.7rem);
+		margin-bottom: 1rem;
+	}
+	.fw-text p {
+		color: var(--ink-2);
+		margin-bottom: 1.5rem;
+	}
+	.fw-table {
+		margin: 0;
+		overflow-x: auto;
+		background: var(--paper);
+		border-radius: var(--r-md);
+		box-shadow: var(--shadow-2);
+	}
+	.fw-table table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.92rem;
+		min-width: 30rem;
+	}
+	.fw-table caption {
+		caption-side: bottom;
+		text-align: left;
+		font-size: 0.8rem;
+		color: var(--ink-3);
+		padding: 0.6rem 1rem 0.8rem;
+	}
+	.fw-table th,
+	.fw-table td {
+		padding: 0.75rem 0.9rem;
+		border-bottom: 1px solid var(--line);
+		text-align: left;
+		vertical-align: top;
+		line-height: 1.55;
+	}
+	.fw-table thead th {
+		white-space: nowrap;
+		font-family: var(--kai);
+		font-size: 1.02rem;
+		background: var(--cover);
+		color: var(--cover-ink);
+	}
+	.fw-table thead th:first-child {
+		border-top-left-radius: var(--r-md);
+	}
+	.fw-table thead th:last-child {
+		border-top-right-radius: var(--r-md);
+	}
+	.fw-table tbody th {
+		font-family: var(--kai);
+		white-space: nowrap;
+		color: var(--cover);
+	}
+	@media (max-width: 52rem) {
+		.fw-layout {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	/* 導讀目次 */
+	.contents {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		border-top: 2px solid var(--ink);
+	}
+	.contents a {
+		grid-template-areas: 'title leader go' 'desc desc desc';
+		row-gap: 0.15rem;
+		padding-block: 1rem;
+	}
+	.ct-title {
+		grid-area: title;
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: clamp(1.2rem, 2.6vw, 1.45rem);
+	}
+	.contents .leader {
+		grid-area: leader;
+	}
+	.ct-go {
+		grid-area: go;
+		font-size: 0.88rem;
+		color: var(--cover);
+		font-weight: 700;
+	}
+	.ct-desc {
+		grid-area: desc;
+		color: var(--ink-2);
+		font-size: 0.92rem;
+	}
+
+	/* 書架 */
+	.shelf {
+		list-style: none;
+		padding: 0 0.5rem;
+		margin: 0 0 3rem;
+		display: flex;
+		gap: 0.45rem;
+		align-items: flex-end;
+		overflow-x: auto;
+		border-bottom: 10px solid var(--cover);
+		scrollbar-width: thin;
+	}
+	.shelf li {
+		flex: none;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.35rem;
+		padding-top: 1rem;
+	}
+	.spine {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.6rem;
+		width: 4.3rem;
+		padding: 0.8rem 0.3rem;
+		border-radius: 0.3rem 0.3rem 0 0;
+		text-decoration: none;
+		color: var(--cover-ink);
+		background: var(--spine);
+		box-shadow:
+			inset -6px 0 0 rgba(0, 0, 0, 0.12),
+			inset 6px 0 0 rgba(255, 255, 255, 0.08);
+		transition: translate 0.25s var(--ease-out);
+	}
+	.spine:hover {
+		translate: 0 -10px;
+	}
+	.spine--teacher { --spine: var(--c-teacher); }
+	.spine--student { --spine: var(--c-student); }
+	.spine--parent { --spine: var(--c-parent); }
+	.spine--admin { --spine: var(--c-admin); }
+	.shelf li:nth-child(odd) .spine { min-height: 16.5rem; }
+	.shelf li:nth-child(even) .spine { min-height: 15rem; }
+	.shelf li:nth-child(3n) .spine { min-height: 17.5rem; }
+	.spine-code {
+		font-size: 0.8rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		padding: 0 0.3rem;
+		background: rgba(255, 255, 255, 0.92);
+		color: var(--ink);
+		border-radius: 2px;
+	}
+	.spine-title {
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.1rem;
+	}
+	.spine-count {
+		font-size: 0.75rem;
+		opacity: 0.9;
+	}
+	.spine-moe {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.2rem;
+		font-size: 0.78rem;
+		color: var(--blue-pen);
+		min-height: 1.5rem;
+	}
+	.handbooks h3 {
+		font-size: 1.3rem;
+		margin-bottom: 1rem;
+	}
+	.hb-row {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1rem;
+	}
+	.hb {
+		display: grid;
+		gap: 0.25rem;
+		padding: 1.2rem 1.3rem 1.2rem 1.6rem;
+		border-radius: 0.3rem var(--r-md) var(--r-md) 0.3rem;
+		background: var(--c-student-soft);
+		color: var(--c-student-ink);
+		text-decoration: none;
+		box-shadow: inset 0.5rem 0 0 var(--c-student);
+		transition: box-shadow 0.2s;
+	}
+	.hb:hover {
+		box-shadow:
+			inset 0.5rem 0 0 var(--c-student),
+			var(--shadow-1);
+	}
+	.hb-stage {
+		font-size: 0.85rem;
+		font-weight: 700;
+	}
+	.hb-title {
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.3rem;
+		color: var(--ink);
+	}
+	.hb-meta {
+		font-size: 0.82rem;
+	}
+	@media (max-width: 40rem) {
+		.hb-row {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

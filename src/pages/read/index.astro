@@ -1,0 +1,313 @@
+---
+import Site from '../../layouts/Site.astro';
+import Icon from '../../components/Icon.astro';
+import { catalog } from '../../lib/content';
+import { AUDIENCE_LABELS } from '../../data/audiences';
+import { moeFor } from '../../data/moe';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const r = (p: string) => `${base}/read/${p}`;
+
+// 互動導讀：像課本的目次頁，左邊是主題、右邊是讀者
+const features = [
+	{ t: 'AI 素養框架', d: '切換教師／學生，沿著三個層級看每個面向的目標與內涵。', h: r('framework/'), aud: ['teacher', 'student', 'admin'] },
+	{ t: '生成式 AI 注意事項', d: '學生版、大人版，一張卡片一個重點；翻到背面是原文附錄的情境示例。', h: r('notices/'), aud: ['student', 'teacher', 'parent', 'admin'] },
+	{ t: '課堂 AI 紅黃綠燈', d: '依學習目標決定 AI 使用程度，點燈號看規範與班級公約示例。', h: r('traffic-light/'), aud: ['teacher'] },
+	{ t: '指引重點先看', d: '教師、校長指引每章開頭的重點；家長指引各章一覽。', h: r('guides/'), aud: ['teacher', 'parent', 'admin'] },
+	{ t: '教案地圖', d: '23 份課例排在學段與領域交錯的課表上。', h: r('lessons/'), aud: ['teacher'] },
+];
+
+const SHELVES = [
+	{ id: 'framework', title: 'AI 素養框架', groups: ['framework'] },
+	{ id: 'notices', title: '使用生成式 AI 注意事項', groups: ['notices'] },
+	{ id: 'guides', title: '數位與 AI 教學指引（115 年）', groups: ['guides'] },
+	{ id: 'handbooks', title: 'AI 學習應用手冊', groups: ['handbooks'] },
+	{ id: 'lessons', title: '教案示例', groups: ['lessons-es', 'lessons-jh', 'lessons-sh', 'lessons-vs'] },
+	{ id: 'parents', title: '家長宣導', groups: ['parents'] },
+	{ id: 'admin', title: '行政：實施計畫與教育大數據', groups: ['admin-plan', 'admin-data'] },
+	{ id: 'ark', title: 'AI 人才方舟計畫', groups: ['ark'] },
+	{ id: 'history', title: '歷史版本（114 年指引）', groups: ['history'] },
+].map((s) => ({
+	...s,
+	docs: catalog
+		.filter((d) => s.groups.includes(d.group))
+		.sort((a, b) => (a.lesson && b.lesson ? a.lesson.stageOrder - b.lesson.stageOrder || a.lesson.number - b.lesson.number : a.order - b.order)),
+}));
+---
+
+<Site title="導讀" description="AI 素養相關文件的互動導讀與閱讀版。" current="read">
+	<section class="page-hero wrap">
+		<h1>導讀</h1>
+		<p class="lead">先從五個互動頁面開始，或在下方書架挑一份文件直接閱讀。內容都是教育部原文，只是換了排版與讀法；原始 PDF 一律連回教育部下載。</p>
+	</section>
+
+	<section class="band band--grid toc-band">
+		<div class="wrap-narrow">
+			<div class="toc-sheet">
+				<h2 class="toc-title">目次</h2>
+				<ol class="toc">
+					{
+						features.map((f) => (
+							<li>
+								<a href={f.h}>
+									<span class="toc-name">{f.t}</span>
+									<span class="leader" aria-hidden="true" />
+									<span class="toc-aud">
+										{f.aud.map((a) => (
+											<span class={`dot dot--${a}`} title={AUDIENCE_LABELS[a]}>
+												<span class="visually-hidden">{AUDIENCE_LABELS[a]}</span>
+											</span>
+										))}
+									</span>
+									<span class="toc-desc">{f.d}</span>
+								</a>
+							</li>
+						))
+					}
+				</ol>
+				<p class="toc-legend" aria-hidden="true">
+					{Object.entries(AUDIENCE_LABELS).map(([k, v]) => <span><span class={`dot dot--${k}`} />{v}</span>)}
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="band" id="shelf" data-shelf>
+		<div class="wrap">
+			<div class="section-head">
+				<h2>書架：所有文件</h2>
+				<p>47 份文件都可以直接在網頁上閱讀。選讀者類型可以只看相關的文件。</p>
+			</div>
+			<div class="toggle filter" role="group" aria-label="依讀者篩選">
+				<button type="button" data-aud="" aria-pressed="true">全部</button>
+				{
+					Object.entries(AUDIENCE_LABELS).map(([k, v]) => (
+						<button type="button" data-aud={k} aria-pressed="false">
+							{v}
+						</button>
+					))
+				}
+			</div>
+
+			{
+				SHELVES.map((s) => (
+					<section class="shelf-row" id={s.id} data-row>
+						<h3 class="shelf-title">
+							{s.title}
+							<span class="shelf-count">{s.docs.length} 份</span>
+						</h3>
+						<ul class="shelf-docs">
+							{s.docs.map((d) => (
+								<li data-aud={d.audience.join(' ')}>
+									<a class="doc" href={r(`doc/${d.slug}/`)}>
+										{d.lesson && (
+											<span class="doc-tags">
+												<span class="chip chip--student">{d.lesson.stage}</span>
+												<span class="chip">{d.lesson.domain}</span>
+											</span>
+										)}
+										<span class="doc-title">{d.title}</span>
+										<span class="doc-meta">
+											{d.chapters ? `${d.chapters.length} 章` : '單頁'}
+											{d.audience.length < 4 && `，${d.audience.map((a) => AUDIENCE_LABELS[a]).join('、')}`}
+										</span>
+									</a>
+									<a class="doc-moe" href={moeFor(d.file).url} target="_blank" rel="noopener" aria-label={`${d.title}：教育部原文（另開新視窗）`}>
+										原文
+										<Icon name="external" class="ext" />
+									</a>
+								</li>
+							))}
+						</ul>
+					</section>
+				))
+			}
+		</div>
+	</section>
+</Site>
+
+<script>
+	const root = document.querySelector('[data-shelf]');
+	if (root) {
+		const btns = [...root.querySelectorAll<HTMLButtonElement>('button[data-aud]')];
+		const apply = (aud: string) => {
+			btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.aud === aud)));
+			root.querySelectorAll<HTMLElement>('[data-row]').forEach((row) => {
+				let shown = 0;
+				row.querySelectorAll<HTMLLIElement>('li[data-aud]').forEach((li) => {
+					const ok = !aud || li.dataset.aud!.split(' ').includes(aud);
+					li.hidden = !ok;
+					if (ok) shown++;
+				});
+				row.hidden = shown === 0;
+			});
+			const u = new URL(location.href);
+			aud ? u.searchParams.set('aud', aud) : u.searchParams.delete('aud');
+			history.replaceState(null, '', u);
+		};
+		btns.forEach((b) => b.addEventListener('click', () => apply(b.dataset.aud!)));
+		const q = new URLSearchParams(location.search).get('aud');
+		if (q) apply(q);
+	}
+</script>
+
+<style>
+	.toc-band {
+		--cell: 26px;
+	}
+	.toc-sheet {
+		background: var(--paper);
+		border-radius: var(--r-md);
+		box-shadow: var(--shadow-2);
+		padding: clamp(1.5rem, 5vw, 3rem) clamp(1.25rem, 5vw, 3.25rem);
+	}
+	.toc-title {
+		font-size: clamp(1.8rem, 4vw, 2.4rem);
+		text-align: center;
+		letter-spacing: 0.6em;
+		padding-left: 0.6em;
+		margin-bottom: 1.25rem;
+	}
+	.toc {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.toc a {
+		display: grid;
+		grid-template-columns: auto 1fr auto;
+		grid-template-areas: 'name leader aud' 'desc desc desc';
+		align-items: baseline;
+		column-gap: 0.75rem;
+		row-gap: 0.2rem;
+		padding: 1.05rem 0.25rem;
+		border-bottom: 1px solid var(--line);
+		text-decoration: none;
+	}
+	.toc-name {
+		grid-area: name;
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: clamp(1.25rem, 3vw, 1.6rem);
+	}
+	.toc a:hover .toc-name {
+		color: var(--cover);
+		text-decoration: underline;
+		text-underline-offset: 0.25em;
+	}
+	.leader {
+		grid-area: leader;
+		border-bottom: 2px dotted var(--grid-strong);
+		translate: 0 -0.35em;
+	}
+	.toc-aud {
+		grid-area: aud;
+		display: inline-flex;
+		gap: 0.25rem;
+	}
+	.toc-desc {
+		grid-area: desc;
+		color: var(--ink-2);
+		font-size: 0.92rem;
+	}
+	.dot {
+		display: inline-block;
+		width: 0.7rem;
+		height: 0.7rem;
+		border-radius: 50%;
+		background: var(--c);
+	}
+	.dot--teacher { --c: var(--c-teacher); }
+	.dot--student { --c: var(--c-student); }
+	.dot--parent { --c: var(--c-parent); }
+	.dot--admin { --c: var(--c-admin); }
+	.toc-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem 1.1rem;
+		margin: 1.25rem 0 0;
+		font-size: 0.82rem;
+		color: var(--ink-3);
+	}
+	.toc-legend > span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+	}
+
+	.filter {
+		margin-bottom: 2rem;
+		flex-wrap: wrap;
+	}
+	.shelf-row {
+		margin-bottom: 2.5rem;
+	}
+	.shelf-title {
+		display: flex;
+		align-items: baseline;
+		gap: 0.75rem;
+		font-size: 1.3rem;
+		padding-bottom: 0.5rem;
+		margin-bottom: 1rem;
+		border-bottom: 2px solid var(--ink);
+	}
+	.shelf-count {
+		font-family: var(--sans);
+		font-size: 0.82rem;
+		font-weight: 500;
+		color: var(--ink-3);
+	}
+	.shelf-docs {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+		gap: 0.75rem;
+	}
+	.shelf-docs li {
+		position: relative;
+	}
+	.doc {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		height: 100%;
+		padding: 0.95rem 1.05rem 2.1rem;
+		background: var(--paper);
+		border-radius: var(--r-md);
+		border: 1px solid var(--line);
+		text-decoration: none;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
+	}
+	.doc:hover {
+		border-color: var(--grid-strong);
+		box-shadow: var(--shadow-1);
+	}
+	.doc-tags {
+		display: flex;
+		gap: 0.3rem;
+	}
+	.doc-title {
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.08rem;
+		line-height: 1.5;
+	}
+	.doc-meta {
+		font-size: 0.8rem;
+		color: var(--ink-3);
+	}
+	.doc-moe {
+		position: absolute;
+		right: 0.9rem;
+		bottom: 0.6rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.2rem;
+		font-size: 0.78rem;
+		color: var(--blue-pen);
+	}
+</style>

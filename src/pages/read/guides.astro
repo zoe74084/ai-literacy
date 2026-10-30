@@ -1,0 +1,254 @@
+---
+import Site from '../../layouts/Site.astro';
+import ReadMeta from '../../components/read/ReadMeta.astro';
+import { bySlug, readBody, keyPoints, md, byGroup } from '../../lib/content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// 章節開頭第一段一般內文（家長指引沒有「重點先看」時當作預覽）
+function opening(body: string) {
+	const p = body
+		.split('\n')
+		.map((l) => l.trim())
+		.find((l) => l && !/^([#|>\-*]|\d+\.)/.test(l) && [...l].length > 40);
+	if (!p) return '';
+	const chars = [...p];
+	return chars.length > 160 ? chars.slice(0, 160).join('') + '……' : p;
+}
+
+const GUIDES = [
+	{ key: 'teacher', label: '教師', slug: 'guides/teacher', color: 'var(--c-teacher-soft)' },
+	{ key: 'parent', label: '家長', slug: 'guides/parent', color: 'var(--c-parent-soft)' },
+	{ key: 'principal', label: '校長', slug: 'guides/principal', color: 'var(--c-admin-soft)' },
+].map((g) => {
+	const doc = bySlug(g.slug)!;
+	const chapters = (doc.chapters ?? []).map((c, i) => {
+		const body = readBody(c.slug);
+		const kp = keyPoints(body);
+		return { ...c, n: i + 1, kp: kp ? md(kp.join('\n\n')) : '', preview: kp ? '' : opening(body) };
+	});
+	return { ...g, doc, chapters };
+});
+const history = byGroup('history');
+---
+
+<Site title="指引重點先看" description="115 年教師、家長、校長數位與 AI 指引：各章重點一次看。" current="read">
+	<section class="page-hero wrap">
+		<h1>三份指引，<br />每章重點先看</h1>
+		<p class="lead" style="--i:2">
+			115 年教育部的教師、家長、校長數位與 AI 指引都很厚。教師與校長指引每章開頭都有「重點先看」，這裡把它們依章節排成一條路；家長指引則列出各章開頭，方便決定要先讀哪一章。
+		</p>
+	</section>
+
+	<section class="band band--tint" data-guides>
+		<div class="wrap">
+			<div class="toggle" role="tablist" aria-label="選擇指引">
+				{
+					GUIDES.map((g, i) => (
+						<button type="button" role="tab" data-g={g.key} aria-selected={i === 0 ? 'true' : 'false'}>
+							{g.label}指引
+						</button>
+					))
+				}
+			</div>
+
+			{
+				GUIDES.map((g, gi) => (
+					<div class="guide" data-guide={g.key} role="tabpanel" hidden={gi !== 0} style={`--g:${g.color}`}>
+						<div class="guide-head">
+							<h2>{g.doc.title}</h2>
+							<ReadMeta file={g.doc.file} full={`${g.slug}/`} />
+						</div>
+						<ol class="road">
+							{g.chapters.map((c, i) => (
+								<li class={`stop ${i % 2 ? 'stop--r' : 'stop--l'}`}>
+									<span class="stop-pin" aria-hidden="true">
+										{String(c.n).padStart(2, '0')}
+									</span>
+									<article class="stop-card">
+										<h3>{c.title}</h3>
+										{c.kp ? (
+											<div class="kp">
+												<p class="kp-label">重點先看</p>
+												<div set:html={c.kp} />
+											</div>
+										) : (
+											c.preview && <p class="preview">{c.preview}</p>
+										)}
+										<a class="moe-link" href={`${base}/read/doc/${c.slug}/`}>
+											讀這一章
+										</a>
+									</article>
+								</li>
+							))}
+						</ol>
+					</div>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="band">
+		<div class="wrap">
+			<div class="section-head">
+				<h2>歷史版本（114 年）</h2>
+				<p>檔名含 1140113 的 114 年版指引，保留供對照。</p>
+			</div>
+			<div class="grid" style="--min:16rem">
+				{
+					history.map((h, i) => (
+						<a class="card" style={`--i:${i}`} href={`${base}/read/doc/${h.slug}/`}>
+							<span class="chip">114 年</span>
+							<h3>{h.title}</h3>
+							<p>共 {h.chapters?.length ?? 1} 章</p>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+</Site>
+
+<script>
+	const root = document.querySelector<HTMLElement>('[data-guides]')!;
+	const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-g]')];
+	const io = new IntersectionObserver(
+		(es) =>
+			es.forEach((e) => {
+				if (e.isIntersecting) {
+					e.target.classList.add('is-in');
+					io.unobserve(e.target);
+				}
+			}),
+		{ rootMargin: '0px 0px -8% 0px' },
+	);
+	const show = (g: string) => {
+		tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.g === g)));
+		root.querySelectorAll<HTMLElement>('[data-guide]').forEach((p) => {
+			p.hidden = p.dataset.guide !== g;
+			if (!p.hidden) p.querySelectorAll('.reveal:not(.is-in)').forEach((el) => io.observe(el));
+		});
+		const u = new URL(location.href);
+		g === 'teacher' ? u.searchParams.delete('g') : u.searchParams.set('g', g);
+		history.replaceState(null, '', u);
+	};
+	tabs.forEach((t) => t.addEventListener('click', () => show(t.dataset.g!)));
+	const q = new URLSearchParams(location.search).get('g');
+	show(q && tabs.some((t) => t.dataset.g === q) ? q : 'teacher');
+</script>
+
+<style>
+	.guide {
+		margin-top: 2rem;
+	}
+	.guide-head h2 {
+		font-size: clamp(1.4rem, 3.5vw, 2rem);
+	}
+	.road {
+		list-style: none;
+		padding: 0;
+		margin: 3rem 0 0;
+		position: relative;
+		display: grid;
+		gap: 1.5rem;
+	}
+	.road::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		top: 0;
+		bottom: 0;
+		width: 0;
+		border-left: 3px dashed var(--ink-3);
+		transform: translateX(-50%);
+	}
+	.stop {
+		position: relative;
+		display: grid;
+		grid-template-columns: 1fr 4rem 1fr;
+		align-items: start;
+	}
+	.stop-pin {
+		grid-column: 2;
+		grid-row: 1;
+		justify-self: center;
+		display: grid;
+		place-items: center;
+		width: 3.4rem;
+		height: 3.4rem;
+		border-radius: 50%;
+		background: var(--ink);
+		color: var(--paper);
+		font-family: var(--sans);
+		font-weight: 500;
+		position: relative;
+		z-index: 1;
+		box-shadow: 0 0 0 6px var(--paper-tint);
+	}
+	.stop-card {
+		grid-row: 1;
+		background: var(--paper);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
+		padding: 1.4rem 1.5rem;
+		display: grid;
+		gap: 0.75rem;
+	}
+	.stop--l .stop-card {
+		grid-column: 1;
+	}
+	.stop--r .stop-card {
+		grid-column: 3;
+	}
+	.stop-card h3 {
+		font-size: 1.2rem;
+		padding-bottom: 0.6rem;
+		border-bottom: 3px solid var(--g);
+	}
+	.kp {
+		background: var(--g);
+		border-radius: 1rem;
+		padding: 0.9rem 1rem 0.3rem;
+		font-size: 0.9rem;
+		line-height: 1.8;
+	}
+	.kp-label {
+		display: inline-block;
+		margin: 0 0 0.5rem !important;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.15em;
+		padding: 0 0.6rem;
+		border-radius: 999px;
+		background: var(--ink);
+		color: var(--paper);
+	}
+	.kp :global(p) {
+		margin: 0 0 0.6em;
+	}
+	.kp :global(ul) {
+		padding-left: 1.1rem;
+		margin: 0 0 0.6em;
+	}
+	.preview {
+		color: var(--ink-2);
+		font-size: 0.92rem;
+		margin: 0;
+	}
+	@media (max-width: 48rem) {
+		.road::before {
+			left: 1.7rem;
+		}
+		.stop {
+			grid-template-columns: 3.4rem 1fr;
+			gap: 0.75rem;
+		}
+		.stop-pin {
+			grid-column: 1;
+		}
+		.stop--l .stop-card,
+		.stop--r .stop-card {
+			grid-column: 2;
+		}
+	}
+</style>

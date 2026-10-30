@@ -1,0 +1,119 @@
+/* 資料庫（Starlight）沿用首頁與導讀頁的字體與和色 */
+:root {
+	--sl-font: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+	--serif: 'LXGW WenKai TC', 'BiauKai', 'Kaiti TC', serif;
+	--sl-color-accent-low: #173a2d;
+	--sl-color-accent: #4fa57a;
+	--sl-color-accent-high: #c8ead6;
+	--aud-teacher-bg: #1f3d2c;
+	--aud-teacher-fg: #b7ebc9;
+	--aud-student-bg: #1d3550;
+	--aud-student-fg: #bcdcff;
+	--aud-parent-bg: #4a2c1c;
+	--aud-parent-fg: #ffd2b5;
+	--aud-admin-bg: #3a2a4d;
+	--aud-admin-fg: #e0ccff;
+	--fw-l0: #5f9e77;
+	--fw-l1: #2f7a50;
+	--fw-l2: #1f5a43;
+	--fw-level-fg: #ffffff;
+}
+:root[data-theme='light'] {
+	/* 和紙底色 */
+	--sl-color-bg: #fdfdfa;
+	--sl-color-bg-nav: #fdfdfa;
+	--sl-color-bg-sidebar: #f1f6f0;
+	--sl-color-hairline-light: #e3ede4;
+	--sl-color-hairline: #d7e1da;
+	--sl-color-white: #1d2a24;
+	--sl-color-gray-1: #2c3a33;
+	--sl-color-gray-2: #4a5852;
+	--sl-color-gray-3: #6e7a74;
+	--sl-color-gray-5: #d7e1da;
+	--sl-color-gray-6: #e3ede4;
+	--sl-color-gray-7: #f1f6f0;
+	--sl-color-accent-low: #e1f1e6;
+	--sl-color-accent: #1f5a43;
+	--sl-color-accent-high: #17473a;
+	--aud-teacher-bg: #dcf3e4;
+	--aud-teacher-fg: #1c5a33;
+	--aud-student-bg: #ddebfb;
+	--aud-student-fg: #1b4f86;
+	--aud-parent-bg: #fde7d9;
+	--aud-parent-fg: #8a3d12;
+	--aud-admin-bg: #ece2fa;
+	--aud-admin-fg: #55308a;
+	--fw-l0: #5f9e77;
+	--fw-l1: #2f7a50;
+	--fw-l2: #1f5a43;
+}
+
+/* 中文排版：行高稍大，長表格可橫向捲動而不撐破版面 */
+.sl-markdown-content {
+	line-height: 1.85;
+	overflow-wrap: break-word;
+}
+.sl-markdown-content table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+	font-size: var(--sl-text-sm);
+	line-height: 1.6;
+}
+.sl-markdown-content td,
+.sl-markdown-content th {
+	min-width: 4.5em;
+	vertical-align: top;
+}
+
+/* 首頁讀者入口卡片 */
+.audience-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+}
+.audience-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 1.1rem 1.2rem;
+	border-radius: 0.75rem;
+	text-decoration: none !important;
+	border: 1px solid transparent;
+	transition: transform 0.15s ease;
+}
+.audience-card:hover {
+	transform: translateY(-2px);
+	border-color: currentColor;
+}
+.audience-card strong {
+	font-size: var(--sl-text-xl);
+}
+.audience-card span {
+	font-size: var(--sl-text-sm);
+	line-height: 1.6;
+	opacity: 0.9;
+}
+.audience-card.teacher { background: var(--aud-teacher-bg); color: var(--aud-teacher-fg); }
+.audience-card.student { background: var(--aud-student-bg); color: var(--aud-student-fg); }
+.audience-card.parent { background: var(--aud-parent-bg); color: var(--aud-parent-fg); }
+.audience-card.admin { background: var(--aud-admin-bg); color: var(--aud-admin-fg); }
+
+/* 標題用明朝體 */
+.sl-markdown-content :is(h2, h3),
+h1#_top,
+.site-title,
+.hero h1 {
+	font-family: var(--serif);
+	letter-spacing: 0.03em;
+}
+.site-title {
+	font-weight: 900;
+}
+.sl-markdown-content h2 {
+	color: var(--sl-color-white);
+}
+.sl-markdown-content .sl-heading-wrapper:has(h2) {
+	margin-top: 2.2em;
+}

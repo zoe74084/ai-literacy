@@ -1,0 +1,44 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+import { SOURCE_NAME, SOURCE_URL } from '../data/audiences';
+import { moeFor } from '../data/moe';
+
+const { source } = Astro.locals.starlightRoute.entry.data;
+const moe = moeFor(source?.file);
+---
+
+<Default><slot /></Default>
+<p class="source-credit" data-pagefind-ignore>
+	資料來源：<a href={SOURCE_URL} rel="noopener">{SOURCE_NAME}</a>
+	{
+		source && (
+			<span class="source-file">
+				原始檔案：{source.original ?? source.file}
+				{source.pages ? `（${source.pages} 頁）` : ''}
+			</span>
+		)
+	}
+	{
+		source && (
+			<a class="source-file" href={moe.url} target="_blank" rel="noopener">
+				原文 PDF：教育部下載專區「{moe.name}」↗
+			</a>
+		)
+	}
+</p>
+
+<style>
+	.source-credit {
+		margin-top: 1.5rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--sl-color-hairline);
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1.25rem;
+	}
+	.source-file {
+		word-break: break-all;
+	}
+</style>

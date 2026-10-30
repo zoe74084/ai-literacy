@@ -1,0 +1,34 @@
+---
+title: AI 素養框架矩陣
+description: 臺灣中小學教師與學生 AI 素養框架：教師、學生各 4 面向 × 3 層級（取得理解、深化應用、創造轉型），點格子展開內涵。
+audience: [teacher, student, admin]
+source:
+  file: 02_AI素養框架_臺灣中小學教師與學生AI素養框架.md
+  original: 臺灣中小學教師與學生AI素養框架.pdf
+  pages: 68
+sidebar:
+  label: 框架矩陣（4 面向 × 3 層級）
+  order: 1
+tableOfContents: false
+---
+
+import { Tabs, TabItem, LinkCard, CardGrid } from '@astrojs/starlight/components';
+import FrameworkMatrix from '../../../../components/FrameworkMatrix.astro';
+
+框架以「以人為中心」為核心，教師與學生各有四個面向，每個面向分「取得理解、深化應用、創造轉型」三個層級。下表取自框架原文表 1（教師）與表 2（學生）；點任一格可展開該層級的內涵，點面向名稱可跳到全文說明。
+
+<Tabs syncKey="framework-who">
+	<TabItem label="教師 AI 素養">
+		<FrameworkMatrix who="teacher" />
+	</TabItem>
+	<TabItem label="學生 AI 素養">
+		<FrameworkMatrix who="student" />
+	</TabItem>
+</Tabs>
+
+## 延伸閱讀
+
+<CardGrid>
+	<LinkCard title="框架全文" description="前言、國際趨勢、我國框架、教師與學生 AI 素養完整說明" href="../framework/full/" />
+	<LinkCard title="附錄：公版簡報" description="AI 素養框架公版簡報的文字內容" href="../framework/slides/" />
+</CardGrid>

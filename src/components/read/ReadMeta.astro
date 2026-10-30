@@ -1,0 +1,54 @@
+---
+// 導讀頁標題下方的出處列：原始檔名、讀全文、資料庫版、原文下載（連回教育部）
+import Icon from '../Icon.astro';
+import { moeFor, pdfName } from '../../data/moe';
+
+interface Props {
+	file: string;
+	/** 全文頁的 slug（不含 /library/ 前綴） */
+	full?: string;
+}
+const { file, full } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const moe = moeFor(file);
+---
+
+<div class="read-meta">
+	<p class="read-src">出處：{pdfName(file)}</p>
+	<p class="read-actions">
+		{full && <a href={`${base}/read/doc/${full}`}>網頁全文</a>}
+		{full && <a href={`${base}/library/${full}`}>資料庫版</a>}
+		<a class="moe" href={moe.url} target="_blank" rel="noopener" title={`在教育部下載專區的「${moe.name}」分類下載原始 PDF`}>
+			教育部原文 PDF<Icon name="external" class="ext" /><span class="visually-hidden">（另開新視窗）</span>
+		</a>
+	</p>
+</div>
+
+<style>
+	.read-meta {
+		margin-top: 1.5rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem 1.5rem;
+		align-items: baseline;
+		font-size: 0.88rem;
+	}
+	.read-src {
+		margin: 0;
+		color: var(--ink-3);
+		word-break: break-all;
+	}
+	.read-actions {
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1rem;
+	}
+	.read-actions a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25em;
+		min-height: 1.75rem;
+		color: var(--blue-pen);
+	}
+</style>

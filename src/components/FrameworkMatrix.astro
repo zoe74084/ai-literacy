@@ -1,0 +1,211 @@
+---
+// AI 素養框架矩陣：4 面向 × 3 層級，點格子展開內涵。
+// 資料取自框架原文表 1、表 2（src/data/framework.json），不另行改寫。
+import GithubSlugger from 'github-slugger';
+import data from '../data/framework.json';
+
+interface Props {
+	who: 'teacher' | 'student';
+}
+const { who } = Astro.props;
+const fw = data[who];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const slugger = new GithubSlugger();
+const anchor = (heading: string) => {
+	slugger.reset();
+	return slugger.slug(heading);
+};
+---
+
+<div class="fw-matrix" data-who={who}>
+	<div class="fw-toolbar">
+		<button type="button" class="fw-toggle" data-open="true">全部展開</button>
+		<button type="button" class="fw-toggle" data-open="false">全部收合</button>
+	</div>
+	<div class="fw-grid" role="table" aria-label={`${fw.label}：4 面向 × 3 層級`}>
+		<div class="fw-row fw-head" role="row">
+			<div class="fw-corner" role="columnheader">面向＼層級</div>
+			{data.levels.map((lv, i) => <div class={`fw-level fw-level-${i}`} role="columnheader">{lv}</div>)}
+		</div>
+		{
+			fw.facets.map((facet) => (
+				<div class="fw-row" role="row">
+					<div class="fw-facet" role="rowheader">
+						<a href={`${base}/${fw.page}/#${anchor(facet.heading)}`}>{facet.name}</a>
+					</div>
+					{facet.cells.map((cell, i) => (
+						<details class={`fw-cell fw-level-${i}`} role="cell">
+							<summary>
+								<span class="fw-cell-level">{data.levels[i]}</span>
+								<span class="fw-goal">{cell.goal}</span>
+							</summary>
+							<ul>
+								{cell.items.map((item) => (
+									<li>{item}</li>
+								))}
+							</ul>
+							<a class="fw-more" href={`${base}/${fw.page}/#${anchor(facet.heading)}`}>
+								閱讀「{facet.name}」完整說明 →
+							</a>
+						</details>
+					))}
+				</div>
+			))
+		}
+	</div>
+</div>
+
+<script>
+	document.querySelectorAll<HTMLElement>('.fw-matrix').forEach((matrix) => {
+		matrix.querySelectorAll<HTMLButtonElement>('.fw-toggle').forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const open = btn.dataset.open === 'true';
+				matrix.querySelectorAll('details').forEach((d) => (d.open = open));
+			});
+		});
+	});
+</script>
+
+<style>
+	.fw-matrix {
+		margin-top: 1rem;
+	}
+	.fw-toolbar {
+		display: flex;
+		gap: 0.5rem;
+		justify-content: flex-end;
+	}
+	.fw-toggle {
+		margin: 0 !important;
+		white-space: nowrap;
+		font: inherit;
+		font-size: var(--sl-text-sm);
+		padding: 0.2rem 0.75rem;
+		border-radius: 999px;
+		border: 1px solid var(--sl-color-gray-5);
+		background: transparent;
+		color: var(--sl-color-gray-2);
+		cursor: pointer;
+	}
+	.fw-toggle:hover {
+		border-color: var(--sl-color-accent);
+		color: var(--sl-color-white);
+	}
+	.fw-grid {
+		display: grid;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+	}
+	.fw-row {
+		display: grid;
+		grid-template-columns: minmax(6.5rem, 0.8fr) repeat(3, minmax(0, 1fr));
+		gap: 0.5rem;
+		align-items: start;
+	}
+	.fw-head > div {
+		font-weight: 600;
+		font-size: var(--sl-text-sm);
+		padding: 0.4rem 0.6rem;
+		border-radius: 0.4rem;
+		text-align: center;
+	}
+	.fw-corner {
+		color: var(--sl-color-gray-3);
+	}
+	.fw-level-0 { --lv: var(--fw-l0); }
+	.fw-level-1 { --lv: var(--fw-l1); }
+	.fw-level-2 { --lv: var(--fw-l2); }
+	.fw-head .fw-level {
+		background: var(--lv);
+		color: var(--fw-level-fg);
+	}
+	.fw-facet {
+		align-self: stretch;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		padding: 0.6rem;
+		border-radius: 0.5rem;
+		background: var(--sl-color-gray-6);
+		font-weight: 600;
+	}
+	.fw-facet a {
+		color: var(--sl-color-white);
+		text-decoration: none;
+	}
+	.fw-facet a:hover {
+		text-decoration: underline;
+	}
+	.fw-cell {
+		margin: 0 !important;
+		border: 1px solid var(--sl-color-gray-5);
+		border-top: 4px solid var(--lv);
+		border-radius: 0.5rem;
+		background: var(--sl-color-bg);
+	}
+	.fw-cell[open] {
+		background: var(--sl-color-gray-7, var(--sl-color-gray-6));
+	}
+	.fw-cell summary {
+		cursor: pointer;
+		padding: 0.6rem 0.75rem;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+	}
+	.fw-cell summary::-webkit-details-marker {
+		display: none;
+	}
+	.fw-cell summary::marker,
+	.fw-cell summary::before {
+		content: none !important;
+		display: none !important;
+	}
+	.fw-cell summary::after {
+		content: '＋ 展開內涵';
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.fw-cell[open] summary::after {
+		content: '－ 收合';
+	}
+	.fw-cell-level {
+		display: none;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.fw-goal {
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.fw-cell ul {
+		margin: 0 0.75rem 0.5rem 0;
+		padding-inline-start: 1.75rem;
+		font-size: var(--sl-text-sm);
+	}
+	.fw-more {
+		display: block;
+		padding: 0 0.75rem 0.6rem;
+		font-size: var(--sl-text-xs);
+	}
+	/* 手機：每個面向一張卡片，三個層級直向排列 */
+	@media (max-width: 50rem) {
+		.fw-head {
+			display: none !important;
+		}
+		.fw-row {
+			grid-template-columns: 1fr;
+			padding: 0.5rem;
+			border: 1px solid var(--sl-color-gray-5);
+			border-radius: 0.6rem;
+		}
+		.fw-facet {
+			justify-content: flex-start;
+		}
+		.fw-cell-level {
+			display: inline;
+		}
+	}
+</style>

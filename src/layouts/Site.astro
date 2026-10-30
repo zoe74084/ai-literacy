@@ -1,0 +1,87 @@
+---
+// 首頁與導讀頁共用的版型（資料庫仍用 Starlight 版型）
+import '../styles/site.css';
+import Icon from '../components/Icon.astro';
+import { MOE_DOWNLOAD, MOE_NAME } from '../data/moe';
+
+interface Props {
+	title: string;
+	description?: string;
+	current?: 'home' | 'read' | 'library' | 'search';
+}
+const { title, description, current } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const siteName = 'AI 素養資源站';
+const fullTitle = title === siteName ? siteName : `${title}｜${siteName}`;
+const desc =
+	description ?? '教育部數位學習推動辦公室 AI 素養相關文件的導讀與全文查詢：AI 素養框架、教學指引、教案示例、學習應用手冊與行政文件。';
+---
+
+<!doctype html>
+<html lang="zh-TW">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#1f5a43" />
+		<title>{fullTitle}</title>
+		<meta name="description" content={desc} />
+		<meta property="og:title" content={fullTitle} />
+		<meta property="og:description" content={desc} />
+		<link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+		/>
+	</head>
+	<body class="site">
+		<a class="skip" href="#main">跳到主要內容</a>
+		<header class="site-header">
+			<div class="wrap">
+				<a class="logo" href={`${base}/`} aria-label={`${siteName} 首頁`}>
+					<span class="logo-mark" aria-hidden="true"><span>素</span><span>養</span></span>
+					<span class="logo-text">AI 素養資源站</span>
+				</a>
+				<nav class="nav" aria-label="主要">
+					<a href={`${base}/read/`} aria-current={current === 'read' ? 'page' : undefined}>導讀</a>
+					<a href={`${base}/library/`} aria-current={current === 'library' ? 'page' : undefined}>資料庫</a>
+					<a class="nav-search" href={`${base}/search/`} aria-label="搜尋全站" aria-current={current === 'search' ? 'page' : undefined}>
+						<Icon name="search" /><span>搜尋</span>
+					</a>
+				</nav>
+			</div>
+		</header>
+
+		<main id="main">
+			<slot />
+		</main>
+
+		<footer class="site-footer">
+			<div class="wrap">
+				<div class="footer-grid">
+					<div>
+						<p class="footer-title">AI 素養資源站</p>
+						<p>把教育部的 AI 素養文件整理成可以導讀、也能全文查詢的網頁。內容以教育部原文為準。</p>
+					</div>
+					<div>
+						<p class="footer-title">網站</p>
+						<p>
+							<a href={`${base}/read/`}>導讀</a><br />
+							<a href={`${base}/library/`}>資料庫</a><br />
+							<a href={`${base}/search/`}>搜尋</a>
+						</p>
+					</div>
+					<div>
+						<p class="footer-title">原文</p>
+						<p>
+							所有內容出自{MOE_NAME}公開文件。原始 PDF 請到
+							<a href={MOE_DOWNLOAD} rel="noopener" target="_blank">教育部下載專區（另開新視窗）</a>下載，本站不另外存放。
+						</p>
+					</div>
+				</div>
+				<p class="footer-credit">資料來源：<a href={MOE_DOWNLOAD} rel="noopener" target="_blank">{MOE_NAME}</a></p>
+			</div>
+		</footer>
+	</body>
+</html>

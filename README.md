@@ -1,0 +1,76 @@
+# AI 素養資源站
+
+把教育部數位學習推動辦公室的 AI 素養相關文件（`source-md/`，由 PDF 轉出的 Markdown）做成網站，有兩個入口：
+
+- **讀・導讀**（`/read/`）：把文件轉成互動頁面。素養框架矩陣、注意事項翻卡、課堂 AI 紅黃綠燈、指引重點先看、教案地圖，以及每份文件的閱讀版。
+- **查・資料庫**（`/library/`）：全文分章、依讀者分類、中文全文搜尋（[Astro Starlight](https://starlight.astro.build/)）。
+
+原始 PDF 不放在本站，一律連回教育部下載專區。部署到 GitHub Pages。
+
+資料來源：[教育部數位學習推動辦公室 下載專區](https://pads.moe.edu.tw/download2.php)
+
+## 開發
+
+需要 Node.js 22.23.4 以上（建議 24）。
+
+```bash
+npm ci
+npm run dev      # 先跑 convert，再開本機預覽（開發模式沒有搜尋）
+npm run build    # 先跑 convert，再輸出到 dist/（含搜尋索引）
+npm run preview  # 預覽 dist/，可測試搜尋
+```
+
+## 目錄
+
+| 路徑 | 說明 |
+| --- | --- |
+| `source-md/` | 來源文件，**不要手動修改** |
+| `scripts/convert.mjs` | 轉換腳本：來源檔→頁面的對照表、清理規則、拆頁、讀者入口頁、側邊欄 |
+| `src/content/docs/library/**/*.md` | 轉換產出（已列入 `.gitignore`，每次 build 重新產生） |
+| `src/content/docs/library/**/*.mdx` | 資料庫的手寫頁面：資料庫首頁、框架矩陣、教案篩選 |
+| `src/pages/` | 首頁、導讀頁（`read/`）、閱讀版（`read/doc/`）、搜尋頁 |
+| `src/layouts/Site.astro`、`src/styles/site.css` | 首頁與導讀頁的版型與設計系統 |
+| `src/lib/content.ts` | 導讀頁從轉換結果擷取原文段落的工具 |
+| `src/data/moe.ts` | 教育部原文下載連結（要改成各分類或各檔案的直接連結，改這裡） |
+| `src/data/framework.json` | AI 素養框架表 1、表 2 的內容（矩陣用） |
+| `src/components/` | 頁尾資料來源、讀者標籤、框架矩陣、教案篩選 |
+| `src/search/` | 中文搜尋處理（見下方） |
+
+## 網址設定
+
+`astro.config.mjs` 讀兩個環境變數：
+
+- `SITE_URL`：網站網域，預設 `https://zoe74084.github.io`
+- `BASE_PATH`：子路徑，預設 `/ai-literacy`；掛在子網域根目錄時設成 `/`
+
+GitHub Actions 部署時可以在 repo 的 **Settings → Secrets and variables → Actions → Variables** 設定同名變數覆蓋，不用改程式。內文連結都是相對路徑，換子路徑不需要重新轉換。
+
+第一次部署前，到 **Settings → Pages** 把 Source 設成 **GitHub Actions**。
+
+## 轉換與清理規則
+
+`scripts/convert.mjs` 只清理 PDF 轉檔雜訊，不改寫、不摘要原文：
+
+1. 移除檔頭的來源說明區塊，改放進 frontmatter（`source.file`、`source.original`、`source.pages`）
+2. 移除 `<!-- 第 N 頁 -->` 頁碼註解；上一頁最後一段沒有句尾標點、下一頁直接接續中文時，接回同一段
+3. 移除頁緣單獨一行的頁碼（`12`、`- 3 -`、`iv`、`2323` 等）
+4. 移除在 4 頁以上、且至少 10% 頁面的頁緣重複出現的短行（頁首、頁尾）；表格、引言、清單與「：」結尾的標籤不算
+5. 移除目錄：標題為「目錄／目次／CONTENTS／圖目錄／表目錄」的整段，以及點線引導（`......12`）的目錄行與目錄表格
+6. 移除 `<u>`、`<mark>` 等排版標籤與誤判的刪除線 `~~`（保留文字）；保留 `<br>`、`<sup>`、`<sub>`；其他角括號（例如 `<start_id>`）轉成 `&lt;`
+7. 移除字型編碼錯誤造成的亂碼行（含控制字元，或 30% 以上是替代字元 `�`）
+8. 康熙部首與相容表意字（例如「⼀」）轉成一般漢字，搜尋才找得到
+9. 去掉 4 格以上的行首縮排（否則會變成程式碼區塊）
+10. 標題：去掉粗體與標籤；空標題刪除；連續重複的標題只留一個；只有編號（`壹`、`2`）或以「。；，」結尾、超過 60 字的「標題」改回粗體段落
+11. 標題層級：頁面內從 h2 起算，且不跳級
+12. 表格：補上分隔列、補齊欄數、刪掉全空列、合併直排文字（`面<br>向`→`面向`）
+13. 超過 60 KB 的長文件依最上層章節拆頁；小於 1.5 KB 的章節併入下一章；拆完仍超過 90 KB 的章節往下一層拆，再打包成約 45 KB 一頁
+
+每次執行會輸出 `src/generated/report.json`，列出每份來源檔對應的頁面與各規則的套用次數。
+
+## 中文搜尋
+
+Pagefind 對繁體中文的斷詞不一致（同一個詞有時切成單字、有時當成一個詞），瀏覽器端又用另一套規則斷詞，導致像「人工智慧」只找得到少數頁面。`src/search/` 的處理方式：
+
+- 建索引時（`build-index.mjs`，由 `integration.mjs` 在建置結束時以獨立程序執行，輸出到 `dist/pagefind-zh/`）：只在索引用的 HTML 文字裡，相鄰漢字之間插入空白，頁面本身不變。另開程序是因為和 Starlight 共用 Pagefind 背景程序會讓索引檔寫到一半被中斷
+- 搜尋時（`pagefind-ui.js`，透過 Vite alias 包裝 Pagefind 介面）：查詢字串做同樣處理；沒有空白的中文查詢用精確比對（字要相連）
+- 顯示結果時把漢字之間的空白拿掉

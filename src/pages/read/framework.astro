@@ -1,0 +1,436 @@
+---
+import Site from '../../layouts/Site.astro';
+import ReadMeta from '../../components/read/ReadMeta.astro';
+import fw from '../../data/framework.json';
+import { readBody, sections } from '../../lib/content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// 「以人為中心」的兩種能動性：取自框架原文第參章
+const ch3 = readBody('framework/full/03');
+const agency = ch3
+	.split('\n')
+	.filter((l) => /^- (一|二)、(人類|知識)能動性/.test(l))
+	.map((l) => {
+		const t = l.replace(/^- /, '');
+		const [head, ...rest] = t.split('：');
+		return { head: head.replace(/^(一|二)、/, ''), body: rest.join('：') };
+	});
+
+// 每個面向在原文中的第一段說明
+function facetIntros(slug: string) {
+	const { sections: secs } = sections(readBody(slug));
+	const map: Record<string, string> = {};
+	for (const s of secs) {
+		const first = s.body.split('\n').find((l) => l.trim() && !/^[#|>*-]/.test(l.trim()));
+		if (first) map[s.title] = first.trim();
+	}
+	return map;
+}
+const intros = { teacher: facetIntros('framework/full/04'), student: facetIntros('framework/full/05') };
+
+const who = (['teacher', 'student'] as const).map((k) => ({
+	key: k,
+	label: fw[k].label,
+	page: fw[k].page.replace(/^library\//, ''),
+	facets: fw[k].facets.map((f) => ({ ...f, intro: intros[k][f.heading] ?? '' })),
+}));
+// 三個層級是遞進關係：同一個綠色由淺到深
+const colors = ['#5f9e77', '#2f7a50', '#1f5a43'];
+---
+
+<Site title="AI 素養框架" description="臺灣中小學教師與學生 AI 素養框架的互動導讀：4 面向 × 3 層級。" current="read">
+	<section class="page-hero wrap">
+		<h1>AI 素養框架</h1>
+		<p class="lead" style="--i:2">
+			教育部《臺灣中小學教師與學生 AI 素養框架》為教師與學生各規劃四個面向，每個面向分「取得理解、深化應用、創造轉型」三個層級。框架也提醒：各面向可以非同步發展，不需要每個人都到最高層級。
+		</p>
+		<ReadMeta file="02_AI素養框架_臺灣中小學教師與學生AI素養框架.md" full="framework/full/" />
+	</section>
+
+	<!-- 以人為中心 -->
+	<section class="band band--tint">
+		<div class="wrap">
+			<div class="section-head">
+				<h2>核心是「以人為中心」</h2>
+				<p>框架原文說，兩種能動性確保人類在與 AI 協作時仍掌握關鍵能力：</p>
+			</div>
+			<div class="agency">
+				{
+					agency.map((a, i) => (
+						<article class="agency-card">
+							<h3>{a.head}</h3>
+							<p>{a.body}</p>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- 互動矩陣 -->
+	<section class="band" id="matrix" data-fw>
+		<div class="wrap">
+			<div class="section-head">
+				<h2>選身分，再選層級</h2>
+				<p>點下方的階梯切換層級；每張卡片是該面向在這一層的目標與內涵，文字取自原文表 1、表 2。</p>
+			</div>
+
+			<div class="controls">
+				<div class="toggle" role="group" aria-label="選擇身分">
+					{who.map((w, i) => <button type="button" data-who={w.key} aria-pressed={i === 0 ? 'true' : 'false'}>{w.label}</button>)}
+				</div>
+				<button type="button" class="view-all" data-view-all aria-pressed="false">整張表一次看</button>
+			</div>
+
+			<div class="steps" role="group" aria-label="選擇層級">
+				{
+					fw.levels.map((lv, i) => (
+						<button type="button" class="step" data-level={i} aria-pressed={i === 0 ? 'true' : 'false'} style={`--c:${colors[i]};--h:${45 + i * 27}%`}>
+							<span class="step-bar" />
+							<span class="step-num">{['一', '二', '三'][i]}</span>
+							<span class="step-name">{lv}</span>
+						</button>
+					))
+				}
+			</div>
+
+			{
+				who.map((w, wi) => (
+					<div class="board" data-board={w.key} hidden={wi !== 0}>
+						{w.facets.map((f, fi) => (
+							<article class="facet" style={`--i:${fi}`}>
+								<header class="facet-head">
+									<span class="facet-no">{['一', '二', '三', '四'][fi]}</span>
+									<h3>{f.name}</h3>
+								</header>
+								{f.cells.map((c, li) => (
+									<div class="cell" data-cell={li} hidden={li !== 0} style={`--c:${colors[li]}`}>
+										<p class="cell-level">{fw.levels[li]}</p>
+										<p class="cell-goal">{c.goal}</p>
+										<ul>
+											{c.items.map((it) => (
+												<li>{it}</li>
+											))}
+										</ul>
+									</div>
+								))}
+								{f.intro && (
+									<details class="facet-intro">
+										<summary>原文怎麼說這個面向？</summary>
+										<p>{f.intro}</p>
+									</details>
+								)}
+								<a class="moe-link" href={`${base}/read/doc/${w.page}/`}>
+									讀「{f.name}」完整說明
+								</a>
+							</article>
+						))}
+					</div>
+				))
+			}
+		</div>
+	</section>
+
+	<!-- 下一步 -->
+	<section class="band band--tint">
+		<div class="wrap">
+			<div class="section-head">
+				<h2>接著讀</h2>
+			</div>
+			<div class="grid" style="--min:15rem">
+				<a class="card" href={`${base}/read/doc/framework/full/`} style="--i:0"
+					><span class="chip">全文</span>
+					<h3>框架全文（分 5 章）</h3>
+					<p>前言、國際趨勢、我國框架、教師與學生 AI 素養的完整說明。</p></a
+				>
+				<a class="card" href={`${base}/read/doc/framework/slides/`} style="--i:1"
+					><span class="chip">附錄</span>
+					<h3>公版簡報</h3>
+					<p>框架公版簡報的文字內容。</p></a
+				>
+				<a class="card" href={`${base}/read/traffic-light/`} style="--i:2"
+					><span class="chip chip--teacher">導讀</span>
+					<h3>課堂 AI 紅黃綠燈</h3>
+					<p>把素養落實到課堂：什麼任務該用多少 AI。</p></a
+				>
+			</div>
+		</div>
+	</section>
+</Site>
+
+<script>
+	const root = document.querySelector<HTMLElement>('[data-fw]')!;
+	const whoBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-who]')];
+	const stepBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-level]')];
+	const allBtn = root.querySelector<HTMLButtonElement>('[data-view-all]')!;
+	let who = new URLSearchParams(location.search).get('who') === 'student' ? 'student' : 'teacher';
+	let level = 0;
+	let all = false;
+
+	function render(animate = true) {
+		whoBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.who === who)));
+		stepBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(!all && i === level)));
+		allBtn.setAttribute('aria-pressed', String(all));
+		root.classList.toggle('is-all', all);
+		root.querySelectorAll<HTMLElement>('[data-board]').forEach((board) => {
+			const on = board.dataset.board === who;
+			board.hidden = !on;
+			if (!on) return;
+			board.querySelectorAll<HTMLElement>('[data-cell]').forEach((c) => {
+				c.hidden = !all && Number(c.dataset.cell) !== level;
+			});
+			if (animate) {
+				board.classList.remove('is-swap');
+				void board.offsetWidth;
+				board.classList.add('is-swap');
+			}
+		});
+	}
+	whoBtns.forEach((b) =>
+		b.addEventListener('click', () => {
+			who = b.dataset.who!;
+			const u = new URL(location.href);
+			who === 'student' ? u.searchParams.set('who', 'student') : u.searchParams.delete('who');
+			history.replaceState(null, '', u);
+			render();
+		}),
+	);
+	stepBtns.forEach((b, i) =>
+		b.addEventListener('click', () => {
+			level = i;
+			all = false;
+			render();
+		}),
+	);
+	allBtn.addEventListener('click', () => {
+		all = !all;
+		render();
+	});
+	render(false);
+</script>
+
+<style>
+	.agency {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: clamp(1rem, 3vw, 2rem);
+	}
+	.agency-card {
+		background: var(--paper);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
+		padding: clamp(1.5rem, 4vw, 2.5rem);
+	}
+	.agency-card h3 {
+		font-size: clamp(1.2rem, 2.6vw, 1.6rem);
+		margin: 0.5rem 0 0.75rem;
+	}
+	.agency-card p {
+		color: var(--ink-2);
+		margin: 0;
+	}
+	@media (max-width: 44rem) {
+		.agency {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1.5rem;
+	}
+	.view-all {
+		font: inherit;
+		font-size: 0.9rem;
+		font-weight: 500;
+		padding: 0.5rem 1.1rem;
+		border-radius: 999px;
+		border: 1.5px dashed var(--ink-2);
+		background: transparent;
+		color: var(--ink);
+		cursor: pointer;
+	}
+	.view-all[aria-pressed='true'] {
+		border-style: solid;
+		background: var(--paper-deep);
+	}
+
+	/* 階梯 */
+	.steps {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		align-items: end;
+		gap: 0.5rem;
+		height: 10rem;
+		margin-bottom: 2rem;
+		border-bottom: 1.5px solid var(--ink);
+	}
+	.step {
+		position: relative;
+		height: var(--h);
+		font: inherit;
+		color: var(--ink);
+		background: var(--paper);
+		border: 1px solid var(--line);
+		border-bottom: 0;
+		border-radius: 1rem 1rem 0 0;
+		cursor: pointer;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: flex-end;
+		padding: 0.75rem 1rem;
+		overflow: hidden;
+		transition: transform 0.3s var(--ease-out);
+	}
+	.step:hover {
+		transform: translateY(-4px);
+	}
+	.step-bar {
+		position: absolute;
+		inset: 0;
+		background: var(--c);
+		transform: scaleY(0);
+		transform-origin: bottom;
+		transition: transform 0.45s var(--ease-out);
+	}
+	.step[aria-pressed='true'] .step-bar {
+		transform: scaleY(1);
+	}
+	.step[aria-pressed='true'] {
+		color: var(--paper);
+	}
+	.step-num,
+	.step-name {
+		position: relative;
+	}
+	.step-num {
+		font-family: var(--sans);
+		font-weight: 300;
+		font-size: 1.5rem;
+		line-height: 1;
+	}
+	.step-name {
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: clamp(0.95rem, 2.4vw, 1.25rem);
+	}
+	.is-all .step {
+		opacity: 0.55;
+	}
+
+	/* 面向卡片 */
+	.board {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 1rem;
+	}
+	.facet {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		padding: 1.25rem;
+		border-radius: var(--r-lg);
+		border: 1px solid var(--line);
+		background: var(--paper);
+	}
+	.facet-head {
+		display: flex;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding-bottom: 0.6rem;
+		border-bottom: 1px dashed var(--line);
+	}
+	.facet-no {
+		font-family: var(--kai);
+		font-weight: 900;
+		color: var(--red-pen);
+	}
+	.facet-head h3 {
+		font-size: 1.15rem;
+	}
+	.cell {
+		padding: 0.1rem 0;
+	}
+	.cell-level {
+		display: inline-block;
+		margin: 0;
+		font-size: 0.78rem;
+		font-weight: 700;
+		padding: 0 0.5rem;
+		border-radius: 0.3rem;
+		color: var(--paper);
+		background: var(--c);
+	}
+	.cell-goal {
+		margin: 0.1rem 0 0.4rem;
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.1rem;
+		line-height: 1.5;
+	}
+	.cell ul {
+		margin: 0;
+		padding-left: 1.1rem;
+		font-size: 0.9rem;
+		color: var(--ink-2);
+	}
+	.cell li::marker {
+		color: var(--c);
+	}
+	.facet-intro {
+		font-size: 0.85rem;
+		color: var(--ink-2);
+		background: var(--paper);
+		border-radius: 0.75rem;
+		padding: 0.5rem 0.75rem;
+	}
+	.facet-intro summary {
+		cursor: pointer;
+		font-weight: 500;
+		color: var(--ink);
+	}
+	.facet-intro p {
+		margin: 0.5rem 0 0;
+	}
+	.facet .moe-link {
+		margin-top: auto;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.board.is-swap .facet {
+			animation: pop 0.5s var(--ease-out) backwards;
+			animation-delay: calc(var(--i) * 70ms);
+		}
+	}
+	@keyframes pop {
+		from {
+			opacity: 0;
+			transform: translateY(18px) scale(0.97);
+		}
+	}
+	@media (max-width: 64rem) {
+		.board {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+	@media (max-width: 36rem) {
+		.board {
+			grid-template-columns: 1fr;
+		}
+		.steps {
+			height: 10rem;
+		}
+		.step {
+			padding: 0.5rem 0.6rem;
+			min-height: 4.6rem;
+		}
+		.step-num {
+			font-size: 1.1rem;
+		}
+	}
+</style>
