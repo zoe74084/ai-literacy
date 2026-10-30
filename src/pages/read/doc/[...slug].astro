@@ -4,6 +4,7 @@
 import { getCollection, render } from 'astro:content';
 import Site from '../../../layouts/Site.astro';
 import ReadMeta from '../../../components/read/ReadMeta.astro';
+import errata from '../../../data/errata.json';
 import { catalog, type CatalogDoc } from '../../../lib/content';
 import { AUDIENCE_LABELS } from '../../../data/audiences';
 
@@ -33,6 +34,7 @@ const isOverview = Boolean(doc.chapters) && slug === doc.slug;
 const chapters = doc.chapters ?? [];
 const idx = chapters.findIndex((c) => c.slug === slug);
 const chapter = idx >= 0 ? chapters[idx] : null;
+const fixes = errata.filter((e) => e.slug === slug).length;
 const prev = idx > 0 ? chapters[idx - 1] : idx === 0 ? { slug: doc.slug, title: '目次' } : null;
 const next = idx >= 0 && idx < chapters.length - 1 ? chapters[idx + 1] : isOverview && chapters.length ? chapters[0] : null;
 
@@ -97,6 +99,11 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 			)
 		}
 		<ReadMeta file={doc.file} full={`${slug}/`} />
+		{fixes > 0 && (
+			<p class="errata-note">
+				本頁有 {fixes} 處原文錯字已修正，<a href={`${base}/read/errata/`}>看原文勘誤</a>
+			</p>
+		)}
 	</section>
 
 	{
@@ -233,6 +240,14 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 </script>
 
 <style>
+	.errata-note {
+		margin: 0.75rem 0 0;
+		font-size: 0.85rem;
+		color: var(--ink-3);
+	}
+	.errata-note a {
+		color: var(--blue-pen);
+	}
 	.progress {
 		position: fixed;
 		top: 0;

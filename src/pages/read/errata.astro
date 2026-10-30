@@ -1,0 +1,164 @@
+---
+// 原文勘誤：本站對教育部原文做過的文字修正。資料在 src/data/errata.json，
+// 轉換腳本（scripts/convert.mjs）依同一份資料套用，兩邊不會不一致。
+import Site from '../../layouts/Site.astro';
+import Icon from '../../components/Icon.astro';
+import { catalog } from '../../lib/content';
+import { MOE_DOWNLOAD } from '../../data/moe';
+import errata from '../../data/errata.json';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const plainMd = (s: string) => s.replace(/\*\*/g, '');
+const rows = errata.map((e) => {
+	const doc = catalog.find((d) => d.file === e.file)!;
+	const chapter = doc.chapters?.find((c) => c.slug === e.slug);
+	return {
+		...e,
+		doc: doc.title,
+		chapter: chapter?.title,
+		pdf: e.file.replace(/^\d\d_[^_]+_/, '').replace(/\.md$/, '.pdf'),
+		from: plainMd(e.find),
+		to: plainMd(e.replace),
+	};
+});
+---
+
+<Site title="原文勘誤" description="本站對教育部原文 PDF 所做的文字修正與位置。" current="read">
+	<section class="page-hero wrap">
+		<h1>原文勘誤</h1>
+		<p class="lead">
+			本站的文字都取自教育部原文。下面 {rows.length} 處是原文 PDF 本身的錯字（重複的標點），網站上已經修正；其他文字都和原文相同。要對照原文，請依檔名與頁碼到教育部下載專區查看。
+		</p>
+	</section>
+
+	<section class="band band--grid">
+		<div class="wrap-narrow">
+			<ol class="errata">
+				{
+					rows.map((r) => (
+						<li>
+							<p class="where">
+								<b>{r.doc}</b>
+								{r.chapter && <span>{r.chapter}</span>}
+							</p>
+							<p class="file">
+								{r.pdf}，第 {r.page} 頁
+							</p>
+							<dl class="diff">
+								<dt>原文</dt>
+								<dd><del>{r.from}</del></dd>
+								<dt>本站</dt>
+								<dd><ins>{r.to}</ins></dd>
+							</dl>
+							<p class="note">
+								{r.note}
+								<a href={`${base}/read/doc/${r.slug}/`}>看網頁上的位置</a>
+							</p>
+						</li>
+					))
+				}
+			</ol>
+			<p class="moe">
+				原文下載：<a href={MOE_DOWNLOAD} target="_blank" rel="noopener">教育部下載專區<Icon name="external" class="ext" /><span class="visually-hidden">（另開新視窗）</span></a>
+			</p>
+		</div>
+	</section>
+</Site>
+
+<style>
+	.errata {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 0.9rem;
+		counter-reset: e;
+	}
+	.errata li {
+		counter-increment: e;
+		position: relative;
+		background: var(--paper);
+		border-radius: var(--r-md);
+		box-shadow: var(--shadow-1);
+		padding: 1rem 1.25rem 1rem 3.4rem;
+	}
+	.errata li::before {
+		content: counter(e);
+		position: absolute;
+		left: 1rem;
+		top: 1rem;
+		display: grid;
+		place-items: center;
+		width: 1.6rem;
+		height: 1.6rem;
+		border: 2px solid var(--red-pen);
+		color: var(--red-pen);
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 0.9rem;
+	}
+	.where {
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 0.6rem;
+		align-items: baseline;
+	}
+	.where b {
+		font-family: var(--kai);
+		font-size: 1.1rem;
+	}
+	.where span,
+	.file {
+		font-size: 0.85rem;
+		color: var(--ink-3);
+	}
+	.file {
+		margin: 0.15rem 0 0.6rem;
+		overflow-wrap: anywhere;
+	}
+	.diff {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.3rem 0.75rem;
+		margin: 0;
+		font-family: var(--kai);
+		font-size: 1.05rem;
+	}
+	.diff dt {
+		font-family: var(--sans);
+		font-size: 0.8rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		padding-top: 0.2rem;
+	}
+	.diff dd {
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+	.diff del {
+		color: var(--ink-2);
+		text-decoration-color: var(--red-pen);
+	}
+	.diff ins {
+		text-decoration: none;
+		background: color-mix(in srgb, var(--c-teacher) 14%, var(--paper));
+		padding: 0 0.2rem;
+	}
+	.note {
+		margin: 0.6rem 0 0;
+		font-size: 0.88rem;
+		color: var(--ink-2);
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1rem;
+	}
+	.note a,
+	.moe a {
+		color: var(--blue-pen);
+	}
+	.moe {
+		margin-top: 1.5rem;
+		font-size: 0.9rem;
+	}
+</style>
