@@ -58,6 +58,11 @@ const history = byGroup('history');
 						<div class="guide-head">
 							<h2>{g.doc.title}</h2>
 							<ReadMeta file={g.doc.file} full={`${g.slug}/`} />
+							{g.key === 'teacher' && (
+								<a class="btn btn--solid tg-cta" href={`${base}/read/guides/teacher/`}>
+									打開教師指引互動版：選工具五問、風險口訣、AI 素養自我檢視
+								</a>
+							)}
 						</div>
 						<ol class="road">
 							{g.chapters.map((c, i) => (
@@ -138,6 +143,11 @@ const history = byGroup('history');
 </script>
 
 <style>
+	.tg-cta {
+		margin-top: 1.25rem;
+		white-space: normal;
+		text-align: left;
+	}
 	.guide {
 		margin-top: 2rem;
 	}

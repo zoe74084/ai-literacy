@@ -295,3 +295,208 @@ export function handbookChapter(slug: string, title: string): HandbookChapter {
 
 	return { slug, title, sections, checks, checkPrompt, recap, quote, nextUp, challenges };
 }
+
+// ---------------------------------------------------------------------------
+// 教師指引互動版：章節重點、選工具五問、七個風險口訣、AI 素養自我檢視
+// ---------------------------------------------------------------------------
+
+/** PDF 斷行的段落接回：上一行沒有句末標點就接下一行 */
+function joinParas(lines: string[]) {
+	const out: string[] = [];
+	for (const raw of lines) {
+		const t = raw.trim().replace(/^[-*]\s+/, '');
+		if (!t) continue;
+		if (out.length && !/[。！？」：）]$/.test(out[out.length - 1])) out[out.length - 1] += t;
+		else out.push(t);
+	}
+	return out;
+}
+
+/** 從某行之後讀到下一個標題（或符合 stop 的行）為止 */
+function linesAfter(lines: string[], i: number, stop = /^#{1,6} /) {
+	const out: string[] = [];
+	for (const l of lines.slice(i + 1)) {
+		if (stop.test(l.trim())) break;
+		out.push(l);
+	}
+	return out;
+}
+
+/** 表格列（不含表頭、分隔列）：從 i 起讀，空行可跳過，遇到一般文字就停 */
+function tableRowsFrom(lines: string[], i: number) {
+	const rows: string[] = [];
+	for (const l of lines.slice(i)) {
+		const t = l.trim();
+		if (!t) continue;
+		if (!t.startsWith('|')) {
+			if (rows.length) break;
+			continue;
+		}
+		rows.push(t);
+	}
+	return parseTable(rows).filter((r) => !/^\*\*(層級|教師專業發展路徑|STEP|THINK|FACT|OPEN|SAFE|HUMAN|CARE)\*\*$/.test(r[0]));
+}
+
+export interface GuideChapter {
+	n: number;
+	title: string;
+	slugs: string[];
+	kp: string;
+	question: string;
+	quote: { text: string; cite: string } | null;
+}
+
+function guideChapterExtras(body: string) {
+	const lines = body.split('\n');
+	const qi = lines.findIndex((l) => /問思與討論/.test(l));
+	const question = qi >= 0 ? plain(lines.slice(qi + 1).find((l) => l.trim()) ?? '') : '';
+	let quote: GuideChapter['quote'] = null;
+	const si = lines.findIndex((l) => /啟思小語/.test(l));
+	if (si >= 0) {
+		const text: string[] = [];
+		let cite = '';
+		for (const l of lines.slice(si + 1)) {
+			const t = l.trim().replace(/^>\s*/, '').replace(/^[-*]\s+/, '');
+			if (/^#{1,6} /.test(l.trim())) break;
+			if (!t || /圖片內文字/.test(t) || /^—+$/.test(t)) continue;
+			if (/^——/.test(t)) {
+				cite = plain(t.replace(/^——\s*/, '').replace(/_/g, ''));
+				break;
+			}
+			text.push(plain(t));
+		}
+		if (text.length) quote = { text: text.join(''), cite };
+	}
+	return { question, quote };
+}
+
+export function teacherGuide() {
+	const doc = bySlug('guides/teacher')!;
+	const chs = (doc.chapters ?? []).slice(1);
+
+	// 章節：第五章分成兩頁（｜續），合成一站
+	const chapters: GuideChapter[] = [];
+	for (const c of chs) {
+		const title = c.title.replace(/｜續$/, '');
+		const body = readBody(c.slug);
+		const last = chapters[chapters.length - 1];
+		const extra = guideChapterExtras(body);
+		if (last && last.title === title) {
+			last.slugs.push(c.slug);
+			if (!last.question) last.question = extra.question;
+			if (!last.quote) last.quote = extra.quote;
+			continue;
+		}
+		// 圖片轉出的文字區塊只留內容，不留「（圖片內文字…）」說明
+		const kp = keyPoints(body)
+			?.map((l) => l.replace(/^>\s*/, ''))
+			.filter((l) => l && !/圖片內文字/.test(l));
+		chapters.push({ n: chapters.length + 1, title, slugs: [c.slug], kp: kp?.length ? md(kp.join('\n\n')) : '', ...extra });
+	}
+
+	// 第四章：教師選用數位學習平臺與 AI 工具的五個核心問題
+	const ch4 = chs.find((c) => /第四章/.test(c.title))!;
+	const l4 = readBody(ch4.slug).split('\n');
+	const toolQuestions = l4
+		.map((l, i) => ({ m: l.match(/^#{2,6} （[一二三四五]）(這個工具.+？)$/), i }))
+		.filter((x) => x.m)
+		.map(({ m, i }) => ({ q: plain(m![1]), html: joinParas(linesAfter(l4, i)).map((p) => md(p)).join('') }));
+	const ti = l4.findIndex((l) => /教師選用數位學習平臺與AI 工具的參考原則/.test(l));
+	const toolIntro = ti >= 0 ? plain(linesAfter(l4, ti).find((l) => l.trim()) ?? '') : '';
+	const ai = l4.findIndex((l) => /^#{2,6} 優先選用教育部建置/.test(l));
+	const toolA2 = ai >= 0 ? { title: plain(l4[ai].replace(/^#+ /, '')), text: joinParas(linesAfter(l4, ai)).join('') } : null;
+
+	// 第六章：七個風險與口訣
+	const ch6 = chs.find((c) => /第六章/.test(c.title))!;
+	const l6 = readBody(ch6.slug).split('\n');
+	const wise = plain(l6.find((l) => /WISE 原則，引導/.test(l)) ?? '');
+	const acrIdx = l6
+		.map((l, i) => ({ m: l.match(/^(?:#{2,6} |[-*] \*\*)（1）.*?(STEP|THINK|FACT|OPEN|SAFE|HUMAN|CARE)/), i }))
+		.filter((x) => x.m);
+	const risks = l6
+		.map((l, i) => (/➊——風險說明/.test(l) ? i : -1))
+		.filter((i) => i >= 0)
+		.map((ri) => {
+			let name = '';
+			for (let j = ri - 1; j >= 0 && !name; j--) {
+				const m = l6[j].match(/^(?:#{2,6} |\*\*)（[一二三四五六七]）(.{2,16}?)(?:\*\*)?$/);
+				if (m) name = plain(m[1]);
+			}
+			const desc = plain(l6.slice(ri + 1).find((l) => l.trim() && !/^#/.test(l)) ?? '');
+			const a = acrIdx.find((x) => x.i > ri)!;
+			const steps: { letter: string; en: string; zh: string; desc: string; ask: string }[] = [];
+			for (const r of tableRowsFrom(l6, a.i + 1)) {
+				const parts = r[0].split(/<br\s*\/?>/i).map((p) => plain(p)).filter(Boolean);
+				const head = parts[0]?.match(/^([A-Z])\s*｜\s*(.*)$/);
+				if (head) {
+					const rest = [head[2], ...parts.slice(1)];
+					steps.push({
+						letter: head[1],
+						en: rest.filter((p) => /^[A-Za-z\s]+$/.test(p)).join(' '),
+						zh: rest.filter((p) => !/^[A-Za-z\s]+$/.test(p)).join(''),
+						desc: cell(r[1] ?? ''),
+						ask: cell(r[2] ?? ''),
+					});
+				} else if (steps.length) {
+					const s = steps[steps.length - 1];
+					s.zh += parts.join('');
+					s.desc += cell(r[1] ?? '');
+					s.ask += cell(r[2] ?? '');
+				}
+			}
+			return { name, desc, acronym: a.m![1], steps };
+		});
+
+	// 第七章：教師 AI 素養自我檢視（四個面向 × 三層級 × 三項）
+	const ch7 = chs.find((c) => /第七章/.test(c.title))!;
+	const l7 = readBody(ch7.slug).split('\n');
+	const LEVELS = ['取得理解', '深化應用', '創造轉型'];
+	const selfCheck = l7
+		.map((l, i) => ({ m: l.match(/^## [一二三四] (AI .+)$/), i }))
+		.filter((x) => x.m)
+		.map(({ m, i }, d) => {
+			const goals = ['', '', ''];
+			const items: { id: string; level: number; text: string }[] = [];
+			let lv = 0;
+			for (const r of tableRowsFrom(l7, i + 1)) {
+				const code = r[0].match(/\d-(\d)/);
+				if (code) lv = Number(code[1]) - 1;
+				goals[lv] += cell(r[1] ?? '');
+				const it = cell(r[2] ?? '').match(/^(\d-\d-\d)\s*(.+)$/);
+				if (it) items.push({ id: it[1], level: Number(it[1].split('-')[1]) - 1, text: it[2] });
+			}
+			// 表格後的反思提問（到下一個面向為止）
+			const reflections: string[] = [];
+			let past = false;
+			for (const l of l7.slice(i + 1)) {
+				const t = l.trim();
+				if (t.startsWith('|')) { past = true; continue; }
+				if (!past) continue;
+				if (/^## /.test(t) && !/自我反思/.test(t)) break;
+				const q = t.match(/^\*\*\d\.\s*(.+?)\*\*$/);
+				if (q) reflections.push(plain(q[1]).replace(/下一步行動：$/, ''));
+			}
+			return { n: d + 1, name: plain(m![1]), goals, items, reflections };
+		});
+
+	// 第七章：AI 促進教師專業發展策略建議（三層級）
+	const strategies = [/^## 取得理解$/, /^## 二深化應用$/, /^## 三創造轉型$/].map((re, k) => {
+		const i = l7.findIndex((l) => re.test(l.trim()));
+		const goalLine = l7.slice(i + 1).find((l) => /專業發展目標：/.test(l)) ?? '';
+		const rows: { path: string; how: string; where: string }[] = [];
+		const end = l7.findIndex((l, j) => j > i && /^## (二深化應用|三創造轉型|我\/)/.test(l.trim()));
+		const tableRows = parseTable(l7.slice(i + 1, end).filter((l) => l.trim().startsWith('|'))).filter((r) => !/教師專業發展路徑/.test(r[0]));
+		for (const r of tableRows) {
+			const row = { path: cell(r[0]), how: cell(r[1] ?? ''), where: cell(r[2] ?? '') };
+			const last = rows[rows.length - 1];
+			if (last && !/。$/.test(last.how)) {
+				last.path += row.path;
+				last.how += row.how;
+				last.where += row.where;
+			} else rows.push(row);
+		}
+		return { level: LEVELS[k], goal: plain(goalLine.replace(/^.*專業發展目標：\**/, '')), rows };
+	});
+
+	return { doc, chapters, toolIntro, toolQuestions, toolA2, wise, risks, selfCheck, strategies, levels: LEVELS };
+}
