@@ -256,13 +256,21 @@ function continues(line) {
   return true;
 }
 
+// 引號、括號還沒關上就斷行：一定是句子中間
+function openQuote(line) {
+  const t = line.replace(/\*\*/g, '').trim();
+  const open = (a, b) => t.split(a).length - t.split(b).length;
+  return !/[。！？；」』）)]$/.test(t) && (open('「', '」') > 0 || open('（', '）') > 0);
+}
+
 // 句子還沒結束：停在逗號、頓號，或停在一般中文字且最後一個子句夠長（不是標題、編號）
 function midSentence(line) {
   if (/^\s*([-*+]\s+|\d+\.\s+)?\*\*[^*]+\*\*\s*$/.test(line)) return false; // 整行粗體是小標
   const t = line.replace(/\*\*/g, '').trim().replace(/^([-*+]|\d+\.)\s+/, '');
   if (/[，、]$/.test(t)) return true;
-  if (!CJK.test(t.slice(-1))) return false;
   if (/[●⚫]/.test(t) || /^\p{Extended_Pictographic}/u.test(t) || /如下[圖表]?$/.test(t)) return false;
+  if (openQuote(t)) return true;
+  if (!CJK.test(t.slice(-1))) return false;
   if (/^[（(][一二三四五六七八九十]+[）)]/.test(t) && !/。/.test(t)) return false; // 「（三）……」小標
   const tail = t.split(/[。！？；：:]/).pop().trim().replace(/^([-*+]|\d+\.)\s*/, '');
   if (/^[（(]?[一二三四五六七八九十\d]+[）)、.．]/.test(tail) || /^[壹貳參肆伍陸柒捌玖拾]、/.test(tail)) return /，/.test(tail) && [...tail].length >= 20;
@@ -591,6 +599,38 @@ function splitGluedTitles(lines) {
   return out;
 }
 
+// 10. 粗體記號：PDF 轉出的 `**` 常黏在中文標點旁邊，Markdown 不認得而直接顯示星號。
+//     空的粗體（「項****次」）拿掉；`**文字 **` 去掉內側空白；
+//     Markdown 不會當成粗體的配對改用 <strong>。
+const PUNCT = /[\p{P}\p{S}]/u;
+function fixBold(lines) {
+  return lines.map((l) => {
+    if (/^\s*</.test(l) || !l.includes('**')) return l;
+    let out = l.replace(/\*{4,}/g, () => (bump('移除空的粗體記號'), ''));
+    // 沒有配對的 `**`（同一段或同一格裡只有一個）拿掉；表格逐格處理
+    const unpair = (seg) =>
+      seg
+        .replace(/\*\*([^*\n]+?)\*\*/g, '\u0001$1\u0002')
+        .replace(/\*\*/g, () => (bump('移除沒有配對的粗體記號'), ''))
+        .replace(/\u0001/g, '**')
+        .replace(/\u0002/g, '**');
+    out = /^\s*\|/.test(out) ? out.split(/(?<!\\)\|/).map(unpair).join('|') : unpair(out);
+    out = out.replace(/\*\*([^*\n]*?\S)\s+\*\*/g, '**$1**').replace(/\*\*\s+(\S[^*\n]*?)\*\*/g, '**$1**');
+    out = out.replace(/\*\*([^*\n]+?)\*\*/g, (m, x, i, str) => {
+      const prev = str[i - 1] ?? ' ';
+      const next = str[i + m.length] ?? ' ';
+      const first = [...x][0];
+      const last = [...x].pop();
+      const openOk = !/\s/.test(first) && (!PUNCT.test(first) || /\s/.test(prev) || PUNCT.test(prev));
+      const closeOk = !/\s/.test(last) && (!PUNCT.test(last) || /\s/.test(next) || PUNCT.test(next));
+      if (openOk && closeOk && !/^_+$/.test(x)) return m;
+      bump('Markdown 不認得的粗體改用 <strong>');
+      return `<strong>${x}</strong>`;
+    });
+    return out;
+  });
+}
+
 // 8. 頁緣章節側標：單獨一行的「壹」「貳」……在同一份文件重複出現就是每頁的側標，移除
 const SIDE_TAB = /^\s*(\*\*)?([壹貳參肆伍陸柒捌玖拾])(\*\*)?\s*$/;
 function dropSideTabs(lines) {
@@ -629,8 +669,10 @@ function joinBrokenLines(lines) {
       const commaEnd = /[，、]$/.test(a.replace(/\*\*/g, '').trim());
       const listB = b.match(/^\s*[-*+]\s+(.*)$/);
       let rest = null;
-      if (!/^\s*([-*+]|\d+\.)\s/.test(b) && (continues(b) || (commaEnd && /^[A-Za-z]/.test(b)))) rest = b;
-      else if (listA && commaEnd && listB && continues(listB[1]) && !/^.{1,8}[：:]/.test(listB[1])) rest = listB[1];
+      if (!/^\s*([-*+]|\d+\.)\s/.test(b) && (continues(b) || (commaEnd && /^[A-Za-z0-9]/.test(b)) || (openQuote(a) && /^[A-Za-z]/.test(b)))) rest = b;
+      else if ((listA && commaEnd) || openQuote(a)) {
+        if (listB && (continues(listB[1]) || (openQuote(a) && /^[A-Za-z]/.test(listB[1]))) && !/^.{1,8}[：:]/.test(listB[1])) rest = listB[1];
+      }
       if (rest === null) {
         out.push(a);
         continue;
@@ -648,7 +690,7 @@ function joinBrokenLines(lines) {
 export function cleanDocument(text) {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body } = parseHeader(raw);
-  const lines = facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(body)))))));
+  const lines = fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(body))))))));
   return { meta, lines };
 }
 

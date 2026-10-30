@@ -51,6 +51,7 @@ export function plain(text: string): string {
 	return text
 		.replace(/<br\s*\/?>/gi, '')
 		.replace(/<\/?sup>/gi, '')
+		.replace(/<\/?strong>/gi, '')
 		.replace(/\*\*/g, '')
 		.replace(/\s+/g, ' ')
 		.trim();
