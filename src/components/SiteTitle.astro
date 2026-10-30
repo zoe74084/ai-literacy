@@ -1,0 +1,84 @@
+---
+// 資料庫版頁首：網站名稱左邊加一個收合左側目錄的按鈕（只在桌面寬度出現；
+// 手機版沿用 Starlight 自己的選單）。收合狀態記在這台裝置的瀏覽器。
+import Default from '@astrojs/starlight/components/SiteTitle.astro';
+const { hasSidebar } = Astro.locals.starlightRoute;
+---
+
+{
+	hasSidebar && (
+		<button type="button" class="sidebar-toggle" aria-controls="starlight__sidebar" aria-expanded="true" data-sidebar-toggle>
+			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+				<path d="M9.5 4.5v15" />
+				<path class="sidebar-toggle-fill" d="M5.5 7.5h2M5.5 10.5h2M5.5 13.5h2" />
+			</svg>
+			<span class="visually-hidden" data-sidebar-label>收合左側目錄</span>
+		</button>
+	)
+}
+<Default />
+
+{/* 放在頁首、內容之前執行，避免收合時先閃一下 */}
+<script is:inline>
+	(() => {
+		const KEY = 'ai-literacy:sidebar-collapsed';
+		const html = document.documentElement;
+		let collapsed = false;
+		try {
+			collapsed = localStorage.getItem(KEY) === '1';
+		} catch {}
+		const apply = () => {
+			html.toggleAttribute('data-sidebar-collapsed', collapsed);
+			const btn = document.querySelector('[data-sidebar-toggle]');
+			if (!btn) return;
+			btn.setAttribute('aria-expanded', String(!collapsed));
+			btn.title = collapsed ? '展開左側目錄' : '收合左側目錄';
+			btn.querySelector('[data-sidebar-label]').textContent = btn.title;
+		};
+		apply();
+		document.querySelector('[data-sidebar-toggle]')?.addEventListener('click', () => {
+			collapsed = !collapsed;
+			try {
+				localStorage.setItem(KEY, collapsed ? '1' : '0');
+			} catch {}
+			apply();
+		});
+	})();
+</script>
+
+<style>
+	.sidebar-toggle {
+		display: none;
+	}
+	@media (min-width: 50em) {
+		.sidebar-toggle {
+			display: inline-grid;
+			place-items: center;
+			flex: none;
+			width: 2.5rem;
+			height: 2.5rem;
+			margin-inline-end: 0.5rem;
+			border: 1px solid var(--sl-color-gray-5);
+			border-radius: 0.6rem;
+			background: transparent;
+			color: var(--sl-color-gray-2);
+			cursor: pointer;
+		}
+		.sidebar-toggle:hover {
+			color: var(--sl-color-text-accent);
+			border-color: var(--sl-color-text-accent);
+		}
+		:global(html[data-sidebar-collapsed]) .sidebar-toggle-fill {
+			opacity: 0;
+		}
+	}
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+</style>
