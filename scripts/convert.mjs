@@ -333,7 +333,7 @@ function cleanPages(body) {
     const prose = (l) => l && !/^\s*([#>|]|<)/.test(l);
     if (
       prev !== undefined &&
-      ((plain(prev) && CJK.test(prev.slice(-1)) && CJK.test(first.charAt(0))) || (prose(prev) && midSentence(prev) && continues(first))) &&
+      ((plain(prev) && !ENUM_TITLE.test(prev.trim()) && CJK.test(prev.slice(-1)) && CJK.test(first.charAt(0))) || (prose(prev) && midSentence(prev) && continues(first))) &&
       plain(first)
     ) {
       out[out.length - 1] = prev + first;
@@ -564,6 +564,33 @@ function facetTables(lines) {
   return out;
 }
 
+// 9. 編號小標（「一、……」「（二）……」「3、……」）：PDF 常把它黏在上一段結尾，
+//    拆成獨立一行；獨立成行的編號小標加粗，讀起來才分得出層次。
+const ENUM_HEAD = String.raw`(?:[一二三四五六七八九十]{1,2}、|（[一二三四五六七八九十]{1,2}）|\d{1,2}、)`;
+const ENUM_TITLE = new RegExp(String.raw`^${ENUM_HEAD}\s*[^，。；！？|]{2,30}$`);
+const GLUED_TITLE = new RegExp(String.raw`^(.*[。：；！？」])\s*(${ENUM_HEAD}\s*[^，。；！？|]{2,30})$`);
+function splitGluedTitles(lines) {
+  const out = [];
+  const isPara = (l) => l.trim() && !/^\s*([#>|<]|[-*+]\s|\d+\.\s)/.test(l);
+  const title = (t) => `**${t.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim()}**`;
+  for (const l of lines) {
+    if (!isPara(l)) {
+      out.push(l);
+      continue;
+    }
+    const bare = l.replace(/\*\*/g, '').trim();
+    const m = bare.match(GLUED_TITLE);
+    if (m && [...m[1]].length >= 20) {
+      bump('把黏在段尾的編號小標拆成獨立一行');
+      out.push(m[1].trim(), '', title(m[2]));
+    } else if (ENUM_TITLE.test(bare) && !/^\*\*[^*]+\*\*$/.test(l.trim())) {
+      bump('獨立成行的編號小標加粗');
+      out.push(title(bare));
+    } else out.push(l);
+  }
+  return out;
+}
+
 // 8. 頁緣章節側標：單獨一行的「壹」「貳」……在同一份文件重複出現就是每頁的側標，移除
 const SIDE_TAB = /^\s*(\*\*)?([壹貳參肆伍陸柒捌玖拾])(\*\*)?\s*$/;
 function dropSideTabs(lines) {
@@ -621,7 +648,7 @@ function joinBrokenLines(lines) {
 export function cleanDocument(text) {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body } = parseHeader(raw);
-  const lines = facetTables(joinBrokenLines(dropSideTabs(cleanBlocks(cleanLines(cleanPages(body))))));
+  const lines = facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(body)))))));
   return { meta, lines };
 }
 
