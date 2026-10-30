@@ -35,9 +35,9 @@ const roles = [
 		items: [
 			{ t: 'AI 素養框架：學生的四個面向', h: r('framework/?who=student'), k: '導讀' },
 			{ t: '生成式 AI 注意事項（學生版）', h: r('notices/'), k: '導讀' },
-			{ t: '國小生聰明用 AI', h: r('doc/handbooks/elementary/'), k: '手冊' },
-			{ t: '國中生靈活用 AI', h: r('doc/handbooks/junior/'), k: '手冊' },
-			{ t: '高中生智慧駕馭 AI', h: r('doc/handbooks/senior/'), k: '手冊' },
+			{ t: '國小生聰明用 AI', h: r('handbooks/elementary/'), k: '手冊' },
+			{ t: '國中生靈活用 AI', h: r('handbooks/junior/'), k: '手冊' },
+			{ t: '高中生智慧駕馭 AI', h: r('handbooks/senior/'), k: '手冊' },
 		],
 	},
 	{
@@ -70,6 +70,7 @@ const contents = [
 	{ t: '課堂 AI 紅黃綠燈', d: '依學習目標決定 AI 使用程度，附班級公約示例。', h: r('traffic-light/') },
 	{ t: '指引重點先看', d: '教師、校長指引每章開頭的重點；家長指引各章一覽。', h: r('guides/') },
 	{ t: '教案地圖', d: '23 份課例排在學段與領域交錯的課表上。', h: r('lessons/') },
+	{ t: 'AI 學習應用手冊', d: '國小、國中、高中三本，沿著章節路線讀，讀完勾選「我學會了嗎」。', h: r('handbooks/') },
 	{ t: '書架', d: '47 份文件都能直接在網頁上閱讀。', h: r('') },
 ];
 
@@ -79,7 +80,7 @@ const shelf = [
 	{ code: '03', title: '生成式AI注意事項', groups: ['notices'], href: r('notices/'), c: 'parent' },
 	{ code: '04', title: '數位與AI教學指引', groups: ['guides', 'history'], href: r('guides/'), c: 'admin' },
 	{ code: '04', title: '教案示例', groups: ['lessons-es', 'lessons-jh', 'lessons-sh', 'lessons-vs'], href: r('lessons/'), c: 'teacher' },
-	{ code: '05', title: '學習應用手冊', groups: ['handbooks'], href: r('#handbooks'), c: 'student' },
+	{ code: '05', title: '學習應用手冊', groups: ['handbooks'], href: r('handbooks/'), c: 'student' },
 	{ code: '06', title: '家長宣導', groups: ['parents'], href: r('doc/parents/briefing/'), c: 'parent' },
 	{ code: '07', title: '數位學習實施計畫', groups: ['admin-plan'], href: r('doc/admin/plan/'), c: 'admin' },
 	{ code: '08', title: '教育大數據', groups: ['admin-data'], href: l('admin/bigdata/xapi/'), c: 'teacher' },
@@ -291,7 +292,7 @@ const stages = ['國小', '國中', '高中'];
 				<div class="hb-row">
 					{
 						handbooks.map((h, i) => (
-							<a class="hb" href={r(`doc/${h.slug}/`)}>
+							<a class="hb" href={r(`${h.slug}/`)}>
 								<span class="hb-stage">{stages[i]}</span>
 								<span class="hb-title">{h.title}</span>
 								<span class="hb-meta">共 {h.chapters?.length ?? 1} 章</span>

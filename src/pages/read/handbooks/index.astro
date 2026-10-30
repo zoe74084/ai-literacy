@@ -1,0 +1,120 @@
+---
+import Site from '../../../layouts/Site.astro';
+import { byGroup, handbookChapter } from '../../../lib/content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const keys = ['elementary', 'junior', 'senior'] as const;
+const STAGES = ['國小', '國中', '高中'];
+const colors = ['var(--c-teacher)', 'var(--c-student)', 'var(--c-admin)'];
+const books = byGroup('handbooks').map((b, i) => {
+	const chapters = (b.chapters ?? []).filter((c, j) => j > 0 && !/^教育部中小學AI之學習應用手冊/.test(c.title));
+	const checks = chapters.reduce((n, c) => n + handbookChapter(c.slug, c.title).checks.length, 0);
+	return { ...b, key: keys[i], stage: STAGES[i], color: colors[i], chapters, checks };
+});
+---
+
+<Site title="AI 學習應用手冊" description="115 年中小學 AI 之學習應用手冊：國小、國中、高中三本的互動版。" current="read">
+	<section class="page-hero wrap">
+		<h1>AI 學習應用手冊</h1>
+		<p class="lead">教育部 115 年為國小、國中、高中學生各寫了一本。選你的學段，沿著章節路線讀，讀完每章可以在「我學會了嗎」勾選自己做到了哪些。</p>
+	</section>
+	<section class="band band--grid">
+		<div class="wrap books">
+			{
+				books.map((b) => (
+					<a class="book" href={`${base}/read/handbooks/${b.key}/`} style={`--book:${b.color}`} data-book={b.key} data-total={b.checks}>
+						<span class="spine">{b.stage}</span>
+						<span class="book-body">
+							<span class="book-title">{b.title}</span>
+							<span class="book-meta">
+								{b.chapters.length} 章・{b.checks} 項自我檢核
+							</span>
+							<span class="book-progress" data-progress hidden>
+								已做到 <b>0</b> 項
+							</span>
+							<span class="btn btn--solid">開始讀</span>
+						</span>
+					</a>
+				))
+			}
+		</div>
+	</section>
+</Site>
+
+<script>
+	// 顯示這台裝置上的勾選進度
+	document.querySelectorAll<HTMLElement>('[data-book]').forEach((el) => {
+		try {
+			const s = JSON.parse(localStorage.getItem(`ai-literacy:handbook:${el.dataset.book}`) || '{}');
+			const done = Object.values(s).filter((v) => v === 'done').length;
+			if (!done) return;
+			const p = el.querySelector<HTMLElement>('[data-progress]')!;
+			p.querySelector('b')!.textContent = String(done);
+			p.hidden = false;
+		} catch {}
+	});
+</script>
+
+<style>
+	.books {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: clamp(1rem, 3vw, 1.75rem);
+	}
+	.book {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		min-height: 20rem;
+		background: var(--paper);
+		border-radius: 0.4rem var(--r-lg) var(--r-lg) 0.4rem;
+		box-shadow: var(--shadow-2);
+		text-decoration: none;
+		overflow: hidden;
+		transition:
+			transform 0.25s var(--ease-out),
+			box-shadow 0.25s var(--ease-out);
+	}
+	.book:hover {
+		transform: translateY(-4px);
+	}
+	.spine {
+		writing-mode: vertical-rl;
+		text-orientation: upright;
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: 1.6rem;
+		letter-spacing: 0.25em;
+		padding: 1.25rem 0.75rem;
+		background: var(--book);
+		color: var(--paper);
+	}
+	.book-body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		padding: 1.5rem 1.4rem;
+	}
+	.book-title {
+		font-family: var(--kai);
+		font-weight: 700;
+		font-size: clamp(1.5rem, 2.6vw, 1.9rem);
+		line-height: 1.35;
+	}
+	.book-meta,
+	.book-progress {
+		font-size: 0.9rem;
+		color: var(--ink-2);
+	}
+	.book .btn {
+		margin-top: auto;
+		align-self: flex-start;
+	}
+	@media (max-width: 52rem) {
+		.books {
+			grid-template-columns: 1fr;
+		}
+		.book {
+			min-height: 0;
+		}
+	}
+</style>
