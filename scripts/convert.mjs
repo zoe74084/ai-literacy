@@ -687,6 +687,22 @@ function joinBrokenLines(lines) {
   return out;
 }
 
+// 原文勘誤：src/data/errata.json 列出原文 PDF 本身的錯字（例如重複的標點）。
+// 每一筆都必須在該文件裡剛好出現一次，否則中止，避免勘誤表和原文對不上。
+const ERRATA = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/errata.json'), 'utf8'));
+function applyErrata(file, lines) {
+  const items = ERRATA.filter((e) => e.file === file);
+  if (!items.length) return lines;
+  let text = lines.join('\n');
+  for (const e of items) {
+    const n = text.split(e.find).length - 1;
+    if (n !== 1) throw new Error(`原文勘誤對不上（${file}，第 ${e.page} 頁）：「${e.find}」出現 ${n} 次`);
+    text = text.replace(e.find, () => e.replace);
+    bump('原文勘誤（src/data/errata.json）');
+  }
+  return text.split('\n');
+}
+
 export function cleanDocument(text) {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body } = parseHeader(raw);
@@ -869,7 +885,8 @@ function main() {
 
   for (const spec of specs) {
     const text = fs.readFileSync(path.join(SRC, spec.file), 'utf8');
-    const { meta, lines } = cleanDocument(text);
+    const { meta, lines: cleaned } = cleanDocument(text);
+    const lines = applyErrata(spec.file, cleaned);
     const base = {
       audience: spec.audience,
       source: { file: spec.file, original: meta.originalFile || undefined, pages: meta.pages ?? undefined },
