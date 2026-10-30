@@ -54,6 +54,7 @@ const colors = { elementary: 'var(--c-teacher)', junior: 'var(--c-student)', sen
 
 	<section class="band band--grid journey-band" data-hb={book} data-total={totalChecks} style={`--book:${colors[book as keyof typeof colors]}`}>
 		<div class="wrap">
+			<div class="route-card">
 			<div class="progress-line" aria-live="polite">
 				<span>已做到 <b data-done>0</b> / {totalChecks} 項</span>
 				<span class="bar" aria-hidden="true"><span data-bar></span></span>
@@ -81,6 +82,7 @@ const colors = { elementary: 'var(--c-teacher)', junior: 'var(--c-student)', sen
 					))
 				}
 			</ol>
+			</div>
 
 			{
 				chapters.map((c, i) => (
@@ -326,15 +328,20 @@ const colors = { elementary: 'var(--c-teacher)', junior: 'var(--c-student)', sen
 		--cell: 26px;
 		padding-top: 2.5rem;
 	}
+	/* 路線卡：白紙底，不讓背後的方格干擾閱讀 */
+	.route-card {
+		background: var(--paper);
+		border-radius: var(--r-lg);
+		box-shadow: var(--shadow-1);
+		padding: 0.9rem clamp(0.75rem, 2.5vw, 1.5rem) 0.5rem;
+	}
 	.progress-line {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 0.5rem 1rem;
-		background: var(--paper);
-		border: 1px solid var(--line);
-		border-radius: var(--r-md);
-		padding: 0.6rem 1rem;
+		padding: 0 0.25rem 0.85rem;
+		border-bottom: 1px solid var(--line);
 		font-size: 0.92rem;
 		font-variant-numeric: tabular-nums;
 	}
@@ -371,8 +378,8 @@ const colors = { elementary: 'var(--c-teacher)', junior: 'var(--c-student)', sen
 	/* 路線：一站一站，中間以虛線相連 */
 	.route {
 		list-style: none;
-		margin: 1.5rem 0 0;
-		padding: 0.5rem 0 1rem;
+		margin: 0;
+		padding: 1.1rem 0 0.9rem;
 		display: grid;
 		grid-auto-flow: column;
 		grid-auto-columns: minmax(7.5rem, 1fr);
@@ -392,6 +399,7 @@ const colors = { elementary: 'var(--c-teacher)', junior: 'var(--c-student)', sen
 		left: -50%;
 		width: 100%;
 		border-top: 2px dashed var(--grid-strong);
+		translate: 0 -1px;
 		z-index: 0;
 	}
 	.route a {
@@ -410,8 +418,9 @@ const colors = { elementary: 'var(--c-teacher)', junior: 'var(--c-student)', sen
 		place-items: center;
 		width: 2.9rem;
 		height: 2.9rem;
+		position: relative;
 		border: 2px solid var(--grid-strong);
-		background: var(--paper);
+		background: var(--paper-tint);
 		font-family: var(--kai);
 		font-weight: 700;
 		font-size: 1.25rem;
@@ -421,23 +430,46 @@ const colors = { elementary: 'var(--c-teacher)', junior: 'var(--c-student)', sen
 			color 0.2s,
 			border-color 0.2s;
 	}
+	/* 已完成：淡色底＋右上角勾 */
 	.stop.is-complete {
+		background: color-mix(in srgb, var(--book) 16%, var(--paper));
+		border-color: var(--book);
+		color: var(--ink);
+	}
+	.stop.is-complete::after {
+		content: '✓';
+		position: absolute;
+		top: -0.55rem;
+		right: -0.55rem;
+		display: grid;
+		place-items: center;
+		width: 1.15rem;
+		height: 1.15rem;
+		border-radius: 50%;
+		background: var(--book);
+		color: var(--paper);
+		font-family: var(--sans);
+		font-size: 0.7rem;
+		line-height: 1;
+	}
+	.stop-title {
+		font-size: 0.84rem;
+		line-height: 1.5;
+		max-width: 9rem;
+		padding: 0.1rem 0.45rem;
+		border-radius: 0.35rem;
+	}
+	/* 目前這一站：實心書色、標題加底色 */
+	.route a[aria-selected='true'] .stop {
 		background: var(--book);
 		border-color: var(--book);
 		color: var(--paper);
-	}
-	.stop-title {
-		font-size: 0.82rem;
-		line-height: 1.45;
-		max-width: 9rem;
-	}
-	.route a[aria-selected='true'] .stop {
-		border-color: var(--ink);
-		box-shadow: 0 0 0 4px var(--paper), 0 0 0 6px var(--book);
+		box-shadow: 0 0 0 4px var(--paper), 0 0 0 6px color-mix(in srgb, var(--book) 35%, var(--paper));
 	}
 	.route a[aria-selected='true'] .stop-title {
 		color: var(--ink);
 		font-weight: 700;
+		background: color-mix(in srgb, var(--book) 14%, var(--paper));
 	}
 	.route a:hover .stop-title {
 		color: var(--ink);
