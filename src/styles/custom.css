@@ -192,10 +192,6 @@ h1#_top,
 	color: var(--sl-color-gray-2);
 	letter-spacing: 0.04em;
 }
-.sl-markdown-content .dg-title::before {
-	content: '圖解｜';
-	color: var(--sl-color-accent);
-}
 .sl-markdown-content .dg-list {
 	list-style: none;
 	margin: 0;

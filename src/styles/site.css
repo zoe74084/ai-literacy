@@ -559,18 +559,6 @@ a.card:hover {
 	font-size: 1.05em;
 	color: var(--cover);
 }
-.prose .dg-title::before {
-	content: '圖解';
-	display: inline-block;
-	margin-right: 0.5em;
-	padding: 0 0.5em;
-	border: 1.5px solid var(--red-pen);
-	border-radius: 0.3em;
-	color: var(--red-pen);
-	font-size: 0.8em;
-	line-height: 1.5;
-	vertical-align: 0.1em;
-}
 .prose .dg-list {
 	list-style: none;
 	margin: 0;
