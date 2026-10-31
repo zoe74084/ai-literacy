@@ -797,11 +797,70 @@ function applyErrata(file, lines) {
   return text.split('\n');
 }
 
-export function cleanDocument(text) {
+// 10. 圖解：source-md 裡的 ```diagram 區塊是補在原文旁邊的結構化圖，不是原文。
+//     先換成佔位行，避開清理步驟與勘誤比對，最後才換成 HTML（樣式在 custom.css 的 .dg）。
+//     格式：
+//       ```diagram
+//       type: steps | cycle | cards | compare | levels | map
+//       title: 圖的標題
+//       note: 圖下方的補充（可省略）
+//       - 項目標題 | 說明 | 標記（steps/cards/levels 是角標；compare 是 green/yellow/red；map 是右欄標題）
+//       ```
+const DIAGRAM_TYPES = ['steps', 'cycle', 'cards', 'compare', 'levels', 'map'];
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const inl = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+function renderDiagram(src, file) {
+  const d = { items: [] };
+  for (const l of src) {
+    const kv = l.match(/^(type|title|note):\s*(.*)$/);
+    if (kv) d[kv[1]] = kv[2].trim();
+    else if (/^-\s+/.test(l)) d.items.push(l.replace(/^-\s+/, '').split(/\s+\|\s+/).map((x) => x.trim()));
+  }
+  if (!DIAGRAM_TYPES.includes(d.type) || !d.title || !d.items.length) throw new Error(`圖解格式錯誤（${file}）：${src.join(' / ')}`);
+  const item = ([t, desc = '', tag = '']) => {
+    if (d.type === 'map')
+      return `<li class="dg-item"><span class="dg-from">${inl(t)}</span><span class="dg-arrow" aria-hidden="true">→</span><span class="dg-to"><strong>${inl(tag)}</strong>${desc ? `<span class="dg-desc">${inl(desc)}</span>` : ''}</span></li>`;
+    const tone = d.type === 'compare' && /^(green|yellow|red)$/.test(tag) ? ` dg-${tag}` : '';
+    const badge = tag && !tone ? `<span class="dg-badge">${inl(tag)}</span>` : '';
+    return `<li class="dg-item${tone}">${badge}<strong class="dg-head">${inl(t)}</strong>${desc ? `<span class="dg-desc">${inl(desc)}</span>` : ''}</li>`;
+  };
+  const list = ['steps', 'cycle', 'levels'].includes(d.type) ? 'ol' : 'ul';
+  bump('加入圖解');
+  return [
+    `<figure class="dg dg-${d.type}" aria-label="${esc(d.title)}">`,
+    `<figcaption class="dg-title">${inl(d.title)}</figcaption>`,
+    `<${list} class="dg-list"${list === 'ol' ? ` style="--n:${d.items.length}"` : ''}>${d.items.map(item).join('')}</${list}>`,
+    d.type === 'cycle' ? '<p class="dg-loop" aria-hidden="true">↻ 回到第一步，持續循環</p>' : '',
+    d.note ? `<p class="dg-note">${inl(d.note)}</p>` : '',
+    '</figure>',
+  ]
+    .filter(Boolean)
+    .join('');
+}
+function extractDiagrams(body, file) {
+  const out = [];
+  const html = [];
+  const lines = body.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() !== '```diagram') {
+      out.push(lines[i]);
+      continue;
+    }
+    const src = [];
+    while (++i < lines.length && lines[i].trim() !== '```') src.push(lines[i]);
+    html.push(renderDiagram(src, file));
+    out.push('', `@@DIAGRAM_${html.length - 1}@@`, '');
+  }
+  return { body: out.join('\n'), html };
+}
+export const putDiagrams = (lines, html) => lines.map((l) => l.replace(/^@@DIAGRAM_(\d+)@@$/, (_, n) => html[Number(n)]));
+
+export function cleanDocument(text, file = '') {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
-  const { meta, body } = parseHeader(raw);
+  const { meta, body: rawBody } = parseHeader(raw);
+  const { body, html } = extractDiagrams(rawBody, file);
   const lines = fixBrackets(fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(ocrNotes(body))))))))));
-  return { meta, lines };
+  return { meta, lines, diagrams: html };
 }
 
 // ---------------------------------------------------------------------------
@@ -979,8 +1038,8 @@ function main() {
 
   for (const spec of specs) {
     const text = fs.readFileSync(path.join(SRC, spec.file), 'utf8');
-    const { meta, lines: cleaned } = cleanDocument(text);
-    const lines = applyErrata(spec.file, cleaned);
+    const { meta, lines: cleaned, diagrams } = cleanDocument(text, spec.file);
+    const lines = putDiagrams(applyErrata(spec.file, cleaned), diagrams);
     const base = {
       audience: spec.audience,
       source: { file: spec.file, original: meta.originalFile || undefined, pages: meta.pages ?? undefined },
