@@ -17,7 +17,8 @@ const GEN = path.join(ROOT, 'src/generated');
 
 // 超過這個大小（bytes）的文件依章節拆頁
 const SPLIT_THRESHOLD = 60_000;
-// 拆完後單頁仍超過這個大小，就再往下一層拆
+// 拆完後單頁仍超過這個大小，就再往下一層拆。個別文件可用 resplit 另訂門檻：
+// 例如圖片亂碼改成短說明後文件變小，靠門檻維持原本的拆法，網址才不會移位
 const RESPLIT_THRESHOLD = 90_000;
 // 小於這個大小的章節併入下一章（避免只有一行字的頁面）
 const MIN_CHUNK = 1_500;
@@ -74,7 +75,7 @@ const DOCS = [
   { file: '03_生成式AI注意事項_中小學使用生成式人工智慧注意事項2.1_教師_行政人員及家長版.md', slug: 'notices/adults', title: '中小學使用生成式人工智慧注意事項 2.1（教師、行政人員及家長版）', label: '教師、行政人員及家長版', audience: ['teacher', 'admin', 'parent'], group: 'notices', order: 2 },
 
   // 04 教學指引（115 年）
-  { file: '04_教學指引_115年中小學教師數位與AI教學指引1150920.md', slug: 'guides/teacher', title: '115 年中小學教師數位與 AI 教學指引', label: '教師數位與 AI 教學指引', audience: ['teacher'], group: 'guides', order: 1, split: true },
+  { file: '04_教學指引_115年中小學教師數位與AI教學指引1150920.md', slug: 'guides/teacher', title: '115 年中小學教師數位與 AI 教學指引', label: '教師數位與 AI 教學指引', audience: ['teacher'], group: 'guides', order: 1, split: true, resplit: 80_000 },
   { file: '04_教學指引_115年中小學家長數位與AI學習知能指引v1150908.md', slug: 'guides/parent', title: '115 年中小學家長數位與 AI 學習知能指引', label: '家長數位與 AI 學習知能指引', audience: ['parent'], group: 'guides', order: 2, split: true },
   { file: '04_教學指引_115年中小學校長數位與AI學習領導指引1150920.md', slug: 'guides/principal', title: '115 年中小學校長數位與 AI 學習領導指引', label: '校長數位與 AI 學習領導指引', audience: ['admin'], group: 'guides', order: 3, split: true },
   // 04 教學指引（114 年，歷史版本）
@@ -294,6 +295,30 @@ function parseHeader(text) {
     i++;
   }
   return { meta, body: lines.slice(i).join('\n') };
+}
+
+// 1b. 圖片內文字：PDF 圖片裡自動辨識出來的文字順序常常是亂的，讀者看不懂。
+//     source-md 裡還沒照原文重建的，換成一行說明，請讀者看原文 PDF 的那一頁；
+//     同一頁連續幾個圖片區塊只留一行。
+const OCR_HEAD = /^>\s*（圖片內文字，順序可能錯亂）/;
+function ocrNotes(body) {
+  const lines = body.split('\n');
+  const out = [];
+  let page = null;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].trim().match(/^<!--\s*第\s*(\d+)\s*頁\s*-->$/);
+    if (m) page = Number(m[1]);
+    if (!OCR_HEAD.test(lines[i])) {
+      out.push(lines[i]);
+      continue;
+    }
+    while (i + 1 < lines.length && lines[i + 1].startsWith('>')) i++;
+    const prev = [...out].reverse().find((l) => l.trim());
+    const note = `> 此處是圖片，內容請見原文 PDF 第 ${page ?? '?'} 頁。`;
+    if (prev !== note) out.push(note);
+    bump('圖片內文字改為「請見原文 PDF」說明');
+  }
+  return out.join('\n');
 }
 
 // 2. 依頁碼註解切頁，處理頁首頁尾與單獨頁碼，再接回來
@@ -775,7 +800,7 @@ function applyErrata(file, lines) {
 export function cleanDocument(text) {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body } = parseHeader(raw);
-  const lines = fixBrackets(fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(body)))))))));
+  const lines = fixBrackets(fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(ocrNotes(body))))))))));
   return { meta, lines };
 }
 
@@ -838,11 +863,11 @@ function mergeSmall(chunks) {
 
 // 單一章節仍過大時，往下一層拆開，再把相鄰小節打包成約 PACK_TARGET 大小的頁面
 const PACK_TARGET = 45_000;
-function splitOversized(chunk, depth) {
-  if (size(chunk.body) <= RESPLIT_THRESHOLD || depth > 3) return [chunk];
+function splitOversized(chunk, depth, threshold = RESPLIT_THRESHOLD) {
+  if (size(chunk.body) <= threshold || depth > 3) return [chunk];
   const level = chooseLevel(chunk.body);
   if (!level) return [chunk];
-  const subs = splitAt(chunk.body, level).flatMap((s) => splitOversized(s, depth + 1));
+  const subs = splitAt(chunk.body, level).flatMap((s) => splitOversized(s, depth + 1, threshold));
   if (subs.length <= 1) return [chunk];
   const packs = [];
   let cur = null;
@@ -876,10 +901,10 @@ function splitOversized(chunk, depth) {
   });
 }
 
-function splitDocument(lines) {
+function splitDocument(lines, threshold) {
   const level = chooseLevel(lines);
   if (!level) return [{ heading: null, body: lines }];
-  return mergeSmall(splitAt(lines, level)).flatMap((c) => splitOversized(c, 0));
+  return mergeSmall(splitAt(lines, level)).flatMap((c) => splitOversized(c, 0, threshold));
 }
 
 // ---------------------------------------------------------------------------
@@ -978,7 +1003,7 @@ function main() {
       continue;
     }
 
-    const chunks = splitDocument(lines);
+    const chunks = splitDocument(lines, spec.resplit);
     const chapters = [];
     chunks.forEach((c, i) => {
       const n = String(i + 1).padStart(2, '0');
