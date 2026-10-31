@@ -70,5 +70,13 @@
     "find": "• 計跨領域 AI 系統",
     "replace": "• 設計跨領域 AI 系統",
     "note": "漏字「計跨領域」改為「設計跨領域」（框架全文同一條為「設計跨領域」）"
+  },
+  {
+    "file": "06_家長宣導_中小學數位學習發展趨勢與推動家長陪伴公版簡報0911.md",
+    "slug": "parents/briefing",
+    "page": 6,
+    "find": "Bring You Own Device",
+    "replace": "Bring Your Own Device",
+    "note": "漏字「Bring You Own Device」改為「Bring Your Own Device」"
   }
 ]
