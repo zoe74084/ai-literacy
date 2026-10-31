@@ -160,3 +160,196 @@ h1#_top,
 		display: none;
 	}
 }
+
+/* 圖解（convert.mjs 從 ```diagram 區塊產生；補在原文旁的結構化圖） */
+:root {
+	--dg-green-bg: #173a2d;
+	--dg-green-bar: #4fa57a;
+	--dg-yellow-bg: #3d3214;
+	--dg-yellow-bar: #d9a520;
+	--dg-red-bg: #45201f;
+	--dg-red-bar: #e06a62;
+}
+:root[data-theme='light'] {
+	--dg-green-bg: #e3f2e8;
+	--dg-green-bar: #2f7a50;
+	--dg-yellow-bg: #fbf1d5;
+	--dg-yellow-bar: #b07d00;
+	--dg-red-bg: #fbe4e1;
+	--dg-red-bar: #c0392b;
+}
+.sl-markdown-content .dg {
+	margin: 1.75em 0;
+	padding: 1rem 1.1rem 1.1rem;
+	border: 1px solid var(--sl-color-hairline);
+	border-radius: 0.75rem;
+	background: var(--sl-color-gray-7, var(--sl-color-bg-nav));
+}
+.sl-markdown-content .dg-title {
+	margin: 0 0 0.75rem;
+	font-weight: 700;
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-2);
+	letter-spacing: 0.04em;
+}
+.sl-markdown-content .dg-title::before {
+	content: '圖解｜';
+	color: var(--sl-color-accent);
+}
+.sl-markdown-content .dg-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.6rem;
+}
+.sl-markdown-content .dg-list > li {
+	margin: 0;
+}
+.sl-markdown-content .dg-item {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	padding: 0.65rem 0.8rem;
+	border-radius: 0.5rem;
+	background: var(--sl-color-bg);
+	border: 1px solid var(--sl-color-hairline-light, var(--sl-color-hairline));
+	line-height: 1.55;
+}
+.sl-markdown-content .dg-head {
+	color: var(--sl-color-white);
+	font-weight: 700;
+}
+.sl-markdown-content .dg-desc {
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-2);
+}
+.sl-markdown-content .dg-badge {
+	align-self: flex-start;
+	min-width: 1.8rem;
+	padding: 0.05rem 0.5rem;
+	border-radius: 999px;
+	background: var(--sl-color-accent);
+	color: var(--sl-color-black, #fff);
+	font-size: var(--sl-text-xs);
+	font-weight: 700;
+	text-align: center;
+}
+:root[data-theme='light'] .sl-markdown-content .dg-badge {
+	color: #fff;
+}
+.sl-markdown-content .dg-note,
+.sl-markdown-content .dg-loop {
+	margin: 0.75rem 0 0;
+	font-size: var(--sl-text-xs);
+	color: var(--sl-color-gray-3);
+}
+
+/* 卡片：自動排欄 */
+.sl-markdown-content .dg-cards .dg-list,
+.sl-markdown-content .dg-compare .dg-list {
+	grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+/* 步驟／循環：寬螢幕橫排加箭頭，窄螢幕直排 */
+.sl-markdown-content :is(.dg-steps, .dg-cycle) .dg-list {
+	counter-reset: dg;
+	gap: 0.6rem 1.4rem;
+}
+@media (min-width: 48rem) {
+	.sl-markdown-content :is(.dg-steps, .dg-cycle, .dg-levels) .dg-list {
+		grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+	}
+}
+.sl-markdown-content :is(.dg-steps, .dg-cycle) .dg-item {
+	counter-increment: dg;
+	padding-top: 2.1rem;
+}
+.sl-markdown-content :is(.dg-steps, .dg-cycle) .dg-item::before {
+	content: counter(dg);
+	position: absolute;
+	top: 0.6rem;
+	left: 0.8rem;
+	width: 1.3rem;
+	height: 1.3rem;
+	border-radius: 50%;
+	background: var(--sl-color-accent);
+	color: var(--sl-color-black, #fff);
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 1.3rem;
+	text-align: center;
+}
+:root[data-theme='light'] .sl-markdown-content :is(.dg-steps, .dg-cycle) .dg-item::before {
+	color: #fff;
+}
+.sl-markdown-content :is(.dg-steps, .dg-cycle) .dg-item .dg-badge {
+	position: absolute;
+	top: 0.55rem;
+	left: 2.5rem;
+}
+@media (min-width: 48rem) {
+	.sl-markdown-content :is(.dg-steps, .dg-cycle) .dg-item:not(:last-child)::after {
+		content: '→';
+		position: absolute;
+		right: -1.15rem;
+		top: 50%;
+		transform: translateY(-50%);
+		color: var(--sl-color-accent);
+		font-weight: 700;
+	}
+}
+
+/* 層級：由下而上的階梯 */
+.sl-markdown-content .dg-levels .dg-list {
+	align-items: end;
+}
+@media (min-width: 48rem) {
+	.sl-markdown-content .dg-levels .dg-item:nth-child(2) { margin-bottom: 1.2rem; }
+	.sl-markdown-content .dg-levels .dg-item:nth-child(3) { margin-bottom: 2.4rem; }
+}
+.sl-markdown-content .dg-levels .dg-item {
+	border-top: 4px solid var(--fw-l0);
+}
+.sl-markdown-content .dg-levels .dg-item:nth-child(2) { border-top-color: var(--fw-l1); }
+.sl-markdown-content .dg-levels .dg-item:nth-child(3) { border-top-color: var(--fw-l2); }
+
+/* 對照：紅黃綠燈 */
+.sl-markdown-content .dg-compare .dg-item {
+	border: 0;
+	border-left: 5px solid var(--sl-color-hairline);
+}
+.sl-markdown-content .dg-compare .dg-green { background: var(--dg-green-bg); border-left-color: var(--dg-green-bar); }
+.sl-markdown-content .dg-compare .dg-yellow { background: var(--dg-yellow-bg); border-left-color: var(--dg-yellow-bar); }
+.sl-markdown-content .dg-compare .dg-red { background: var(--dg-red-bg); border-left-color: var(--dg-red-bar); }
+
+/* 對應：左欄 → 右欄 */
+.sl-markdown-content .dg-map .dg-item {
+	display: grid;
+	grid-template-columns: minmax(7rem, 1fr) auto minmax(0, 2fr);
+	align-items: center;
+	gap: 0.6rem;
+}
+.sl-markdown-content .dg-map .dg-from {
+	font-weight: 700;
+	color: var(--sl-color-white);
+}
+.sl-markdown-content .dg-map .dg-arrow {
+	color: var(--sl-color-accent);
+	font-weight: 700;
+}
+.sl-markdown-content .dg-map .dg-to {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+@media (max-width: 30rem) {
+	.sl-markdown-content .dg-map .dg-item {
+		grid-template-columns: 1fr;
+		gap: 0.2rem;
+	}
+	.sl-markdown-content .dg-map .dg-arrow {
+		display: none;
+	}
+}
