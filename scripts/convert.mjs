@@ -856,6 +856,57 @@ function extractDiagrams(body, file) {
   }
   return { body: out.join('\n'), html };
 }
+// 11. 段落裡串在一起的編號（「重點：1. 甲、2. 乙、3. 丙」「（1）…（2）…」「①…②…」）拆成一行一項。
+//     只拆從 1 開始、依序遞增且每項都有文字的；編號前的引言要停在標點（避免拆斷「如果我（1）增加…」這種句子），
+//     順序錯亂的（PDF 欄位交錯）不動。表格、標題、HTML 不處理。
+const LIST_MARKS = [
+  { re: /(?<![\d.\w/])(\d{1,2})\s?[.．、](?!\d)\s*/g, n: (m) => Number(m[1]), out: (k) => `${k}. ` },
+  { re: /[（(](\d{1,2})[）)]\s*/g, n: (m) => Number(m[1]), out: (k) => `（${k}）` },
+  { re: /([⑴-⒇])\s*/g, n: (m) => m[1].charCodeAt(0) - 0x2473, out: (k) => String.fromCharCode(0x2473 + k) },
+  { re: /([①-⑳])\s*/g, n: (m) => m[1].charCodeAt(0) - 0x245f, out: (k) => String.fromCharCode(0x245f + k) },
+];
+function splitInlineLists(lines) {
+  const out = [];
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t || /^[|#<>`@]/.test(t) || /^-{3,}$/.test(t)) {
+      out.push(line);
+      continue;
+    }
+    let done = false;
+    for (const mk of LIST_MARKS) {
+      let body = t;
+      let bullet = '';
+      const b = body.match(/^([-*+]\s+)(.*)$/);
+      if (b) [, bullet, body] = b;
+      let bold = false;
+      if (/^\*\*[^*]+\*\*$/.test(body)) {
+        bold = true;
+        body = body.slice(2, -2);
+      }
+      const ms = [...body.matchAll(mk.re)];
+      if (ms.length < 2 || !ms.every((m, k) => mk.n(m) === k + 1)) continue;
+      const lead = body.slice(0, ms[0].index).trim();
+      const label = lead.replace(/\*\*/g, '');
+      const okLead = !lead || /[：:，,。；;）)】」*—]$/.test(lead) || /(包含|包括)$/.test(lead) || ([...label].length <= 8 && !/[，。；：、]/.test(label));
+      if (!okLead) continue;
+      const items = ms.map((m, k) => body.slice(m.index + m[0].length, k + 1 < ms.length ? ms[k + 1].index : undefined).trim().replace(/[、，,；;]\s*$/, ''));
+      if (items.some((x) => [...x.replace(/\*\*/g, '')].length < 2)) continue;
+      const indent = bullet ? '   ' : '';
+      if (lead) out.push(`${bullet}${bold ? `**${lead}**` : lead}`, '');
+      else if (bullet) out.push(bullet.trim(), '');
+      const isOl = mk.out(1) === '1. ';
+      items.forEach((x, k) => out.push(`${indent}${isOl ? mk.out(k + 1) : `- ${mk.out(k + 1)}`}${bold ? `**${x}**` : x}`));
+      out.push('');
+      bump('段落中的編號拆成條列');
+      done = true;
+      break;
+    }
+    if (!done) out.push(line);
+  }
+  return out;
+}
+
 export const putDiagrams = (lines, html) => lines.map((l) => l.replace(/^@@DIAGRAM_(\d+)@@$/, (_, n) => html[Number(n)]));
 
 export function cleanDocument(text, file = '') {
@@ -1042,7 +1093,7 @@ function main() {
   for (const spec of specs) {
     const text = fs.readFileSync(path.join(SRC, spec.file), 'utf8');
     const { meta, lines: cleaned, diagrams } = cleanDocument(text, spec.file);
-    const lines = putDiagrams(applyErrata(spec.file, cleaned), diagrams);
+    const lines = putDiagrams(splitInlineLists(applyErrata(spec.file, cleaned)), diagrams);
     const base = {
       audience: spec.audience,
       source: { file: spec.file, original: meta.originalFile || undefined, pages: meta.pages ?? undefined },
