@@ -604,6 +604,30 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		word-break: break-all;
 	}
 
+	.prose :global(.pdf-screener td:nth-child(2)) {
+		min-width: 17em;
+	}
+	.prose :global(img) {
+		display: block;
+		max-width: 100%;
+		height: auto;
+		margin: 1.5em auto;
+	}
+	.prose :global(pre) {
+		max-width: 100%;
+		overflow-x: auto;
+		padding: 1rem;
+		border: 1px solid var(--line);
+		border-radius: 0.75rem;
+		line-height: 1.6;
+	}
+	.prose :global(pre code) {
+		padding: 0;
+		background: transparent;
+		word-break: normal;
+		white-space: pre;
+	}
+
 	.pager {
 		display: grid;
 		grid-template-columns: 1fr 1fr;

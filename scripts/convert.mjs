@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { repairPageContent } from './pdf-content-repairs.mjs';
 import { repairHeadingHierarchy, separateParentChapter, preserveHeadingAnchors } from './heading-hierarchy.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -450,8 +451,12 @@ function cleanLines(lines) {
     }
     // 字型編碼錯誤造成的亂碼行（含控制字元，或大部分是替代字元）
     if (CTRL.test(raw)) {
-      bump('移除亂碼行（控制字元）');
-      continue;
+      if ((raw.match(/[\u4e00-\u9fff]/g) ?? []).length < 10 || raw.includes('�')) {
+        bump('移除亂碼行（控制字元）');
+        continue;
+      }
+      bump('移除控制字元（保留原文）');
+      raw = raw.replace(new RegExp(CTRL.source, 'g'), '');
     }
     const visible = raw.replace(/\s/g, '');
     const bad = (visible.match(/�/g) ?? []).length;
@@ -1354,7 +1359,7 @@ function main() {
     const shouldSplit = spec.split && Buffer.byteLength(text) > SPLIT_THRESHOLD;
     if (!shouldSplit) {
       const original = normalizeHeadings(structureHeadings(lines));
-      const body = preserveHeadingAnchors(original, repairHeadingHierarchy(original, spec.slug));
+      const body = preserveHeadingAnchors(original, repairHeadingHierarchy(repairPageContent(original, spec.slug), spec.slug));
       const fm = {
         title: spec.title,
         description: spec.lesson
@@ -1385,7 +1390,7 @@ function main() {
       const original = normalizeHeadings(structureHeadings(dropTitleEcho(c.body, title)));
       const body = preserveHeadingAnchors(
         slug === 'guides/parent/01' ? oldPreface : original,
-        repairHeadingHierarchy(original, slug),
+        repairHeadingHierarchy(repairPageContent(original, slug), slug),
         slug === 'guides/parent/01' ? '../chapter-01/' : null,
       );
       const fm = {

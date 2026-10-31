@@ -11,7 +11,8 @@
     "prebuild": "node scripts/convert.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check:pdf": "node scripts/convert.mjs && node scripts/check-pdf-repairs.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.7",

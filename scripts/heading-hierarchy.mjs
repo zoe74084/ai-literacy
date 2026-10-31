@@ -52,6 +52,11 @@ export function repairHeadingHierarchy(lines, slug) {
       if (chineseItem.test(text) && text.length < 90 && !/[。；]/.test(text)) level = 2;
       if (parenItem.test(text) && text.length < 70 && (h || /^\*\*.*\*\*$/.test(line.trim()))) level = 3;
     }
+    if (slug === 'handbooks/senior/07') {
+      if (/^[123]\. (?:檢視使用條款與隱私權保護|選對工具做對事|留意模型版本與更新狀態)$/.test(text)) level = 3;
+      if (/^\([二三四]\) (?:AI Agent 的三大核心能力|目前常用的 AI Agent 服務|專屬你的學習 Agent 應用情境)$/.test(text)) level = 3;
+    }
+    if (slug === 'handbooks/junior/03' && /^（二）依主要功能分類/.test(text)) level = 3;
     if (slug === 'guides/teacher/08' && text === '（七）情感依附錯位') level = 4;
     if (slug.startsWith('guides/parent/')) {
       if (/^附錄/.test(text) && h) { inAppendix = true; inQA = false; level = 2; }
