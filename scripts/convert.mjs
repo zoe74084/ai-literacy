@@ -801,12 +801,12 @@ function applyErrata(file, lines) {
 //     先換成佔位行，避開清理步驟與勘誤比對，最後才換成 HTML（樣式在 custom.css 的 .dg）。
 //     格式：
 //       ```diagram
-//       type: steps | cycle | cards | compare | levels | map
+//       type: steps | cycle | cards | compare | levels | map | timeline
 //       title: 圖的標題
 //       note: 圖下方的補充（可省略）
-//       - 項目標題 | 說明 | 標記（steps/cards/levels 是角標；compare 是 green/yellow/red；map 是右欄標題）
+//       - 項目標題 | 說明 | 標記（steps/cards/levels 是角標；compare 是 green/yellow/red；map 是右欄標題；timeline 是年份）
 //       ```
-const DIAGRAM_TYPES = ['steps', 'cycle', 'cards', 'compare', 'levels', 'map'];
+const DIAGRAM_TYPES = ['steps', 'cycle', 'cards', 'compare', 'levels', 'map', 'timeline'];
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const inl = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 function renderDiagram(src, file) {
@@ -820,16 +820,19 @@ function renderDiagram(src, file) {
   const item = ([t, desc = '', tag = '']) => {
     if (d.type === 'map')
       return `<li class="dg-item"><span class="dg-from">${inl(t)}</span><span class="dg-arrow" aria-hidden="true">→</span><span class="dg-to"><strong>${inl(tag)}</strong>${desc ? `<span class="dg-desc">${inl(desc)}</span>` : ''}</span></li>`;
+    if (d.type === 'timeline')
+      return `<li class="dg-item"><span class="dg-year">${inl(tag)}</span><span class="dg-body"><strong class="dg-head">${inl(t)}</strong>${desc ? `<span class="dg-desc">${inl(desc)}</span>` : ''}</span></li>`;
     const tone = d.type === 'compare' && /^(green|yellow|red)$/.test(tag) ? ` dg-${tag}` : '';
     const badge = tag && !tone ? `<span class="dg-badge">${inl(tag)}</span>` : '';
     return `<li class="dg-item${tone}">${badge}<strong class="dg-head">${inl(t)}</strong>${desc ? `<span class="dg-desc">${inl(desc)}</span>` : ''}</li>`;
   };
-  const list = ['steps', 'cycle', 'levels'].includes(d.type) ? 'ol' : 'ul';
+  const list = ['steps', 'cycle', 'levels', 'timeline'].includes(d.type) ? 'ol' : 'ul';
+  const cols = ['steps', 'cycle', 'levels'].includes(d.type);
   bump('加入圖解');
   return [
     `<figure class="dg dg-${d.type}" aria-label="${esc(d.title)}">`,
     `<figcaption class="dg-title">${inl(d.title)}</figcaption>`,
-    `<${list} class="dg-list"${list === 'ol' ? ` style="--n:${d.items.length}"` : ''}>${d.items.map(item).join('')}</${list}>`,
+    `<${list} class="dg-list"${cols ? ` style="--n:${d.items.length}"` : ''}>${d.items.map(item).join('')}</${list}>`,
     d.type === 'cycle' ? '<p class="dg-loop" aria-hidden="true">↻ 回到第一步，持續循環</p>' : '',
     d.note ? `<p class="dg-note">${inl(d.note)}</p>` : '',
     '</figure>',

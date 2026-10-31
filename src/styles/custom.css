@@ -360,3 +360,46 @@ h1#_top,
 		display: none;
 	}
 }
+
+/* 時間軸：左欄年份，右欄沿直線排列 */
+.sl-markdown-content .dg-timeline .dg-list {
+	gap: 0;
+}
+.sl-markdown-content .dg-timeline .dg-item {
+	display: grid;
+	grid-template-columns: 4.6rem minmax(0, 1fr);
+	gap: 0 0.9rem;
+	padding: 0;
+	background: none;
+	border: 0;
+	box-shadow: none;
+}
+.sl-markdown-content .dg-timeline .dg-year {
+	padding-top: 0.05rem;
+	text-align: right;
+	font-weight: 700;
+	color: var(--sl-color-accent);
+	font-variant-numeric: tabular-nums;
+}
+.sl-markdown-content .dg-timeline .dg-body {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	padding: 0 0 1rem 1.1rem;
+	border-left: 2px solid var(--sl-color-accent);
+}
+.sl-markdown-content .dg-timeline .dg-item:last-child .dg-body {
+	padding-bottom: 0.2rem;
+}
+.sl-markdown-content .dg-timeline .dg-body::before {
+	content: '';
+	position: absolute;
+	left: -0.45rem;
+	top: 0.35rem;
+	width: 0.7rem;
+	height: 0.7rem;
+	border-radius: 50%;
+	background: var(--sl-color-accent);
+	box-shadow: 0 0 0 3px var(--sl-color-gray-7, var(--sl-color-bg-nav));
+}
