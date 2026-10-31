@@ -289,7 +289,7 @@ const stages = ['國小', '國中', '高中'];
 						<li>
 							<a class={`spine spine--${s.c}`} href={s.href}>
 								<span class="spine-code">{s.code}</span>
-								<span class="spine-title tate">{s.title}</span>
+								<span class="spine-title">{s.title}</span>
 								<span class="spine-count">{s.count} 份</span>
 							</a>
 							<a class="spine-moe" href={s.moe.url} target="_blank" rel="noopener" aria-label={`${s.title}原文（教育部下載專區，另開新視窗）`}>
@@ -837,50 +837,45 @@ const stages = ['國小', '國中', '高中'];
 	/* 書架 */
 	.shelf {
 		list-style: none;
-		padding: 0 0.5rem;
+		padding: 0.5rem 0.25rem 1rem;
 		margin: 0 0 3rem;
-		display: flex;
-		gap: 0.45rem;
-		align-items: flex-end;
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 1.25rem 1rem;
 		overflow-x: auto;
-		border-bottom: 10px solid var(--cover);
 		scrollbar-width: thin;
 	}
 	.shelf li {
-		flex: none;
+		min-width: 0;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: stretch;
 		gap: 0.35rem;
-		padding-top: 1rem;
 	}
 	.spine {
-		display: flex;
-		flex-direction: column;
+		flex: 1;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
 		align-items: center;
-		justify-content: space-between;
-		gap: 0.6rem;
-		width: 4.3rem;
-		padding: 0.8rem 0.3rem;
-		border-radius: 0.3rem 0.3rem 0 0;
+		gap: 0.35rem 0.7rem;
+		min-height: 6.5rem;
+		padding: 1rem 0.9rem 1rem 1.15rem;
+		border-radius: 0.3rem 0.65rem 0.65rem 0.3rem;
 		text-decoration: none;
 		color: var(--cover-ink);
 		background: var(--spine);
 		box-shadow:
-			inset -6px 0 0 rgba(0, 0, 0, 0.12),
-			inset 6px 0 0 rgba(255, 255, 255, 0.08);
+			inset 6px 0 0 rgba(0, 0, 0, 0.16),
+			inset 0 -5px 0 rgba(255, 255, 255, 0.12);
 		transition: translate 0.25s var(--ease-out);
 	}
 	.spine:hover {
-		translate: 0 -10px;
+		translate: 0 -3px;
 	}
 	.spine--teacher { --spine: var(--c-teacher); }
 	.spine--student { --spine: var(--c-student); }
 	.spine--parent { --spine: var(--c-parent); }
 	.spine--admin { --spine: var(--c-admin); }
-	.shelf li:nth-child(odd) .spine { min-height: 16.5rem; }
-	.shelf li:nth-child(even) .spine { min-height: 15rem; }
-	.shelf li:nth-child(3n) .spine { min-height: 17.5rem; }
 	.spine-code {
 		font-size: 0.8rem;
 		font-weight: 700;
@@ -894,18 +889,29 @@ const stages = ['國小', '國中', '高中'];
 		font-family: var(--kai);
 		font-weight: 700;
 		font-size: 1.1rem;
+		line-height: 1.5;
 	}
 	.spine-count {
+		grid-column: 2;
 		font-size: 0.75rem;
 		opacity: 0.9;
 	}
 	.spine-moe {
+		align-self: flex-end;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.2rem;
 		font-size: 0.78rem;
 		color: var(--blue-pen);
 		min-height: 1.5rem;
+	}
+	@media (max-width: 64rem) {
+		.shelf {
+			grid-template-columns: repeat(5, minmax(13.5rem, 1fr));
+		}
+		.shelf-hint {
+			display: block;
+		}
 	}
 	.handbooks h3 {
 		font-size: 1.3rem;
