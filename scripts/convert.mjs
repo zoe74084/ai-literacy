@@ -936,6 +936,23 @@ function chunkTitle(heading, body, fallback) {
   return heading && !/^(Digital|Note)/i.test(heading) ? heading : fallback;
 }
 
+// 章首頁（封面）常把章名重複印好幾次：「第一章數位與…」「數位與…」「第一章」。
+// 頁面標題已經有章名，開頭 40 行內與章名相同、或只有「第X章」的標題／粗體行拿掉。
+function dropTitleEcho(lines, title) {
+  const key = (x) => x.replace(/<[^>]+>|\*\*|[#\s]/g, '');
+  const t = key(title);
+  const name = t.replace(/^第[一二三四五六七八九十]+章/, '');
+  return lines.filter((l, i) => {
+    if (i >= 40) return true;
+    const m = l.match(/^#{1,6} (.+)$/) || l.match(/^\*\*([^*]+)\*\*$/);
+    if (!m) return true;
+    const k = key(m[1]);
+    const echo = k === t || k === name || /^第[一二三四五六七八九十]+章$/.test(k);
+    if (echo) bump('移除章首重複的章名');
+    return !echo;
+  });
+}
+
 function splitAt(lines, level) {
   const re = new RegExp(`^#{${level}} (.*)$`);
   const chunks = [{ heading: null, raw: null, body: [] }];
@@ -1124,7 +1141,7 @@ function main() {
         c.title ?? (!c.heading && i === 0 ? '封面與序言' : chunkTitle(c.heading, c.body, `第 ${i + 1} 部分`));
       // 「第一章數位與…」→「第一章 數位與…」（只調整頁面標題，不動內文）
       title = title.replace(/^(第[一二三四五六七八九十]+章)(?=[^\s，、：])/, '$1 ');
-      const body = normalizeHeadings(c.body);
+      const body = normalizeHeadings(dropTitleEcho(c.body, title));
       const slug = `${spec.slug}/${n}`;
       const fm = {
         title,
@@ -1133,8 +1150,8 @@ function main() {
         ...base,
         part: { of: spec.title, index: i + 1, total: chunks.length, parent: spec.slug },
       };
-      // 章節原本的大標題（例如 CHAPTER 2）若不是拿來當頁面標題，就保留在內文開頭
-      const lead = c.heading && title !== c.heading ? [`**${c.heading}**`, ''] : [];
+      // 章節原本的大標題若不是拿來當頁面標題，就保留在內文開頭；「CHAPTER 2」這類封面字樣不保留
+      const lead = c.heading && title !== c.heading && !WEAK_TITLE.test(c.heading) ? [`**${c.heading}**`, ''] : [];
       write(slug, frontmatter(fm) + [...lead, ...body].join('\n') + '\n');
       chapters.push({ slug, title });
     });
