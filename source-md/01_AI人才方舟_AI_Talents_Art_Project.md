@@ -202,18 +202,9 @@ The MOE’s promotion of digital learning and AI has achieved remarkable milesto
 
 ### Improving Lower-Achieving Students’ Performance
 
-> （圖片內文字，順序可能錯亂）
-> 70%
-> Evidence from 2022–2025 confirms that TALP is a
-> powerful tool for supporting lower-achieving  60%
-> students. Those who use the platform for more
-> than 4 hours achieve markedly higher pass rates in  50%
-> Mandarin, English, and Mathematics compared to  40%
-> non-users. This progress highlights the platform’s
-> success in improving academic performance. 30% 2022 2023 2024 2025
-> Mandarin English Math
-> Impact of TALP on Remedial Instruction (2022–2025) Using TALP for 4+hr. Did not use TALP
-> Pass rate
+Evidence from 2022–2025 confirms that TALP is a powerful tool for supporting lower-achieving students. Those who use the platform for more than 4 hours achieve markedly higher pass rates in Mandarin, English, and Mathematics compared to non-users. This progress highlights the platform's success in improving academic performance.
+
+*Chart: Impact of TALP on Remedial Instruction (2022–2025) — pass rates of students using TALP for 4+ hours and students who did not use TALP. See the original PDF, page 13.*
 
 ### Mitigating Summer Learning Loss through Continuous TALP Usage
 
@@ -225,15 +216,7 @@ Correlation Between Summer TALP Usage and December Growth Test Pass Rates
 
 Since the 2024 launch of TALPer, students who combined sustained TALP usage with active AI interaction have achieved significantly higher pass rates and outcomes across core subjects. Data indicates that students 60% with the most substantial academic growth were typically 50% those most engaged with 40% TALPer, further underscoring the 30% vital role of AI companions in Mandarin English Math delivering effective personalized TALP usage Non user < 4 hours ≥ 4 hours ≥ 4 hours and with TALPer instruction.
 
-> （圖片內文字，順序可能錯亂）
-> 60%
-> 50%
-> 40%
-> 30%
-> Mandarin English Math
-> TALP usage Non user < 4 hours ≥ 4 hours ≥ 4 hours and with TALPer
-> Pass Rate Trends by TALP Usage Duration and TALPer Engagement (2024)
-> Pass Rate
+*Chart: Pass Rate Trends by TALP Usage Duration and TALPer Engagement (2024) — Mandarin, English and Math pass rates for non-users, under 4 hours, 4 hours or more, and 4 hours or more with TALPer. See the original PDF, page 13.*
 
 12
 
