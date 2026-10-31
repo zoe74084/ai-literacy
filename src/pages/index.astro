@@ -9,6 +9,8 @@ import fw from '../data/framework.json';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const r = (p: string) => `${base}/read/${p}`;
 const l = (p: string) => `${base}/library/${p}`;
+const documentCount = catalog.length;
+const lessonCount = catalog.filter((doc) => doc.lesson).length;
 
 // 標題寫進稿紙格子：一格一字，「AI」兩個半形字共用一格
 const row1 = ['AI', '素', '養', '，'];
@@ -18,7 +20,7 @@ const roles = [
 	{
 		key: 'teacher',
 		label: '教師',
-		lead: '備課時需要的：素養框架、課堂 AI 使用燈號、指引重點與 23 份教案。',
+		lead: `備課時需要的：素養框架、課堂 AI 使用燈號、指引重點與 ${lessonCount} 份教案。`,
 		items: [
 			{ t: 'AI 素養框架：教師的四個面向', h: r('framework/'), k: '導讀' },
 			{ t: '課堂 AI 紅黃綠燈', h: r('traffic-light/'), k: '導讀' },
@@ -58,7 +60,9 @@ const roles = [
 		items: [
 			{ t: '校長數位與 AI 學習領導指引：重點先看', h: r('guides/?g=principal'), k: '導讀' },
 			{ t: '115 年度中小學數位學習實施計畫說明', h: r('doc/admin/plan/'), k: '閱讀' },
-			{ t: '教育大數據介接申請規範、申請書、協議書', h: l('admin/bigdata/rules/'), k: '全文' },
+			{ t: '教育大數據介接申請規範', h: l('admin/bigdata/rules/'), k: '全文' },
+			{ t: '教育大數據介接申請書', h: l('admin/bigdata/application/'), k: '全文' },
+			{ t: '教育大數據介接合作協議書', h: l('admin/bigdata/agreement/'), k: '全文' },
 			{ t: '學習資料 xAPI 規格 v1.6', h: l('admin/bigdata/xapi/'), k: '全文' },
 		],
 	},
@@ -70,9 +74,9 @@ const contents = [
 	{ t: '課堂 AI 紅黃綠燈', d: '依學習目標決定 AI 使用程度，附班級公約示例。', h: r('traffic-light/') },
 	{ t: '教師指引互動版', d: '各章重點、選工具五問、七個風險口訣，再做一次 AI 素養自我檢視。', h: r('guides/teacher/') },
 	{ t: '指引重點先看', d: '教師、校長指引每章開頭的重點；家長指引各章一覽。', h: r('guides/') },
-	{ t: '教案地圖', d: '23 份課例排在學段與領域交錯的課表上。', h: r('lessons/') },
+	{ t: '教案地圖', d: `${lessonCount} 份課例排在學段與領域交錯的課表上。`, h: r('lessons/') },
 	{ t: 'AI 學習應用手冊', d: '國小、國中、高中三本，沿著章節路線讀，讀完勾選「我學會了嗎」。', h: r('handbooks/') },
-	{ t: '書架', d: '47 份文件都能直接在網頁上閱讀。', h: r('') },
+	{ t: '書架', d: `${documentCount} 份文件都能直接在網頁上閱讀。`, h: r('#shelf') },
 ];
 
 const shelf = [
@@ -83,11 +87,15 @@ const shelf = [
 	{ code: '04', title: '教案示例', groups: ['lessons-es', 'lessons-jh', 'lessons-sh', 'lessons-vs'], href: r('lessons/'), c: 'teacher' },
 	{ code: '05', title: '學習應用手冊', groups: ['handbooks'], href: r('handbooks/'), c: 'student' },
 	{ code: '06', title: '家長宣導', groups: ['parents'], href: r('doc/parents/briefing/'), c: 'parent' },
-	{ code: '07', title: '數位學習實施計畫', groups: ['admin-plan'], href: r('doc/admin/plan/'), c: 'admin' },
-	{ code: '08', title: '教育大數據', groups: ['admin-data'], href: l('admin/bigdata/xapi/'), c: 'teacher' },
+	{ code: '07', title: '數位學習實施計畫', groups: ['admin-plan'], href: r('#admin'), c: 'admin' },
+	{ code: '08', title: '教育大數據', groups: ['admin-data'], href: r('#admin'), c: 'teacher' },
 ].map((s) => ({ ...s, count: catalog.filter((d) => s.groups.includes(d.group)).length, moe: MOE_CATEGORIES[s.code] }));
 
-const handbooks = byGroup('handbooks');
+const handbooks = byGroup('handbooks').map((book) => ({
+	...book,
+	// 與手冊閱讀路線一致，不把封面序言與研發團隊頁當成章節。
+	chapterCount: (book.chapters ?? []).filter((chapter, i) => i > 0 && !/^教育部中小學AI之學習應用手冊/.test(chapter.title)).length,
+}));
 const stages = ['國小', '國中', '高中'];
 ---
 
@@ -122,7 +130,7 @@ const stages = ['國小', '國中', '高中'];
 					{['AI 倫理', '生成式', '提示詞', '深偽', '因材網'].map((k) => <a href={`${base}/search/?q=${encodeURIComponent(k)}`}>{k}</a>)}
 				</p>
 			</div>
-			<p class="hero-note tate" aria-hidden="true">教育部數位學習推動辦公室　公開文件四十七份</p>
+			<p class="hero-note tate" aria-hidden="true">教育部數位學習推動辦公室　公開文件共 {documentCount} 份</p>
 		</div>
 	</section>
 
@@ -145,7 +153,7 @@ const stages = ['國小', '國中', '高中'];
 					<span class="door-kanji" aria-hidden="true">查</span>
 					<span class="door-body">
 						<span class="door-name"><Icon name="lens" /> 資料庫</span>
-						<span class="door-desc">47 份文件的完整內容，依章節分頁、可全文搜尋。要引用原文、找特定段落時用這裡。</span>
+						<span class="door-desc">{documentCount} 份文件的完整內容，依章節分頁、可全文搜尋。要引用原文、找特定段落時用這裡。</span>
 						<span class="door-list">中文全文搜尋・依讀者分類・教案篩選・附原文出處</span>
 						<span class="btn btn--on-cover">進入資料庫</span>
 					</span>
@@ -214,7 +222,9 @@ const stages = ['國小', '國中', '高中'];
 				</p>
 				<a class="btn btn--solid" href={r('framework/')}>打開素養框架</a>
 			</div>
-			<figure class="fw-table">
+			<div class="fw-table-wrap">
+			<p class="scroll-hint table-hint" id="framework-scroll-hint">左右滑動表格，查看完整層級。</p>
+			<figure class="fw-table" tabindex="0" aria-label="教師 AI 素養框架，可左右捲動" aria-describedby="framework-scroll-hint">
 				<table>
 					<caption>教師 AI 素養框架：各層級的目標（原文表 1）</caption>
 					<thead>
@@ -237,6 +247,7 @@ const stages = ['國小', '國中', '高中'];
 					</tbody>
 				</table>
 			</figure>
+			</div>
 		</div>
 	</section>
 
@@ -245,7 +256,7 @@ const stages = ['國小', '國中', '高中'];
 		<div class="wrap-narrow">
 			<div class="section-head">
 				<h2>導讀目次</h2>
-				<p>每一頁都是教育部原文，只是換了一種讀法。</p>
+				<p>依教育部公開文件整理，提供重點導讀與原文全文。</p>
 			</div>
 			<ul class="contents">
 				{
@@ -271,7 +282,8 @@ const stages = ['國小', '國中', '高中'];
 				<h2>書架</h2>
 				<p>依教育部下載專區的分類排列。原始 PDF 不另外存放，每一冊下方的連結都通往教育部下載專區。</p>
 			</div>
-			<ul class="shelf">
+			<p class="scroll-hint shelf-hint" id="shelf-scroll-hint">左右滑動書架，查看所有分類。</p>
+			<ul class="shelf" tabindex="0" aria-label="文件分類書架，可左右捲動" aria-describedby="shelf-scroll-hint">
 				{
 					shelf.map((s) => (
 						<li>
@@ -296,7 +308,7 @@ const stages = ['國小', '國中', '高中'];
 							<a class="hb" href={r(`${h.slug}/`)}>
 								<span class="hb-stage">{stages[i]}</span>
 								<span class="hb-title">{h.title}</span>
-								<span class="hb-meta">共 {h.chapters?.length ?? 1} 章</span>
+								<span class="hb-meta">共 {h.chapterCount} 章</span>
 							</a>
 						))
 					}
@@ -323,8 +335,9 @@ const stages = ['國小', '國中', '高中'];
 			t.addEventListener('click', () => select(t));
 			t.addEventListener('keydown', (e) => {
 				const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-				if (!d) return;
-				const n = tabs[(i + d + tabs.length) % tabs.length];
+					if (!d && e.key !== 'Home' && e.key !== 'End') return;
+					e.preventDefault();
+					const n = tabs[e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + d + tabs.length) % tabs.length];
 				n.focus();
 				select(n);
 			});
@@ -343,6 +356,9 @@ const stages = ['國小', '國中', '高中'];
 		grid-template-columns: minmax(0, 1fr) auto;
 		gap: clamp(1rem, 4vw, 3rem);
 		align-items: start;
+	}
+	.hero-main {
+		min-width: 0;
 	}
 	.manuscript {
 		display: grid;
@@ -470,7 +486,7 @@ const stages = ['國小', '國中', '高中'];
 	}
 	@media (max-width: 44rem) {
 		.hero-inner {
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr);
 		}
 		.hero-note {
 			display: none;
@@ -699,6 +715,26 @@ const stages = ['國小', '國中', '高中'];
 	}
 
 	/* 框架 */
+	.fw-table-wrap {
+		min-width: 0;
+	}
+	.scroll-hint {
+		display: none;
+		font-size: 0.85rem;
+		color: var(--ink-2);
+		margin: 0 0 0.75rem;
+	}
+	.fw-table:focus-visible,
+	.shelf:focus-visible {
+		outline: 2px solid var(--blue-pen);
+		outline-offset: 4px;
+	}
+	@media (max-width: 34rem) {
+		.table-hint { display: block; }
+	}
+	@media (max-width: 44rem) {
+		.shelf-hint { display: block; }
+	}
 	.fw-layout {
 		display: grid;
 		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
