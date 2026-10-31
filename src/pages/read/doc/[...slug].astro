@@ -621,7 +621,11 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		border-radius: 0.75rem;
 		line-height: 1.6;
 	}
+	.prose :global(pre span) {
+		color: var(--1, var(--ink)) !important;
+	}
 	.prose :global(pre code) {
+		color: var(--ink);
 		padding: 0;
 		background: transparent;
 		word-break: normal;
