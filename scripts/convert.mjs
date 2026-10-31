@@ -814,7 +814,7 @@ function renderDiagram(src, file) {
   for (const l of src) {
     const kv = l.match(/^(type|title|note):\s*(.*)$/);
     if (kv) d[kv[1]] = kv[2].trim();
-    else if (/^-\s+/.test(l)) d.items.push(l.replace(/^-\s+/, '').split(/\s+\|\s+/).map((x) => x.trim()));
+    else if (/^-\s+/.test(l)) d.items.push(l.replace(/^-\s+/, '').split('|').map((x) => x.trim()));
   }
   if (!DIAGRAM_TYPES.includes(d.type) || !d.title || !d.items.length) throw new Error(`圖解格式錯誤（${file}）：${src.join(' / ')}`);
   const item = ([t, desc = '', tag = '']) => {
