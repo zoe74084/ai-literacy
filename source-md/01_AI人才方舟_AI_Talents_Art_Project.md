@@ -212,6 +212,16 @@ Sustained learning during vacations is key to maintaining academic momentum. Amo
 
 Correlation Between Summer TALP Usage and December Growth Test Pass Rates
 
+![Line chart of summer TALP usage and December Growth Test pass rates: more weeks of use, higher pass rates in English and Math](../../../../assets/charts/ark-summer-talp-en.svg)
+
+|**Summer usage**|**English pass rate**|**Math pass rate**|
+|---|---|---|
+|None used|33.68%（N = 64,875）|34.14%（N = 61,286）|
+|1 week|35.88%（N = 985）|34.74%（N = 3,117）|
+|2 weeks|37.97%（N = 358）|39.69%（N = 1,635）|
+|3 weeks|38.41%（N = 158）|40.69%（N = 956）|
+|4+ weeks|41.09%（N = 139）|41.00%（N = 3,685）|
+
 ### Synergistic Enhancement of Learning Outcomes through TALP and TALPer Integration
 
 Since the 2024 launch of TALPer, students who combined sustained TALP usage with active AI interaction have achieved significantly higher pass rates and outcomes across core subjects. Data indicates that students 60% with the most substantial academic growth were typically 50% those most engaged with 40% TALPer, further underscoring the 30% vital role of AI companions in Mandarin English Math delivering effective personalized TALP usage Non user < 4 hours ≥ 4 hours ≥ 4 hours and with TALPer instruction.
