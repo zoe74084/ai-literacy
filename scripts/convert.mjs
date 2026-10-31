@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { repairHeadingHierarchy, separateParentChapter, preserveHeadingAnchors } from './heading-hierarchy.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'source-md');
@@ -1352,7 +1353,8 @@ function main() {
     };
     const shouldSplit = spec.split && Buffer.byteLength(text) > SPLIT_THRESHOLD;
     if (!shouldSplit) {
-      const body = normalizeHeadings(structureHeadings(lines));
+      const original = normalizeHeadings(structureHeadings(lines));
+      const body = preserveHeadingAnchors(original, repairHeadingHierarchy(original, spec.slug));
       const fm = {
         title: spec.title,
         description: spec.lesson
@@ -1367,16 +1369,25 @@ function main() {
       continue;
     }
 
-    const chunks = splitDocument(lines, spec.resplit, spec.pack);
+    const originalChunks = splitDocument(lines, spec.resplit, spec.pack);
+    const oldPreface = spec.slug === 'guides/parent'
+      ? normalizeHeadings(structureHeadings(dropTitleEcho([...originalChunks[0].body], '封面與序言')))
+      : null;
+    const chunks = separateParentChapter(originalChunks, spec.slug);
     const chapters = [];
     chunks.forEach((c, i) => {
-      const n = String(i + 1).padStart(2, '0');
+      const n = c.pageId ?? String(i + 1).padStart(2, '0');
       let title =
         c.title ?? (!c.heading && i === 0 ? '封面與序言' : chunkTitle(c.heading, c.body, `第 ${i + 1} 部分`));
       // 「第一章數位與…」→「第一章 數位與…」（只調整頁面標題，不動內文）
       title = title.replace(/^(第[一二三四五六七八九十]+章)(?=[^\s，、：])/, '$1 ');
-      const body = normalizeHeadings(structureHeadings(dropTitleEcho(c.body, title)));
       const slug = `${spec.slug}/${n}`;
+      const original = normalizeHeadings(structureHeadings(dropTitleEcho(c.body, title)));
+      const body = preserveHeadingAnchors(
+        slug === 'guides/parent/01' ? oldPreface : original,
+        repairHeadingHierarchy(original, slug),
+        slug === 'guides/parent/01' ? '../chapter-01/' : null,
+      );
       const fm = {
         title,
         description: describe(spec, meta, title),

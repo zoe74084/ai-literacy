@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "check:headings": "node scripts/convert.mjs && node scripts/check-heading-hierarchy.mjs",
     "convert": "node scripts/convert.mjs",
     "predev": "node scripts/convert.mjs",
     "dev": "astro dev",
@@ -15,6 +16,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.42.7",
     "astro": "^7.4.4",
+    "github-slugger": "^2.0.0",
     "marked": "^15.0.12",
     "sharp": "^0.35.5"
   },
