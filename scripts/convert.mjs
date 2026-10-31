@@ -96,7 +96,7 @@ const DOCS = [
   { file: '07_數位學習實施計畫_115年度中小學數位學習實施計畫說明_函文附件.md', slug: 'admin/plan-attachment', title: '115 年度中小學數位學習實施計畫說明（函文附件）', label: '函文附件', audience: ['admin'], group: 'admin-plan', order: 2 },
 
   // 08 教育大數據
-  { file: '08_教育大數據_學習資料xAPI規格_v1.6.md', slug: 'admin/bigdata/xapi', title: '學習資料 xAPI 規格 v1.6', label: '學習資料 xAPI 規格 v1.6', audience: ['admin'], group: 'admin-data', order: 1, split: true },
+  { file: '08_教育大數據_學習資料xAPI規格_v1.6.md', slug: 'admin/bigdata/xapi', title: '學習資料 xAPI 規格 v1.6', label: '學習資料 xAPI 規格 v1.6', audience: ['admin'], group: 'admin-data', order: 1, split: true, pack: 44000 },
   { file: '08_教育大數據_教育部教育大數據介接申請規範1150821奉核.md', slug: 'admin/bigdata/rules', title: '教育部教育大數據介接申請規範', label: '介接申請規範', audience: ['admin'], group: 'admin-data', order: 2 },
   { file: '08_教育大數據_教育部教育大數據介接申請書1150821奉核.md', slug: 'admin/bigdata/application', title: '教育部教育大數據介接申請書', label: '介接申請書', audience: ['admin'], group: 'admin-data', order: 3 },
   { file: '08_教育大數據_教育部教育大數據介接合作協議書1150821奉核.md', slug: 'admin/bigdata/agreement', title: '教育部教育大數據介接合作協議書', label: '介接合作協議書', audience: ['admin'], group: 'admin-data', order: 4 },
@@ -785,6 +785,92 @@ function facetTables(lines) {
   return out;
 }
 
+// 6b. 一般表格的轉檔殘留（框架表格已在上一步處理）：
+//     ⑴ 直排文字：「認<br>識<br>分<br>數」接回一行（中間夾著「SDGs」「—」也算）
+//     ⑵ 表名被拆進表格：整列是「表4-1：…」，或表名斷成幾段塞在各欄表頭最後一行 → 取出放到表格上方
+//     ⑶ 跨頁重複表頭：相鄰兩張表表頭相同（中間只隔空行）→ 接成一張
+const CAPTION = /^表\s?\d+\s?[-－]\s?\d+/;
+const vis = (x) => x.replace(/\*\*|<[^>]+>|\s/g, '');
+function joinVertical(c) {
+  const parts = c.split(/<br\s*\/?>/i).filter((x) => vis(x));
+  if (parts.length < 3) return c;
+  const one = parts.filter((x) => [...vis(x)].length <= 1).length;
+  // 直排的中文字之外，允許夾一段英文（「CoolE Bot<br>帶<br>你<br>玩…」）
+  if (one / parts.length < 0.7 || parts.some((x) => [...vis(x)].length > 4 && !/^[\x20-\x7e*]+$/.test(x.trim()))) return c;
+  bump('表格直排文字接回一行');
+  const bold = parts.every((x) => /^\*\*.*\*\*$/.test(x.trim()));
+  const txt = parts.map((x) => x.replace(/\*\*/g, '').trim()).reduce((a, x) => a + (/[A-Za-z0-9]$/.test(a) && /^[^\x00-\x7f]/.test(x) ? ' ' : '') + x, '');
+  return bold ? `**${txt}**` : txt;
+}
+function tidyTables(lines) {
+  const blocks = [];
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!isTableLine(lines[i])) {
+      out.push(lines[i]);
+      continue;
+    }
+    let j = i;
+    while (j < lines.length && isTableLine(lines[j])) j++;
+    let rows = lines.slice(i, j).map(splitRow).filter((r) => !r.every((c) => SEP_CELL.test(c) || c === ''));
+    i = j - 1;
+    if (!rows.length) continue;
+    rows = rows.map((r) => r.map(joinVertical));
+    let caption = '';
+    const first = rows[0].filter((c) => vis(c));
+    if (first.length && CAPTION.test(vis(first[0])) && rows.length > 2) {
+      // ⑵-a 第一列整列就是表名
+      caption = first.map((c) => c.replace(/\*\*/g, '').replace(/<br\s*\/?>/gi, '').trim()).join('');
+      rows = rows.slice(1);
+    } else {
+      // ⑵-b 表名斷成幾段，放在各欄表頭的最後一行
+      const head = rows[0].map((c) => c.split(/<br\s*\/?>/i));
+      const k = head.findIndex((p) => p.some((x, n) => n > 0 && CAPTION.test(vis(x))));
+      if (k >= 0) {
+        const pieces = [];
+        head.forEach((p, n) => {
+          if (n < k || p.length < 2) return;
+          const at = n === k ? p.findIndex((x, m) => m > 0 && CAPTION.test(vis(x))) : p.length - 1;
+          pieces.push(...p.splice(at));
+        });
+        caption = pieces.map((x) => x.replace(/\*\*/g, '').trim()).join('');
+        rows[0] = head.map((p) => p.join('<br>'));
+      }
+    }
+    if (caption) bump('表名從表格裡移到表格上方');
+    // 勾選欄的表頭是方框圖示，轉成「へ」
+    rows[0] = rows[0].map((c) => (vis(c) === 'へ' ? (bump('勾選欄表頭圖示改為「檢核」'), '**檢核**') : c));
+    rows = rows.map((r, n) => (n === 0 ? r : r.map((c) => (vis(c) === 'へ' ? '' : c))));
+    const header = rows[0];
+    const key = header.map(vis).join('|');
+    const prev = blocks[blocks.length - 1];
+    const tail = prev ? out.slice(prev.end) : [];
+    const sameCaption = tail.every((l) => !l.trim() || l === `**${caption}**`);
+    if (prev && sameCaption && prev.key === key && prev.header.length === header.length) {
+      prev.rows.push(...rows.slice(1));
+      out.length = prev.end;
+      bump('接回跨頁斷開的表格');
+      continue;
+    }
+    // 同一張表跨頁後再印一次表名（常只剩一半）：同編號的表名只放一次
+    const no = caption.match(CAPTION)?.[0].replace(/\s/g, '');
+    const seen = no && blocks.some((b) => b.no === no);
+    if (caption && !seen && out.findLast((l) => l.trim()) !== `**${caption}**`) out.push('', `**${caption}**`, '');
+    const block = { key, header, rows, no };
+    out.push(`@@TABLE_${blocks.length}@@`);
+    block.end = out.length;
+    blocks.push(block);
+  }
+  return out.flatMap((l) => {
+    const m = l.match(/^@@TABLE_(\d+)@@$/);
+    if (!m) return [l];
+    const { rows } = blocks[Number(m[1])];
+    const cols = Math.max(...rows.map((r) => r.length));
+    const toLine = (r) => `| ${[...r, ...Array(cols - r.length).fill('')].join(' | ')} |`;
+    return [toLine(rows[0]), toLine(Array(cols).fill('---')), ...rows.slice(1).map(toLine)];
+  });
+}
+
 // 9. 編號小標（「一、……」「（二）……」「3、……」）：PDF 常把它黏在上一段結尾，
 //    拆成獨立一行；獨立成行的編號小標加粗，讀起來才分得出層次。
 const ENUM_HEAD = String.raw`(?:[一二三四五六七八九十]{1,2}、|（[一二三四五六七八九十]{1,2}）|\d{1,2}、)`;
@@ -1058,7 +1144,7 @@ export function cleanDocument(text, file = '') {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body: rawBody } = parseHeader(raw);
   const { body, html } = extractDiagrams(rawBody, file);
-  const lines = fixBrackets(fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(ocrNotes(body)))), /^04_教學指引_(1\d\d年|教育部)/.test(file)))))));
+  const lines = fixBrackets(fixBold(tidyTables(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(ocrNotes(body)))), /^04_教學指引_(1\d\d年|教育部)/.test(file))))))));
   return { meta, lines, diagrams: html };
 }
 
@@ -1140,17 +1226,17 @@ function mergeSmall(chunks) {
 
 // 單一章節仍過大時，往下一層拆開，再把相鄰小節打包成約 PACK_TARGET 大小的頁面
 const PACK_TARGET = 45_000;
-function splitOversized(chunk, depth, threshold = RESPLIT_THRESHOLD) {
+function splitOversized(chunk, depth, threshold = RESPLIT_THRESHOLD, target = PACK_TARGET) {
   if (size(chunk.body) <= threshold || depth > 3) return [chunk];
   const level = chooseLevel(chunk.body);
   if (!level) return [chunk];
-  const subs = splitAt(chunk.body, level).flatMap((s) => splitOversized(s, depth + 1, threshold));
+  const subs = splitAt(chunk.body, level).flatMap((s) => splitOversized(s, depth + 1, threshold, target));
   if (subs.length <= 1) return [chunk];
   const packs = [];
   let cur = null;
   for (const s of subs) {
     const lines = [...(s.raw ? [s.raw] : []), ...s.body];
-    if (cur && size(cur.lines) + size(lines) <= PACK_TARGET) {
+    if (cur && size(cur.lines) + size(lines) <= target) {
       cur.lines.push('', ...lines);
       if (s.heading) cur.last = s.heading;
     } else {
@@ -1159,7 +1245,7 @@ function splitOversized(chunk, depth, threshold = RESPLIT_THRESHOLD) {
     }
   }
   // 尾巴太小的一包併回前一包
-  if (packs.length > 1 && size(packs[packs.length - 1].lines) < PACK_TARGET / 3) {
+  if (packs.length > 1 && size(packs[packs.length - 1].lines) < target / 3) {
     const tail = packs.pop();
     packs[packs.length - 1].lines.push('', ...tail.lines);
   }
@@ -1178,10 +1264,11 @@ function splitOversized(chunk, depth, threshold = RESPLIT_THRESHOLD) {
   });
 }
 
-function splitDocument(lines, threshold) {
+// pack：個別文件可另訂每頁打包大小（表格整理後內容變短，靠它維持原本的分頁界線）
+function splitDocument(lines, threshold, pack) {
   const level = chooseLevel(lines);
   if (!level) return [{ heading: null, body: lines }];
-  return mergeSmall(splitAt(lines, level)).flatMap((c) => splitOversized(c, 0, threshold));
+  return mergeSmall(splitAt(lines, level)).flatMap((c) => splitOversized(c, 0, threshold, pack));
 }
 
 // ---------------------------------------------------------------------------
@@ -1280,7 +1367,7 @@ function main() {
       continue;
     }
 
-    const chunks = splitDocument(lines, spec.resplit);
+    const chunks = splitDocument(lines, spec.resplit, spec.pack);
     const chapters = [];
     chunks.forEach((c, i) => {
       const n = String(i + 1).padStart(2, '0');
