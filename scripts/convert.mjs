@@ -547,6 +547,141 @@ function cleanBlocks(lines) {
   return res;
 }
 
+// 5a. 章節編號與層級：PDF 的「壹／一、／（一）」常跟標題黏在一起（「三提出…」「二 AI…」），
+//     或單獨一行（「**二**」），轉出來所有標題又擠在同一層。分頁後逐頁整理：
+//     補上頓號、把單獨的編號接回標題、拿掉標題前的 ●，再依「壹 → 一、→（一）→ 1.」排層級；
+//     沒有編號的標題放在上一個有編號的標題底下，啟思小語、問思與討論等固定欄目放回最上層。
+const SEC = '壹貳參肆伍陸柒捌玖拾';
+const CNN = '一二三四五六七八九十';
+const NOT_NUMBERED = /^(參考|參與|參加|一生一|一起|一般|一致|一對一|十二年|四學(?!校|習|生)|五育|二元)/;
+const MEASURE = /^(?:[大種項層級階年位類步招方面倍成份次週天節堂]|個(?!人))/;
+const TOP_HEADINGS = /^(啟思小語|問思與討論|參考文獻|重點先看|延伸閱讀|附錄)/;
+function numberedHead(t) {
+  const m = t.match(new RegExp(`^([${SEC}]|[${CNN}]{1,2})(\\s*)(.*)$`));
+  if (!m || !m[3] || /^[、．.）)]/.test(m[3]) || NOT_NUMBERED.test(t) || MEASURE.test(m[3])) return null;
+  return { num: m[1], rest: m[3] };
+}
+function rankOf(t) {
+  if (new RegExp(`^[${SEC}]、`).test(t)) return 0;
+  if (new RegExp(`^[${CNN}]{1,2}、`).test(t)) return 1;
+  if (new RegExp(`^[（(][${CNN}]{1,2}[）)]`).test(t)) return 2;
+  if (/^\d{1,2}[、.．]\s?\D/.test(t)) return 3;
+  return null;
+}
+// 單獨一行的章節編號（「壹」「二」）該接到哪個標題：緊鄰的上一個標題，或往下 30 行內第一個標題；
+// 對象必須還沒有編號、不是「教師增能重點：」這類冒號結尾的小標，中間也不能隔著已編號的標題。
+function numberTarget(lines, i) {
+  const H = /^(#{1,6}) (.*)$/;
+  const clean = (t) => t.replace(/\*\*/g, '').trim();
+  const ok = (t) => {
+    const c = clean(t);
+    return c && !/[：:]$/.test(c) && !new RegExp(`^([${SEC}]|[${CNN}]{1,2})[、\\s]`).test(c) && !/^[（(]/.test(c) && rankOf(c) === null;
+  };
+  for (let k = i - 1; k >= 0; k--) {
+    const l = lines[k];
+    if (!l.trim() || l.startsWith('<figure') || l.startsWith('@@DIAGRAM')) continue;
+    const h = l.match(H);
+    if (h && ok(h[2])) return k;
+    break;
+  }
+  for (let k = i + 1; k < lines.length && k <= i + 30; k++) {
+    const h = lines[k].match(H);
+    if (!h) continue;
+    if (ok(h[2])) return k;
+    if (!/[：:]$/.test(clean(h[2]))) return -1;
+  }
+  return -1;
+}
+function attachNumber(lines, k, num) {
+  const h = lines[k].match(/^(#{1,6}) (.*)$/);
+  const t = h[2].replace(/^\*\*(.*)\*\*$/, '$1').replace(/^[●○■◆]\s*/, '');
+  // \u2063 標記「這個編號是接回來的」，算頁面標題時去掉，寫檔前清除
+  lines[k] = `${h[1]} ${num}、\u2063${t}`;
+}
+function structureHeadings(lines) {
+  const out = [];
+  const head = (l) => l.match(/^(#{1,6}) (.*)$/);
+  for (let i = 0; i < lines.length; i++) {
+    // 「2<sup>-</sup>1」「❶<sup>———</sup>」：PDF 把節次連字號、裝飾橫線轉成上標
+    let l = lines[i]
+      .replace(/(\d)\s*<sup>[-－‐]<\/sup>\s*(\d)/g, (_, a, b) => (bump('節次上標連字號還原'), `${a}-${b}`))
+      .replace(/([❶-❿①-⑳])\s*<sup>[—─－-]+<\/sup>\s*/g, (_, a) => (bump('移除編號後的上標裝飾線'), `${a} `));
+    // 單獨一行的國字編號：接回該屬於的標題，找不到就是頁邊側標，拿掉
+    const lone = l.trim().replace(/\*\*/g, '').trim();
+    if (new RegExp(`^([${CNN}]{1,2}|[${SEC}])$`).test(lone)) {
+      const work = [...out, ...lines.slice(i)];
+      const k = numberTarget(work, out.length);
+      if (k >= 0) {
+        attachNumber(work, k, lone);
+        if (k < out.length) out[k] = work[k];
+        else lines[i + (k - out.length)] = work[k];
+        bump('單獨一行的章節編號接回標題');
+      } else bump('移除無法對應標題的單獨編號');
+      continue;
+    }
+    const h = head(l);
+    if (h) {
+      let t = h[2].replace(/^[●○■◆]\s*/, () => (bump('拿掉標題前的 ●'), ''));
+      t = t.replace(/^([^<]*?)<sup>(.*)<\/sup>$/, (_, a, b) => (bump('拿掉標題外圍的 <sup>'), a + b));
+      const n = numberedHead(t);
+      if (n) {
+        t = `${n.num}、${n.rest}`;
+        bump('章節編號補上頓號');
+      }
+      l = `${h[1]} ${t}`;
+    }
+    out.push(l);
+  }
+  // 「圖4：…」是圖說，不是標題；緊接著重複一次的圖名一併拿掉
+  for (let i = 0; i < out.length; i++) {
+    const h = head(out[i]);
+    if (!h) continue;
+    const cap = h[2].match(/^圖\s?\d+[-－]?\d*\s*[：:→]\s*(.+)$/);
+    if (!cap) continue;
+    out[i] = `**${h[2]}**`;
+    bump('圖說標題改成粗體');
+    const n = out.findIndex((x, k) => k > i && x.trim());
+    const nh = n > 0 && head(out[n]);
+    if (nh && nh[2].replace(/\s/g, '') === cap[1].replace(/\s/g, '')) out[n] = '';
+  }
+  // 第一項的「一」常是單獨排版的大字，轉檔時遺失：大節（壹、貳…）裡有「二、」卻沒有「一、」時，
+  // 該節的第一個標題就是第一項，補上「一、」
+  {
+    const hs = out.map((l, i) => [i, head(l)]).filter(([, h]) => h);
+    let sec = -1;
+    hs.forEach(([, h], k) => {
+      if (rankOf(h[2]) === 0) {
+        sec = k;
+        return;
+      }
+      if (sec < 0 || !/^二、/.test(h[2])) return;
+      const within = hs.slice(sec + 1, k);
+      if (!within.length || within.some(([, x]) => /^一、/.test(x[2]))) return;
+      const [fi, fh] = within[0];
+      const t = fh[2];
+      if (rankOf(t) !== null || TOP_HEADINGS.test(t) || /[：:]$/.test(t)) return;
+      out[fi] = `${fh[1]} 一、\u2063${t}`;
+      bump('第一項補上遺失的「一、」');
+    });
+  }
+  // 依編號排層級（一頁至少兩個「壹／一、」層級的標題才調整）
+  const heads = out.map((l, i) => [i, head(l)]).filter(([, h]) => h);
+  const ranks = heads.map(([, h]) => rankOf(h[2])).filter((r) => r !== null);
+  if (ranks.filter((r) => r <= 1).length < 2) return out;
+  const top = Math.min(...ranks);
+  let last = null;
+  for (const [i, h] of heads) {
+    const r = rankOf(h[2]);
+    let lv;
+    if (r !== null) lv = last = 2 + r - top;
+    else if (TOP_HEADINGS.test(h[2])) lv = 2;
+    else lv = last === null ? 2 : last + 1;
+    out[i] = `${'#'.repeat(Math.min(6, lv))} ${h[2]}`;
+  }
+  bump('依章節編號排標題層級');
+  return out;
+}
+
 // 5. 標題層級：頁面內只用 h2 以下，且不跳級
 function normalizeHeadings(lines) {
   const levels = lines.map((l) => l.match(/^(#{1,6}) /)?.[1].length).filter(Boolean);
@@ -723,20 +858,30 @@ function fixBrackets(lines) {
 
 // 8. 頁緣章節側標：單獨一行的「壹」「貳」……在同一份文件重複出現就是每頁的側標，移除
 const SIDE_TAB = /^\s*(\*\*)?([壹貳參肆伍陸柒捌玖拾])(\*\*)?\s*$/;
-function dropSideTabs(lines) {
+// attach：教學指引的「壹」緊鄰該節標題，接回標題；手冊等其他文件的側標與標題無關，一律移除
+function dropSideTabs(lines, attach = false) {
   const n = new Map();
   for (const l of lines) {
     const m = l.match(SIDE_TAB);
     if (m) n.set(m[2], (n.get(m[2]) ?? 0) + 1);
   }
-  const out = lines.filter((l) => {
+  const work = [...lines];
+  const drop = new Set();
+  // 側標每頁都印，只有依序出現（每章從「壹」開始，接著「貳」「參」）且緊鄰章節標題的那一次是該節的編號
+  let expect = 0;
+  work.forEach((l, i) => {
+    if (/^# /.test(l) || /^(#{1,6} )?\*\*第[一二三四五六七八九十]+章/.test(l)) expect = 0;
     const m = l.match(SIDE_TAB);
-    if (m && n.get(m[2]) >= 2) {
-      bump('移除頁緣章節側標（壹、貳……）');
-      return false;
-    }
-    return true;
+    if (!m || n.get(m[2]) < 2) return;
+    const k = attach && SEC.indexOf(m[2]) === expect ? numberTarget(work, i) : -1;
+    if (k >= 0 && Math.abs(k - i) <= 4 && !/^#{1,6} (\*\*)?\p{Extended_Pictographic}/u.test(work[k])) {
+      expect++;
+      attachNumber(work, k, m[2]);
+      bump('章節側標接回標題');
+    } else bump('移除頁緣章節側標（壹、貳……）');
+    drop.add(i);
   });
+  const out = work.filter((_, i) => !drop.has(i));
   // 移除後可能留下連續空行
   return out.filter((l, i) => l.trim() || (i > 0 && out[i - 1].trim()));
 }
@@ -913,7 +1058,7 @@ export function cleanDocument(text, file = '') {
   const raw = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   const { meta, body: rawBody } = parseHeader(raw);
   const { body, html } = extractDiagrams(rawBody, file);
-  const lines = fixBrackets(fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(ocrNotes(body))))))))));
+  const lines = fixBrackets(fixBold(facetTables(joinBrokenLines(splitGluedTitles(dropSideTabs(cleanBlocks(cleanLines(cleanPages(ocrNotes(body)))), /^04_教學指引_(1\d\d年|教育部)/.test(file)))))));
   return { meta, lines, diagrams: html };
 }
 
@@ -924,17 +1069,19 @@ export function cleanDocument(text, file = '') {
 const WEAK_TITLE = /^(.*\bCHAPTER\b.*|Digital (and AI )?(Teaching|Learning).*|Note|序|[\d\s一二三四五六七八九十壹貳參肆伍陸柒捌玖拾.、]+)$/i;
 const size = (ls) => Buffer.byteLength(ls.join('\n'));
 
-function chunkTitle(heading, body, fallback) {
+function chunkTitle(rawHeading, body, fallback) {
+  // 側標接回後章名前可能多了「壹、」；頁面標題沿用不帶編號的章名
+  const heading = rawHeading && stripSec(rawHeading);
   if (heading && !WEAK_TITLE.test(heading)) return heading;
   // 章名常在「CHAPTER 2」之後的第一個中文標題或粗體行
   for (const l of body.slice(0, 40)) {
     const m = l.match(/^#{1,6} (.+)$/) || l.match(/^\*\*([^*]{2,40})\*\*$/);
-    if (m && CJK.test(m[1]) && !WEAK_TITLE.test(m[1].trim()) && [...m[1]].length <= 40) {
-      return m[1].replace(/\*\*/g, '').trim();
-    }
+    const t = m && stripSec(m[1].replace(/\*\*/g, '').trim());
+    if (t && CJK.test(t) && !WEAK_TITLE.test(t) && [...t].length <= 40) return t;
   }
   return heading && !/^(Digital|Note)/i.test(heading) ? heading : fallback;
 }
+const stripSec = (t) => t.replace(new RegExp(`^[${SEC}]、\u2063`), '');
 
 // 章首頁（封面）常把章名重複印好幾次：「第一章數位與…」「數位與…」「第一章」。
 // 頁面標題已經有章名，開頭 40 行內與章名相同、或只有「第X章」的標題／粗體行拿掉。
@@ -1071,7 +1218,7 @@ function describe(spec, meta, part) {
 function write(slug, content) {
   const file = path.join(OUT, slug === '' ? 'index.md' : `${slug}.md`);
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, content);
+  fs.writeFileSync(file, content.replace(/\u2063/g, ''));
 }
 
 function rmGenerated(dir) {
@@ -1118,7 +1265,7 @@ function main() {
     };
     const shouldSplit = spec.split && Buffer.byteLength(text) > SPLIT_THRESHOLD;
     if (!shouldSplit) {
-      const body = normalizeHeadings(lines);
+      const body = normalizeHeadings(structureHeadings(lines));
       const fm = {
         title: spec.title,
         description: spec.lesson
@@ -1141,7 +1288,7 @@ function main() {
         c.title ?? (!c.heading && i === 0 ? '封面與序言' : chunkTitle(c.heading, c.body, `第 ${i + 1} 部分`));
       // 「第一章數位與…」→「第一章 數位與…」（只調整頁面標題，不動內文）
       title = title.replace(/^(第[一二三四五六七八九十]+章)(?=[^\s，、：])/, '$1 ');
-      const body = normalizeHeadings(dropTitleEcho(c.body, title));
+      const body = normalizeHeadings(structureHeadings(dropTitleEcho(c.body, title)));
       const slug = `${spec.slug}/${n}`;
       const fm = {
         title,
@@ -1151,7 +1298,7 @@ function main() {
         part: { of: spec.title, index: i + 1, total: chunks.length, parent: spec.slug },
       };
       // 章節原本的大標題若不是拿來當頁面標題，就保留在內文開頭；「CHAPTER 2」這類封面字樣不保留
-      const lead = c.heading && title !== c.heading && !WEAK_TITLE.test(c.heading) ? [`**${c.heading}**`, ''] : [];
+      const lead = c.heading && title !== stripSec(c.heading) && !WEAK_TITLE.test(stripSec(c.heading)) ? [`**${c.heading}**`, ''] : [];
       write(slug, frontmatter(fm) + [...lead, ...body].join('\n') + '\n');
       chapters.push({ slug, title });
     });
