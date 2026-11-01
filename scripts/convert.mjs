@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { enhanceDiagrams } from './diagram-enhancements.mjs';
 import { repairPageContent } from './pdf-content-repairs.mjs';
 import { repairHeadingHierarchy, separateParentChapter, preserveHeadingAnchors } from './heading-hierarchy.mjs';
 
@@ -1359,7 +1360,7 @@ function main() {
     const shouldSplit = spec.split && Buffer.byteLength(text) > SPLIT_THRESHOLD;
     if (!shouldSplit) {
       const original = normalizeHeadings(structureHeadings(lines));
-      const body = preserveHeadingAnchors(original, repairHeadingHierarchy(repairPageContent(original, spec.slug), spec.slug));
+      const body = preserveHeadingAnchors(original, enhanceDiagrams(repairHeadingHierarchy(repairPageContent(original, spec.slug), spec.slug), spec.slug));
       const fm = {
         title: spec.title,
         description: spec.lesson
@@ -1390,7 +1391,7 @@ function main() {
       const original = normalizeHeadings(structureHeadings(dropTitleEcho(c.body, title)));
       const body = preserveHeadingAnchors(
         slug === 'guides/parent/01' ? oldPreface : original,
-        repairHeadingHierarchy(repairPageContent(original, slug), slug),
+        enhanceDiagrams(repairHeadingHierarchy(repairPageContent(original, slug), slug), slug),
         slug === 'guides/parent/01' ? '../chapter-01/' : null,
       );
       const fm = {

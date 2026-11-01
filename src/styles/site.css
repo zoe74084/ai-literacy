@@ -748,3 +748,20 @@ a.card:hover {
 @media (max-width: 40rem) {
   .prose .dg-ai-skills .dg-list { grid-template-columns: 1fr; }
 }
+
+/* Long source explanations use rows rather than narrow columns. */
+.prose .dg-stack .dg-list { grid-template-columns: 1fr; }
+.prose .dg-stack .dg-item {
+  display: grid;
+  grid-template-columns: 2rem minmax(8rem, 1fr) minmax(0, 3fr);
+  align-items: start;
+  gap: 0.75rem;
+}
+.prose .dg-stack .dg-badge { justify-self: start; }
+@media (max-width: 40rem) {
+  .prose .dg-stack .dg-item { grid-template-columns: 1fr; gap: 0.3rem; }
+  .prose :is(.dg-cards, .dg-steps)[data-enhancement] .dg-list { grid-template-columns: 1fr; }
+}
+
+.prose .dg-steps[data-enhancement] .dg-item::before { content: none; }
+.prose .dg-steps[data-enhancement] .dg-item .dg-badge { left: 0.9rem; }

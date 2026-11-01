@@ -32,6 +32,7 @@ jobs:
       - run: npm ci
       - run: npm run check:headings
       - run: node scripts/check-pdf-repairs.mjs
+      - run: node scripts/check-diagrams.mjs
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

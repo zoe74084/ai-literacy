@@ -20,7 +20,8 @@ has('lessons/sh-02', '四、AI 使用紅黃綠燈情境與學生使用原則', 2
 has('lessons/sh-02', '【教師導學 1：概念釐清與思辨引導】(後半節)', 3);
 has('admin/bigdata/application', '一、基本資料', 4);
 const principal = read('guides/principal/06');
-assert.equal((principal.match(/<li>[一二三]、<strong>「/g) ?? []).length, 3);
+assert(principal.includes('data-enhancement="D03"'));
+for (const label of ['「學習優先」', '「專業把關」', '「治理先行」']) assert(principal.includes(`<strong class="dg-head">${label}</strong>`));
 // Preserve the source's repeated/skipped numbering, while keeping columns separate.
 const math = read('lessons/es-03');
 assert(math.includes('<li value="3">報告組別'));

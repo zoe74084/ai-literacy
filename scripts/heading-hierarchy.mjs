@@ -160,6 +160,8 @@ function headingIds(lines) {
 // to the new parent chapter point to the visible chapter link at the end of the preface.
 export function preserveHeadingAnchors(before, after, movedTarget = null) {
   const current = new Set(headingIds(after).map((h) => h.id));
+  // Figures may retain former heading IDs on their cards. Do not add duplicates.
+  for (const match of after.join('\n').matchAll(/\bid="([^"]+)"/g)) current.add(match[1]);
   const out = [...after];
   const moved = [];
   for (const { text, id } of headingIds(before)) {

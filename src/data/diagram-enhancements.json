@@ -1,0 +1,101 @@
+[
+  {
+    "id": "D01",
+    "slug": "framework/full/02",
+    "title": "教師 AI 素養的五個轉變",
+    "type": "cards",
+    "count": 5,
+    "find": "<ol class=\"trend-list\">\n<li><strong>（一）教學設計從「科技運用」轉向「AI 賦能」：</strong>超越單純軟體操作，強調將 AI 技術及學科知識與教學知識深度融合。</li>\n<li><strong>（二）教師角色從「知識講授」轉向「支持引導」：</strong>利用 AI 處理認知型任務，將釋出的時間投入於情感支持與高層次的動機引導。</li>\n<li><strong>（三）評量診斷從「數據使用」轉向「學習分析」：</strong>具備解讀教育數據的能力，利用視覺化報表精準診斷學習斷點並調整教學。</li>\n<li><strong>（四）倫理素養從「倫理合規」轉向「倫理守門人與引導者」：</strong>除了自身合規，更需具備識別風險（如偏見、隱私）的能 力，並引導學生建立正確觀念。</li>\n<li><strong>（五）專業發展融合「人際合作」與「人機協作」：</strong>將 AI 視為專業發展夥伴，利用 AI 進行共備、反思，並參與社群協作。</li>\n</ol>",
+    "replace": "<figure class=\"dg dg-cards\" data-enhancement=\"D01\" aria-label=\"教師 AI 素養的五個轉變\"><figcaption class=\"dg-title\">教師 AI 素養的五個轉變</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">（一）教學設計從「科技運用」轉向「AI 賦能」：</strong><span class=\"dg-desc\">超越單純軟體操作，強調將 AI 技術及學科知識與教學知識深度融合。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">（二）教師角色從「知識講授」轉向「支持引導」：</strong><span class=\"dg-desc\">利用 AI 處理認知型任務，將釋出的時間投入於情感支持與高層次的動機引導。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">（三）評量診斷從「數據使用」轉向「學習分析」：</strong><span class=\"dg-desc\">具備解讀教育數據的能力，利用視覺化報表精準診斷學習斷點並調整教學。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">4</span><strong class=\"dg-head\">（四）倫理素養從「倫理合規」轉向「倫理守門人與引導者」：</strong><span class=\"dg-desc\">除了自身合規，更需具備識別風險（如偏見、隱私）的能 力，並引導學生建立正確觀念。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">5</span><strong class=\"dg-head\">（五）專業發展融合「人際合作」與「人機協作」：</strong><span class=\"dg-desc\">將 AI 視為專業發展夥伴，利用 AI 進行共備、反思，並參與社群協作。</span></li></ul></figure>"
+  },
+  {
+    "id": "D02",
+    "slug": "framework/full/02",
+    "title": "學生 AI 素養的五個轉變",
+    "type": "cards",
+    "count": 5,
+    "find": "<ol class=\"trend-list\">\n<li><strong>（一）學習思維從「AI 工具操作」轉向「以人為中心的思維」：</strong>不再僅強調工具操作，而是優先建立以人為中心的價值觀，理解 AI 應服務於人類福祉。</li>\n<li><strong>（二）學習角色從「被動接收」轉向「人機共創」：</strong>鼓勵利用 AI 工具進行創作與解決問題，成為主動的共同創造者。</li>\n<li><strong>（三）學習模式從「齊頭式學習」轉向「AI 輔助的個人化學習」：</strong>善用 AI 家教進行適性化學習，從標準化教育轉向個人化發展。</li>\n<li><strong>（四）學習判斷從「資訊取得」轉向「內容辨識與責任使用」：</strong>鑑於生成式內容的普及，學生需培養真偽判斷、偏見識別與學術誠信意識。</li>\n<li><strong>（五）學習技術從「軟體操作」轉向「系統邏輯與整體思考」：</strong>引導學生理解相關系統的運作邏輯與整體思考能力，非流於語法編寫或工具操作層面。</li>\n</ol>",
+    "replace": "<figure class=\"dg dg-cards\" data-enhancement=\"D02\" aria-label=\"學生 AI 素養的五個轉變\"><figcaption class=\"dg-title\">學生 AI 素養的五個轉變</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">（一）學習思維從「AI 工具操作」轉向「以人為中心的思維」：</strong><span class=\"dg-desc\">不再僅強調工具操作，而是優先建立以人為中心的價值觀，理解 AI 應服務於人類福祉。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">（二）學習角色從「被動接收」轉向「人機共創」：</strong><span class=\"dg-desc\">鼓勵利用 AI 工具進行創作與解決問題，成為主動的共同創造者。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">（三）學習模式從「齊頭式學習」轉向「AI 輔助的個人化學習」：</strong><span class=\"dg-desc\">善用 AI 家教進行適性化學習，從標準化教育轉向個人化發展。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">4</span><strong class=\"dg-head\">（四）學習判斷從「資訊取得」轉向「內容辨識與責任使用」：</strong><span class=\"dg-desc\">鑑於生成式內容的普及，學生需培養真偽判斷、偏見識別與學術誠信意識。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">5</span><strong class=\"dg-head\">（五）學習技術從「軟體操作」轉向「系統邏輯與整體思考」：</strong><span class=\"dg-desc\">引導學生理解相關系統的運作邏輯與整體思考能力，非流於語法編寫或工具操作層面。</span></li></ul></figure>"
+  },
+  {
+    "id": "D03",
+    "slug": "guides/principal/06",
+    "title": "校長 AI 學習領導的三項主張",
+    "type": "cards",
+    "count": 3,
+    "find": "<ol class=\"trend-list\">\n<li>一、<strong>「學習優先」</strong>，確保 AI 導入用於明確的學習目標，而非被工具牽引。</li>\n<li>二、<strong>「專業把關」</strong>，AI 僅提供建議與草稿，保留教師與校長對教學與評量的最終判斷。</li>\n<li>三、<strong>「治理先行」</strong>，把倫理、隱私、安全與責任機制視為學習環境的一部分。</li>\n</ol>",
+    "replace": "<figure class=\"dg dg-cards\" data-enhancement=\"D03\" aria-label=\"校長 AI 學習領導的三項主張\"><figcaption class=\"dg-title\">校長 AI 學習領導的三項主張</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\"><span class=\"dg-badge\">一</span><strong class=\"dg-head\">「學習優先」</strong><span class=\"dg-desc\">確保 AI 導入用於明確的學習目標，而非被工具牽引。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">二</span><strong class=\"dg-head\">「專業把關」</strong><span class=\"dg-desc\">AI 僅提供建議與草稿，保留教師與校長對教學與評量的最終判斷。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">三</span><strong class=\"dg-head\">「治理先行」</strong><span class=\"dg-desc\">把倫理、隱私、安全與責任機制視為學習環境的一部分。</span></li></ul></figure>"
+  },
+  {
+    "id": "D04",
+    "slug": "handbooks/junior/03",
+    "title": "使用 AI 的四個原則：日常怎麼做？",
+    "type": "cards",
+    "count": 4,
+    "find": "|  | 原則 | 日常怎麼做？ |\n| --- | --- | --- |\n| 1 | 先自己想，再問 AI | 至少思考 5 分鐘，再開口問 AI |\n| 2 | 看完要查證 | 重要的資訊，要去課本或可信網站確認 |\n| 3 | 用了要說明白 | 用了 AI 幫忙，就要在作業上誠實標註 |\n| 4 | 最終由你決定 | AI 的建議供參考，重要事情自己判斷 |",
+    "replace": "<figure class=\"dg dg-cards\" data-enhancement=\"D04\" aria-label=\"使用 AI 的四個原則：日常怎麼做？\"><figcaption class=\"dg-title\">使用 AI 的四個原則：日常怎麼做？</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">先自己想，再問 AI</strong><span class=\"dg-desc\">至少思考 5 分鐘，再開口問 AI</span></li><li class=\"dg-item\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">看完要查證</strong><span class=\"dg-desc\">重要的資訊，要去課本或可信網站確認</span></li><li class=\"dg-item\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">用了要說明白</strong><span class=\"dg-desc\">用了 AI 幫忙，就要在作業上誠實標註</span></li><li class=\"dg-item\"><span class=\"dg-badge\">4</span><strong class=\"dg-head\">最終由你決定</strong><span class=\"dg-desc\">AI 的建議供參考，重要事情自己判斷</span></li></ul></figure>"
+  },
+  {
+    "id": "D05",
+    "slug": "handbooks/junior/03",
+    "title": "查證 AI 的三個步驟",
+    "type": "steps",
+    "count": 3,
+    "find": "| 步驟 | 你做什麼？ | 問自己…… |\n| --- | --- | --- |\n| 👀步驟一讀懂 | 把 AI 的回答看完，理解它說了什麼。 | AI 的主要論點是什麼？<br>有哪些具體數字或日期？ |\n| 🤔步驟二懷疑 | 評估有沒有可疑的地方，找出需要查的點。 | 這個說法符合我之前學過的嗎？<br>有沒有太絕對的描述？ |\n| ✅步驟三查證 | 用課本、圖書館、可信網站查核重要資訊。 | 課本和這個說法一致嗎？<br>其他來源也這樣說嗎？ |",
+    "replace": "<figure class=\"dg dg-steps\" data-enhancement=\"D05\" aria-label=\"查證 AI 的三個步驟\"><figcaption class=\"dg-title\">查證 AI 的三個步驟</figcaption><ol class=\"dg-list\" role=\"list\" style=\"--n:3\"><li class=\"dg-item\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">👀步驟一讀懂</strong><span class=\"dg-desc\">你做什麼？<br>把 AI 的回答看完，理解它說了什麼。<br>問自己……<br>AI 的主要論點是什麼？<br>有哪些具體數字或日期？</span></li><li class=\"dg-item\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">🤔步驟二懷疑</strong><span class=\"dg-desc\">你做什麼？<br>評估有沒有可疑的地方，找出需要查的點。<br>問自己……<br>這個說法符合我之前學過的嗎？<br>有沒有太絕對的描述？</span></li><li class=\"dg-item\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">✅步驟三查證</strong><span class=\"dg-desc\">你做什麼？<br>用課本、圖書館、可信網站查核重要資訊。<br>問自己……<br>課本和這個說法一致嗎？<br>其他來源也這樣說嗎？</span></li></ol></figure>"
+  },
+  {
+    "id": "D06",
+    "slug": "handbooks/junior/07",
+    "title": "批判思考的三個核心問題：你可以這樣做",
+    "type": "cards",
+    "count": 3,
+    "find": "| 核心問題 | 你可以這樣做 |\n| --- | --- |\n| 這個資訊是眞的嗎？ | 用其他可靠來源（教科書、新聞、政府網站）交叉查證，不要只依賴 AI 一個來源。 |\n| AI 為什麼這樣說？ | 想想看 AI 的訓練資料可能有什麼偏見或限制，特別是涉及政治、文化、族群的話題。 |\n| 這個答案適合我的情況嗎？ | AI 給的是「通用答案」，但你的情況可能有特殊性；判斷這個答案是否眞的適合你。 |",
+    "replace": "<figure class=\"dg dg-cards\" data-enhancement=\"D06\" aria-label=\"批判思考的三個核心問題：你可以這樣做\"><figcaption class=\"dg-title\">批判思考的三個核心問題：你可以這樣做</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">這個資訊是眞的嗎？</strong><span class=\"dg-desc\">用其他可靠來源（教科書、新聞、政府網站）交叉查證，不要只依賴 AI 一個來源。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">AI 為什麼這樣說？</strong><span class=\"dg-desc\">想想看 AI 的訓練資料可能有什麼偏見或限制，特別是涉及政治、文化、族群的話題。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">這個答案適合我的情況嗎？</strong><span class=\"dg-desc\">AI 給的是「通用答案」，但你的情況可能有特殊性；判斷這個答案是否眞的適合你。</span></li></ul></figure>"
+  },
+  {
+    "id": "D07",
+    "slug": "handbooks/junior/07",
+    "title": "使用 AI 前後的停、看、聽",
+    "type": "steps",
+    "count": 3,
+    "find": "🛑 停：先想淸楚自己需要什麼在問 AI 之前，先嘗試自己思考 30 秒。我知道什麼？我不知道什麼？我的問題是什麼？\n\n👀 看：仔細閱讀 AI 給的答案不要掃一眼就當作看完了。找出重點，也找出可疑的地方。\n\n👂 聽：交叉查證，聽聽其他來源怎麼說\n\n用教科書、可信任的網站、甚至問老師，確認 AI 說的是否可靠。",
+    "replace": "<figure class=\"dg dg-steps\" data-enhancement=\"D07\" aria-label=\"使用 AI 前後的停、看、聽\"><figcaption class=\"dg-title\">使用 AI 前後的停、看、聽</figcaption><ol class=\"dg-list\" role=\"list\" style=\"--n:3\"><li class=\"dg-item\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">停：先想淸楚自己需要什麼</strong><span class=\"dg-desc\">在問 AI 之前，先嘗試自己思考 30 秒。我知道什麼？我不知道什麼？我的問題是什麼？</span></li><li class=\"dg-item\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">看：仔細閱讀 AI 給的答案</strong><span class=\"dg-desc\">不要掃一眼就當作看完了。找出重點，也找出可疑的地方。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">聽：交叉查證，聽聽其他來源怎麼說</strong><span class=\"dg-desc\">用教科書、可信任的網站、甚至問老師，確認 AI 說的是否可靠。</span></li></ol></figure>"
+  },
+  {
+    "id": "D08",
+    "slug": "handbooks/junior/07",
+    "title": "AI 倫理五大核心價値：在 AI 使用上的意義",
+    "type": "cards",
+    "count": 5,
+    "find": "| 核心價値 | 在 AI 使用上的意義 |\n| --- | --- |\n| 公平性 | AI 系統不應該對不同族群、性別、文化有歧視或偏見。 |\n| 透明性 | 我們應該能夠理解 AI 是如何做出決策的，不應該是個黑盒子。 |\n| 問責性 | 當 AI 造成傷害時，設計者、使用者都有責任承擔後果。 |\n| 隱私保護 | AI 使用的資料應該尊重個人隱私，不得未經同意收集或使用。 |\n| 人類主導 | AI 是輔助工具，重要決定最終應由人類做出，而非完全交給 AI。 |",
+    "replace": "<figure class=\"dg dg-cards\" data-enhancement=\"D08\" aria-label=\"AI 倫理五大核心價値：在 AI 使用上的意義\"><figcaption class=\"dg-title\">AI 倫理五大核心價値：在 AI 使用上的意義</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">公平性</strong><span class=\"dg-desc\">AI 系統不應該對不同族群、性別、文化有歧視或偏見。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">透明性</strong><span class=\"dg-desc\">我們應該能夠理解 AI 是如何做出決策的，不應該是個黑盒子。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">問責性</strong><span class=\"dg-desc\">當 AI 造成傷害時，設計者、使用者都有責任承擔後果。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">4</span><strong class=\"dg-head\">隱私保護</strong><span class=\"dg-desc\">AI 使用的資料應該尊重個人隱私，不得未經同意收集或使用。</span></li><li class=\"dg-item\"><span class=\"dg-badge\">5</span><strong class=\"dg-head\">人類主導</strong><span class=\"dg-desc\">AI 是輔助工具，重要決定最終應由人類做出，而非完全交給 AI。</span></li></ul></figure>"
+  },
+  {
+    "id": "D09",
+    "slug": "handbooks/senior/06",
+    "title": "六大倫理原則：設計 AI 時需要問的問題",
+    "type": "cards",
+    "count": 6,
+    "find": "| 倫理原則 | 設計 AI 時需要問的問題 |\n| --- | --- |\n| 隱私 | 這個功能眞的需要這些資料嗎？資料會被如何儲存與使用？ |\n| 公平 | 這個 AI 對每個人都一樣公平嗎？會不會對某些群體產生偏見？ |\n| 責任 | 如果 AI 出了問題，誰應該負責？有沒有申訴或修正的機制？ |\n| 透明 | 人們知道 AI 是怎麼做決定的嗎？決策過程可以被理解嗎？ |\n| 安全 | 如果 AI 出錯，會造成什麼影響？最壞的情況是什麼？ |\n| 人類自主 | 使用這個 AI 後，人還有自己選擇的空間嗎？ |",
+    "replace": "<figure class=\"dg dg-cards\" data-enhancement=\"D09\" aria-label=\"六大倫理原則：設計 AI 時需要問的問題\"><figcaption class=\"dg-title\">六大倫理原則：設計 AI 時需要問的問題</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">隱私</strong><span class=\"dg-desc\">這個功能眞的需要這些資料嗎？資料會被如何儲存與使用？</span></li><li class=\"dg-item\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">公平</strong><span class=\"dg-desc\">這個 AI 對每個人都一樣公平嗎？會不會對某些群體產生偏見？</span></li><li class=\"dg-item\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">責任</strong><span class=\"dg-desc\">如果 AI 出了問題，誰應該負責？有沒有申訴或修正的機制？</span></li><li class=\"dg-item\"><span class=\"dg-badge\">4</span><strong class=\"dg-head\">透明</strong><span class=\"dg-desc\">人們知道 AI 是怎麼做決定的嗎？決策過程可以被理解嗎？</span></li><li class=\"dg-item\"><span class=\"dg-badge\">5</span><strong class=\"dg-head\">安全</strong><span class=\"dg-desc\">如果 AI 出錯，會造成什麼影響？最壞的情況是什麼？</span></li><li class=\"dg-item\"><span class=\"dg-badge\">6</span><strong class=\"dg-head\">人類自主</strong><span class=\"dg-desc\">使用這個 AI 後，人還有自己選擇的空間嗎？</span></li></ul></figure>"
+  },
+  {
+    "id": "D10",
+    "slug": "handbooks/senior/07",
+    "title": "選用 AI 工具前的三個檢查",
+    "type": "stack",
+    "count": 3,
+    "find": "### 1. 檢視使用條款與隱私權保護\n\n在使用任何 AI 工具前，務必先閱讀其隱私權政策與年齡限制，了解哪些資料會被收集以及是否符合倫理原則。請特別留意，你的對話紀錄是否會被拿去訓練未來的 AI 模型？切記，絕對不要將個人隱私資料（如身分證字號、住址、密碼等）輸入給 AI，保護好自己的數位安全。\n\n### 2. 選對工具做對事\n\n不同的 AI 工具擁有不同的超能力。如果你需要的是靈感發想、文章摘要或多語言翻譯，擅長文字處理的語言模型是最佳選擇；但如果你需要生成精美的簡報配圖，或是處理複雜的數學運算與圖表，就需要挑選專門針對圖像生成或邏輯運算優化的 AI 工具。先釐淸自己的任務目的，才能找到對的神隊友。\n\n### 3. 留意模型版本與更新狀態\n\nAI 的大腦進化得非常快！同一個工具往往會有不同版本的語言模型，新版本的 AI 通常理解力更強、出錯率較低。此外，也要注意該AI 的知識庫更新到什麼時候 ⸺有些 AI 無法連上網路，提供的可能是舊資訊。隨時留意工具的更新動態，能幫助你更準確地評估它給出的答案是否符合現況。",
+    "replace": "<figure class=\"dg dg-stack\" data-enhancement=\"D10\" aria-label=\"選用 AI 工具前的三個檢查\"><figcaption class=\"dg-title\">選用 AI 工具前的三個檢查</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\" id=\"1-檢視使用條款與隱私權保護\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">檢視使用條款與隱私權保護</strong><span class=\"dg-desc\">在使用任何 AI 工具前，務必先閱讀其隱私權政策與年齡限制，了解哪些資料會被收集以及是否符合倫理原則。請特別留意，你的對話紀錄是否會被拿去訓練未來的 AI 模型？切記，絕對不要將個人隱私資料（如身分證字號、住址、密碼等）輸入給 AI，保護好自己的數位安全。</span></li><li class=\"dg-item\" id=\"2-選對工具做對事\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">選對工具做對事</strong><span class=\"dg-desc\">不同的 AI 工具擁有不同的超能力。如果你需要的是靈感發想、文章摘要或多語言翻譯，擅長文字處理的語言模型是最佳選擇；但如果你需要生成精美的簡報配圖，或是處理複雜的數學運算與圖表，就需要挑選專門針對圖像生成或邏輯運算優化的 AI 工具。先釐淸自己的任務目的，才能找到對的神隊友。</span></li><li class=\"dg-item\" id=\"3-留意模型版本與更新狀態\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">留意模型版本與更新狀態</strong><span class=\"dg-desc\">AI 的大腦進化得非常快！同一個工具往往會有不同版本的語言模型，新版本的 AI 通常理解力更強、出錯率較低。此外，也要注意該AI 的知識庫更新到什麼時候 ⸺有些 AI 無法連上網路，提供的可能是舊資訊。隨時留意工具的更新動態，能幫助你更準確地評估它給出的答案是否符合現況。</span></li></ul></figure>"
+  },
+  {
+    "id": "D11",
+    "slug": "handbooks/junior/06",
+    "title": "選用 AI 工具前的三個檢查",
+    "type": "stack",
+    "count": 3,
+    "find": "1. 檢視使用條款與隱私權保護\n\n在使用任何AI 工具前，務必先閱讀其隱私權政策與年齡限制，了解哪些資料會被收集以及是否符合倫理原則。請特別留意，你的對話紀錄是否會被拿去訓練未來的AI 模型？切記，絕對不要將個人隱私資料（如身分證字號、住址、密碼等）輸入給AI，保護好自己的數位安全。\n\n2. 選對工具做對事\n\n不同的AI 工具擁有不同的超能力。如果你需要的是靈感發想、文章摘要或多語言翻譯，擅長文字處理的語言模型是最佳選擇；但如果你需要生成精美的簡報配圖，或是處理複雜的數學運算與圖表，就需要挑選專門針對圖像生成或邏輯運算優化的AI 工具。先釐淸自己的任務目的，才能找到對的神隊友。\n\n3. 留意模型版本與更新狀態\n\nAI 的大腦進化得非常快！同一個工具往往會有不同版本的語言模型，新版本的 AI 通常理解力更強、出錯率較低。此外，也要注意該AI 的知識庫更新到什麼時候⸺〱有些AI 無法連上網路，提供的可能是舊資訊。隨時留意工具的更新動態，能幫助你更準確地評估它給出的答案是否符合現況。",
+    "replace": "<figure class=\"dg dg-stack\" data-enhancement=\"D11\" aria-label=\"選用 AI 工具前的三個檢查\"><figcaption class=\"dg-title\">選用 AI 工具前的三個檢查</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\" id=\"1-檢視使用條款與隱私權保護\"><span class=\"dg-badge\">1</span><strong class=\"dg-head\">檢視使用條款與隱私權保護</strong><span class=\"dg-desc\">在使用任何AI 工具前，務必先閱讀其隱私權政策與年齡限制，了解哪些資料會被收集以及是否符合倫理原則。請特別留意，你的對話紀錄是否會被拿去訓練未來的AI 模型？切記，絕對不要將個人隱私資料（如身分證字號、住址、密碼等）輸入給AI，保護好自己的數位安全。</span></li><li class=\"dg-item\" id=\"2-選對工具做對事\"><span class=\"dg-badge\">2</span><strong class=\"dg-head\">選對工具做對事</strong><span class=\"dg-desc\">不同的AI 工具擁有不同的超能力。如果你需要的是靈感發想、文章摘要或多語言翻譯，擅長文字處理的語言模型是最佳選擇；但如果你需要生成精美的簡報配圖，或是處理複雜的數學運算與圖表，就需要挑選專門針對圖像生成或邏輯運算優化的AI 工具。先釐淸自己的任務目的，才能找到對的神隊友。</span></li><li class=\"dg-item\" id=\"3-留意模型版本與更新狀態\"><span class=\"dg-badge\">3</span><strong class=\"dg-head\">留意模型版本與更新狀態</strong><span class=\"dg-desc\">AI 的大腦進化得非常快！同一個工具往往會有不同版本的語言模型，新版本的 AI 通常理解力更強、出錯率較低。此外，也要注意該AI 的知識庫更新到什麼時候⸺〱有些AI 無法連上網路，提供的可能是舊資訊。隨時留意工具的更新動態，能幫助你更準確地評估它給出的答案是否符合現況。</span></li></ul></figure>"
+  }
+]
