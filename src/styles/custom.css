@@ -402,3 +402,7 @@ h1#_top,
 
 /* Keep restored questionnaire sentences readable when its six columns scroll. */
 .sl-markdown-content .pdf-screener td:nth-child(2) { min-width: 17em; }
+
+/* The framework uses its original Chinese numbering, without duplicate bullets. */
+.sl-markdown-content ol.trend-list { list-style: none; padding-inline-start: 0; }
+.sl-markdown-content ol.trend-list > li + li { margin-top: 0.75rem; }

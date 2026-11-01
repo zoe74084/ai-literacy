@@ -604,6 +604,13 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 		word-break: break-all;
 	}
 
+	.prose :global(ol.trend-list) {
+		list-style: none;
+		padding-inline-start: 0;
+	}
+	.prose :global(ol.trend-list > li + li) {
+		margin-top: 0.75rem;
+	}
 	.prose :global(.pdf-screener td:nth-child(2)) {
 		min-width: 17em;
 	}

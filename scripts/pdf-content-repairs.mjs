@@ -11,6 +11,23 @@ function once(text, from, to, label) {
 }
 export function repairPageContent(lines, slug) {
   let text = lines.join('\n');
+  if (slug === 'framework/full/02') {
+    // PDF physical pages 10–11: introductions are prose, followed by five peer items.
+    text = once(text, '- 教師的角色正從知識的傳遞者，轉型為 AI 工具的管理者、學\n\n- 習的設計師', '教師的角色正從知識的傳遞者，轉型為 AI 工具的管理者、學習的設計師', 'framework teacher introduction');
+    text = once(text, '- 全球學生 AI 素養的定義', '全球學生 AI 素養的定義', 'framework student introduction');
+    const escape = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let groups = 0;
+    text = text.replace(/^- （一）[^\n]+(?:\n\n- （[二三四五]）[^\n]+){4}/gm, (block) => {
+      groups++;
+      const items = block.split('\n\n').map((line) => {
+        const match = line.match(/^- (（[一二三四五]）[^：]+：)(.+)$/);
+        if (!match) throw new Error('Framework trend item no longer matches PDF layout');
+        return `<li><strong>${escape(match[1])}</strong>${escape(match[2])}</li>`;
+      });
+      return `<ol class="trend-list">\n${items.join('\n')}\n</ol>`;
+    });
+    if (groups !== 2) throw new Error('Expected teacher and student trend lists');
+  }
   if (slug === 'handbooks/junior/03') {
     text = once(text,
       'AI 此概念對應 AI 素養框架中「AI 賦能學習」的核心精神：學生將 AI 加視為蘇格拉底式的提問夥伴，透過人機互動深化理解，而非依賴 AI 直油站接產出答案。',
