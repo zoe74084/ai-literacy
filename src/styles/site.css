@@ -738,3 +738,13 @@ a.card:hover {
 	background: var(--cover);
 	box-shadow: 0 0 0 3px var(--paper-tint);
 }
+
+/* Three parallel AI learning skills, grouped in one responsive figure. */
+.prose .dg-ai-skills .dg-key {
+  font-weight: 700;
+  color: var(--cover);
+  margin-block: 0.25rem 0.4rem;
+}
+@media (max-width: 40rem) {
+  .prose .dg-ai-skills .dg-list { grid-template-columns: 1fr; }
+}

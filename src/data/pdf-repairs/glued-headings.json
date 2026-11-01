@@ -3,7 +3,7 @@
     "id": "H01",
     "slug": "handbooks/elementary/04",
     "find": "- 一、溝通的技巧：\n\n- 雖然 AI 已經很厲害，但也需要我們把問題講淸楚才能幫 AI 回答得更好。二、合作的技巧：\n\n- 有研究顯示我們過度依賴 AI 得到答案會妨礙我們學習，所以我們要學習怎麼和 AI合作才可以幫我們學得更好。\n\n- 三、保護自己的技巧：\n\n- 為了保護我們的個人資料，我們要了解有哪些東西是不該讓 AI知道的。",
-    "replace": "## 一、溝通的技巧：\n\n雖然 AI 已經很厲害，但也需要我們把問題講淸楚才能幫 AI 回答得更好。\n\n## 二、合作的技巧：\n\n有研究顯示我們過度依賴 AI 得到答案會妨礙我們學習，所以我們要學習怎麼和 AI合作才可以幫我們學得更好。\n\n## 三、保護自己的技巧：\n\n為了保護我們的個人資料，我們要了解有哪些東西是不該讓 AI知道的。"
+    "replace": "<figure class=\"dg dg-cards dg-ai-skills\" aria-label=\"和 AI 一起學習的三個技巧\"><figcaption class=\"dg-title\">和 AI 一起學習的三個技巧</figcaption><ul class=\"dg-list\" role=\"list\"><li class=\"dg-item\" id=\"一溝通的技巧\"><span class=\"dg-badge\">一</span><strong class=\"dg-head\">溝通的技巧</strong><span class=\"dg-key\">把問題說清楚</span><span class=\"dg-desc\">雖然 AI 已經很厲害，但也需要我們把問題講淸楚才能幫 AI 回答得更好。</span></li><li class=\"dg-item\" id=\"二合作的技巧\"><span class=\"dg-badge\">二</span><strong class=\"dg-head\">合作的技巧</strong><span class=\"dg-key\">一起動腦，幫助學習</span><span class=\"dg-desc\">有研究顯示我們過度依賴 AI 得到答案會妨礙我們學習，所以我們要學習怎麼和 AI合作才可以幫我們學得更好。</span></li><li class=\"dg-item\" id=\"三保護自己的技巧\"><span class=\"dg-badge\">三</span><strong class=\"dg-head\">保護自己的技巧</strong><span class=\"dg-key\">守住個人資料</span><span class=\"dg-desc\">為了保護我們的個人資料，我們要了解有哪些東西是不該讓 AI知道的。</span></li></ul></figure>"
   },
   {
     "id": "H02",
