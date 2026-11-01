@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 const data = (name) => fs.readFileSync(new URL(`../src/data/pdf-repairs/${name}`, import.meta.url), 'utf8').trimEnd();
 const login = JSON.parse(data('xapi-login.json'));
+const gluedHeadings = JSON.parse(data('glued-headings.json'));
 const base = (process.env.BASE_PATH || '/ai-literacy').replace(/\/$/, '');
 const figure = (name, alt) => `![${alt}](${base}/source-figures/${name}.png)`;
 function once(text, from, to, label) {
@@ -83,6 +84,9 @@ export function repairPageContent(lines, slug) {
       }
       return ['', '```json', code, '```', ''];
     }).join('\n');
+  }
+  for (const repair of gluedHeadings.filter((r) => r.slug === slug)) {
+    text = once(text, repair.find, repair.replace, repair.id);
   }
   return text.split('\n');
 }

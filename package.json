@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check:headings": "node scripts/convert.mjs && node scripts/check-heading-hierarchy.mjs",
+    "check:headings": "node scripts/convert.mjs && node scripts/check-heading-hierarchy.mjs && node scripts/check-glued-headings.mjs",
     "convert": "node scripts/convert.mjs",
     "predev": "node scripts/convert.mjs",
     "dev": "astro dev",
