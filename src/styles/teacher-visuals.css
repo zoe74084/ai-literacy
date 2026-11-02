@@ -29,6 +29,7 @@
 .tv .tv-level-2 { background: #cce0d0; }
 .tv a { color: #214f3a; font-size: .82rem; text-decoration: none; line-height: 1.6; text-wrap: balance; }
 .tv a:hover { text-decoration: underline; }
+.tv .tv-term { white-space: nowrap; }
 .tv a:focus-visible { outline: 3px solid #956718; outline-offset: 3px; }
 .tv .tv-mobile-level { display: none; }
 .tv .tv-flow, .tv .tv-orbit { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.3rem; }

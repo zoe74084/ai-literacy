@@ -2,7 +2,8 @@
 import { slug as headingSlug } from 'github-slugger';
 
 const figure = (id, title, body, note = '') => `<figure class="tv" data-teacher-visual="${id}" aria-labelledby="tv-${id}"><figcaption id="tv-${id}"><span class="tv-kicker">閱讀圖解・依原文整理</span><strong>${title}</strong></figcaption>${body}${note ? `<p class="tv-note">${note}</p>` : ''}</figure>`;
-const link = (heading, text) => `<a href="#${headingSlug(heading)}">${text}</a>`;
+const keepTerms = (text) => text.replace(/教師|分析/g, '<span class="tv-term">$&</span>');
+const link = (heading, text) => `<a href="#${headingSlug(heading)}">${keepTerms(text)}</a>`;
 const step = (n, title, text) => `<li><span class="tv-num" aria-hidden="true">${n}</span><strong>${title}</strong><span>${text}</span></li>`;
 
 const rows = [
@@ -15,7 +16,7 @@ const levels = ['取得理解', '深化應用', '創造轉型'];
 const matrix = figure('matrix', '四個向度，三種發展層級',
   '<div class="tv-principle"><span>貫穿所有向度與層級</span><strong>以人為中心</strong><span>教師保有專業判斷與決策權</span></div>' +
   '<div class="tv-matrix"><div class="tv-columns" aria-hidden="true"><span>發展向度</span>' + levels.map(x => `<strong>${x}</strong>`).join('') + '</div>' +
-  rows.map(([name, goals, headings]) => `<div class="tv-row"><strong class="tv-facet">${name}</strong>${goals.map((goal, i) => `<div class="tv-cell tv-level-${i}"><span class="tv-mobile-level">${levels[i]}</span>${link(headings[i], goal)}</div>`).join('')}</div>`).join('') + '</div>',
+  rows.map(([name, goals, headings]) => `<div class="tv-row"><strong class="tv-facet">${keepTerms(name)}</strong>${goals.map((goal, i) => `<div class="tv-cell tv-level-${i}"><span class="tv-mobile-level">${levels[i]}</span>${link(headings[i], goal)}</div>`).join('')}</div>`).join('') + '</div>',
   '各向度的發展層級可以不同；並非每位教師都需要達到創造轉型。點選各格可閱讀對應原文；下方保留完整原表。');
 
 const workflow = figure('workflow', '從教學需求到教師判斷的人機協作',
