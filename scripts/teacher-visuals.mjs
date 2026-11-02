@@ -2,7 +2,7 @@
 import { slug as headingSlug } from 'github-slugger';
 
 const figure = (id, title, body, note = '') => `<figure class="tv" data-teacher-visual="${id}" aria-labelledby="tv-${id}"><figcaption id="tv-${id}"><span class="tv-kicker">閱讀圖解・依原文整理</span><strong>${title}</strong></figcaption>${body}${note ? `<p class="tv-note">${note}</p>` : ''}</figure>`;
-const link = (heading, text) => `<a href="#${headingSlug(heading)}">${text}<span aria-hidden="true"> ↗</span></a>`;
+const link = (heading, text) => `<a href="#${headingSlug(heading)}">${text}</a>`;
 const step = (n, title, text) => `<li><span class="tv-num" aria-hidden="true">${n}</span><strong>${title}</strong><span>${text}</span></li>`;
 
 const rows = [
