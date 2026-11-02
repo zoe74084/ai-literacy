@@ -19,15 +19,15 @@
 .tv .tv-principle strong { font-size: 1.3rem; color: #fff; }
 .tv .tv-principle span { font-size: .8rem; }
 .tv .tv-compact strong { font-size: .95rem; }
-.tv .tv-columns, .tv .tv-row { display: grid; grid-template-columns: 1.1fr repeat(3, 1fr); gap: .5rem; }
+.tv .tv-columns, .tv .tv-row { display: grid; grid-template-columns: .82fr 1fr 1.12fr 1.12fr; gap: .5rem; }
 .tv .tv-columns { margin-bottom: .5rem; align-items: center; font-size: .78rem; text-align: center; }
 .tv .tv-row { margin-top: .5rem; }
-.tv .tv-facet { align-self: center; padding: .5rem; font-size: .85rem; }
+.tv .tv-facet { align-self: center; min-width: 0; padding: .5rem; font-size: .85rem; text-wrap: balance; }
 .tv .tv-cell { display: flex; align-items: center; min-width: 0; padding: .85rem .6rem; border: 1px solid #c2d6c7; border-radius: 8px; }
 .tv .tv-level-0 { background: #fff; }
 .tv .tv-level-1 { background: #e0eddf; }
 .tv .tv-level-2 { background: #cce0d0; }
-.tv a { color: #214f3a; font-size: .82rem; text-decoration: none; line-height: 1.6; }
+.tv a { color: #214f3a; font-size: .82rem; text-decoration: none; line-height: 1.6; text-wrap: balance; }
 .tv a:hover { text-decoration: underline; }
 .tv a:focus-visible { outline: 3px solid #956718; outline-offset: 3px; }
 .tv .tv-mobile-level { display: none; }
