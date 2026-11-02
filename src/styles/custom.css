@@ -1,4 +1,6 @@
 /* 資料庫（Starlight）沿用首頁與導讀頁的字體與和色 */
+@import './teacher-visuals.css';
+
 :root {
 	--sl-font: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
 	--serif: 'LXGW WenKai TC', 'BiauKai', 'Kaiti TC', serif;

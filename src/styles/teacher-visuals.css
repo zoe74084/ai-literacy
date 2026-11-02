@@ -1,0 +1,72 @@
+/* Shared by the reading page and Starlight; all selectors are scoped to additive figures. */
+.tv {
+  --tv-ink: #1d382d;
+  --tv-green: #245c44;
+  margin: 2.5em 0;
+  padding: clamp(1rem, 3vw, 1.8rem);
+  border: 1px solid #b8cebe;
+  border-radius: 16px;
+  background: #f3f7f1;
+  color: var(--tv-ink);
+  line-height: 1.6;
+  font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+}
+.tv *, .tv *::before, .tv *::after { box-sizing: border-box; }
+.tv figcaption { display: grid; gap: .4rem; margin: 0 0 1.25rem; }
+.tv figcaption > strong { font-size: 1.18rem; color: var(--tv-ink); }
+.tv .tv-kicker { font-size: .72rem; letter-spacing: .12em; color: #456c57; }
+.tv .tv-principle { display: grid; justify-items: center; gap: .2rem; padding: 1rem; margin: 0 0 1rem; background: var(--tv-green); border-radius: 10px; color: #fff; text-align: center; }
+.tv .tv-principle strong { font-size: 1.3rem; color: #fff; }
+.tv .tv-principle span { font-size: .8rem; }
+.tv .tv-compact strong { font-size: .95rem; }
+.tv .tv-columns, .tv .tv-row { display: grid; grid-template-columns: 1.1fr repeat(3, 1fr); gap: .5rem; }
+.tv .tv-columns { margin-bottom: .5rem; align-items: center; font-size: .78rem; text-align: center; }
+.tv .tv-row { margin-top: .5rem; }
+.tv .tv-facet { align-self: center; padding: .5rem; font-size: .85rem; }
+.tv .tv-cell { display: flex; align-items: center; min-width: 0; padding: .85rem .6rem; border: 1px solid #c2d6c7; border-radius: 8px; }
+.tv .tv-level-0 { background: #fff; }
+.tv .tv-level-1 { background: #e0eddf; }
+.tv .tv-level-2 { background: #cce0d0; }
+.tv a { color: #214f3a; font-size: .82rem; text-decoration: none; line-height: 1.6; }
+.tv a:hover { text-decoration: underline; }
+.tv a:focus-visible { outline: 3px solid #956718; outline-offset: 3px; }
+.tv .tv-mobile-level { display: none; }
+.tv .tv-flow, .tv .tv-orbit { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.3rem; }
+.tv .tv-flow { position: relative; grid-template-columns: repeat(4, minmax(0, 1fr)); padding-bottom: 2rem; }
+/* From the bottom of step 04, return along the line into step 03. */
+.tv .tv-flow::before { content: ''; position: absolute; left: calc(62.5% + .1625rem); right: calc(12.5% - .4875rem); bottom: 0; height: 2rem; border: 2px solid var(--tv-green); border-top: 0; border-radius: 0 0 10px 10px; }
+.tv .tv-flow::after { content: ''; position: absolute; left: calc(62.5% + .1625rem - 4px); bottom: calc(2rem - 6px); width: 9px; height: 9px; border-top: 2px solid var(--tv-green); border-left: 2px solid var(--tv-green); transform: rotate(45deg); }
+.tv :is(.tv-flow, .tv-orbit) > li { position: relative; display: grid; align-content: start; gap: .45rem; margin: 0; padding: .85rem; background: #fff; border: 1px solid #b8cebe; border-radius: 10px; }
+.tv :is(.tv-flow, .tv-orbit) > li > strong { font-size: .92rem; color: var(--tv-ink); }
+.tv :is(.tv-flow, .tv-orbit) > li > span:last-child { font-size: .8rem; color: #3b584a; }
+.tv .tv-num { color: #486f56; font-size: .8rem; font-weight: 700; letter-spacing: .08em; }
+.tv .tv-flow > li:not(:last-child)::after { content: '→'; position: absolute; right: -1.15rem; top: 45%; color: var(--tv-green); }
+.tv .tv-decisions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .65rem; margin-top: 1rem; padding: .8rem; border: 1px dashed #789a82; border-radius: 10px; }
+.tv .tv-decisions strong { font-size: .85rem; }
+.tv .tv-decisions span { padding: .15rem .8rem; border-radius: 20px; background: #dce9dd; font-size: .8rem; }
+.tv .tv-decisions span:last-child { background: #f3e3de; color: #713b2f; }
+.tv .tv-return { margin-top: 1rem; padding: .65rem; text-align: center; font-size: .82rem; color: #315941; }
+.tv .tv-note { margin: 1rem 0 0; font-size: .78rem; color: #486151; }
+.tv .tv-cycle { display: grid; grid-template-columns: 1fr 1.4fr; align-items: center; gap: 1.5rem; }
+.tv .tv-cycle-core { display: grid; align-content: center; justify-items: center; gap: .5rem; aspect-ratio: 1; max-width: 230px; width: 100%; border: 2px solid #72967a; border-radius: 50%; background: #e0eddf; text-align: center; padding: 1rem; }
+.tv .tv-cycle-core strong { color: var(--tv-green); font-size: 1.2rem; }
+.tv .tv-cycle-core span { font-size: .8rem; }
+.tv .tv-orbit { position: relative; gap: 1.3rem; grid-auto-rows: 1fr; padding-left: 1.4rem; }
+/* Equal-height rows keep both endpoints at the middle of the first/last card. */
+.tv .tv-orbit::before { content: ''; position: absolute; left: 0; width: 1.4rem; top: calc(16.6667% - .4333rem); bottom: calc(16.6667% - .4333rem); border: 2px solid var(--tv-green); border-right: 0; border-radius: 10px 0 0 10px; }
+.tv .tv-orbit::after { content: ''; position: absolute; left: calc(1.4rem - 7px); top: calc(16.6667% - .4333rem - 3px); width: 9px; height: 9px; border-top: 2px solid var(--tv-green); border-right: 2px solid var(--tv-green); transform: rotate(45deg); }
+.tv .tv-orbit > li:not(:last-child)::after { content: '↓'; position: absolute; bottom: -1.35rem; left: 50%; color: var(--tv-green); }
+@media (max-width: 700px) {
+  .tv .tv-columns { display: none; }
+  .tv .tv-row { grid-template-columns: 1fr; gap: .4rem; padding: .7rem; background: #fff; border: 1px solid #c2d6c7; border-radius: 10px; margin-top: .8rem; }
+  .tv .tv-cell { display: grid; grid-template-columns: 5em 1fr; gap: .6rem; padding: .7rem; }
+  .tv .tv-mobile-level { display: block; font-size: .75rem; font-weight: 700; }
+  .tv .tv-facet { padding: .2rem; }
+  .tv .tv-flow { grid-template-columns: 1fr; grid-auto-rows: 1fr; padding-bottom: 0; padding-left: 1.4rem; }
+  .tv .tv-flow::before { left: 0; right: auto; top: calc(62.5% + .1625rem); bottom: calc(12.5% - .4875rem); width: 1.4rem; height: auto; border: 2px solid var(--tv-green); border-right: 0; border-radius: 10px 0 0 10px; }
+  .tv .tv-flow::after { left: calc(1.4rem - 7px); top: calc(62.5% + .1625rem - 3px); bottom: auto; border-left: 0; border-right: 2px solid var(--tv-green); }
+  .tv .tv-flow > li:not(:last-child)::after { content: '↓'; right: 50%; top: auto; bottom: -1.4rem; }
+  .tv .tv-cycle { grid-template-columns: 1fr; justify-items: center; }
+  .tv .tv-cycle-core { max-width: 190px; }
+  .tv .tv-orbit { width: 100%; }
+}
