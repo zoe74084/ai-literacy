@@ -151,7 +151,7 @@ const langs = doc.group === 'ark' ? catalog.filter((d) => d.group === 'ark').sor
 									</button>
 								</div>
 								{toc.length > 0 && (
-									<details class="toc" open>
+									<details class="toc" open={slug !== 'guides/teacher/04'}>
 										<summary>本頁段落</summary>
 										<ol>
 											{toc.map((h) => (
